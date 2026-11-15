@@ -80,6 +80,7 @@ pnpm dev           # 관리 화면 http://localhost:3000, 공개 사이트 http:
 | `pnpm --filter @rizer/web size` / `lhci` | 공개 사이트 번들 크기 / Lighthouse 기준 검사 (먼저 빌드 필요) |
 | `pnpm build`                       | 프로덕션 빌드                                   |
 | `pnpm tiles <원본> <출력 폴더>`    | 큰 원본을 로컬에서 딥줌 타일로 자르기           |
+| `pnpm --dir apps/web screenshots` | README 화면 다시 찍기 (먼저 `pnpm seed:images`) |
 
 ## 프로젝트 구조
 
@@ -112,6 +113,7 @@ packages/
 | 자료 | 저작자 | 사용 허락 | 원본 |
 |---|---|---|---|
 | 유물 사진 (전설 속 유물과 모습이 닮은 실제 소장품) | 메트로폴리탄 미술관, 클리블랜드 미술관 | CC0 (Open Access) | [The Met Open Access](https://www.metmuseum.org/hubs/open-access) · [Cleveland Open Access](https://www.clevelandart.org/open-access) |
+| 블랙레터 R 아이콘 (파비콘·홈 화면 아이콘·로고) | arnikahossain | Flaticon 무료 라이선스(저작자 표기 조건) | [Flaticon "Letter r"](https://www.flaticon.com/free-icon/letter-r_9687622) — [Letter r icons created by arnikahossain - Flaticon](https://www.flaticon.com/free-icons/letter-r) |
 | UnifrakturCook 글꼴 (공개 사이트 제목) | j. 'mach' wust, Peter Wiegel | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/UnifrakturCook) |
 | Song Myung(송명) 글꼴 (공개 사이트) | The Song Myung Project Authors | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Song+Myung) |
 | Nanum Myeongjo(나눔명조) 글꼴 (공개 사이트) | NHN(네이버), 디자인 FONTRIX | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Nanum+Myeongjo) |
