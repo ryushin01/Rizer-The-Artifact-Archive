@@ -7,6 +7,11 @@ updates:
     groups:
       dev-tools:
         dependency-type: development
+      # client-s3와 s3-request-presigner는 같은 @smithy/core의 Client 타입을 쓴다.
+      # 한쪽만 올리면 @smithy/core가 두 벌이 되어 타입 검사가 깨지므로 함께 올린다.
+      aws-sdk:
+        patterns:
+          - "@aws-sdk/*"
     ignore:
       # typescript-eslint가 TypeScript 7을 지원하지 않는다. 도구는 6, 타입 검사는 별칭 패키지 typescript-7(tsc7)로 한다.
       - dependency-name: typescript
