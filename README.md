@@ -80,6 +80,7 @@ pnpm dev           # 관리 화면 http://localhost:3000, 공개 사이트 http:
 | `pnpm --filter @rizer/web size` / `lhci` | 공개 사이트 번들 크기 / Lighthouse 기준 검사 (먼저 빌드 필요) |
 | `pnpm build`                       | 프로덕션 빌드                                   |
 | `pnpm tiles <원본> <출력 폴더>`    | 큰 원본을 로컬에서 딥줌 타일로 자르기           |
+| `pnpm --dir apps/web screenshots` | README 화면 다시 찍기 (먼저 `pnpm seed:images`) |
 
 ## 프로젝트 구조
 
