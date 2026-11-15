@@ -19,7 +19,7 @@
     "tiles": "pnpm --filter @rizer/tiles cli"
   },
   "devDependencies": {
-    "@lhci/cli": "^0.16.0",
+    "@lhci/cli": "^0.16.1",
     "@size-limit/file": "^14.3.0",
     "size-limit": "^14.3.0",
     "turbo": "^2"
