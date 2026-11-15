@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@annotorious/openseadragon": "^3.9.5",
-    "@electric-sql/pglite": "0.5.15",
+    "@electric-sql/pglite": "0.5.16",
     "@rizer/config": "workspace:*",
     "@rizer/domain": "workspace:*",
     "@rizer/storage": "workspace:*",
