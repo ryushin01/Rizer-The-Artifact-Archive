@@ -23,7 +23,7 @@ export default defineConfig({
     { name: "chromium", use: { ...devices["Desktop Chrome"] }, testIgnore: /mobile\.spec|readme\.screenshots/ },
     { name: "mobile", use: { ...devices["Pixel 7"] }, testMatch: /mobile\.spec/ },
     // README 화면 촬영(pnpm screenshots). 화면 파일을 덮어쓰므로 SCREENSHOTS=1일 때만 넣습니다.
-    ...(process.env.SCREENSHOTS
+    ...(process.env.SCREENSHOTS === '1'
       ? [{ name: "screenshots", use: { ...devices["Desktop Chrome"] }, testMatch: /readme\.screenshots\.ts/ }]
       : []),
   ],
