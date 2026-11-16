@@ -214,9 +214,14 @@ export function createArtifactRepository(db: Database) {
       return db.select().from(annotations).where(eq(annotations.artifactId, artifactId)).orderBy(asc(annotations.order));
     },
 
-    /** 주석을 통째로 바꾼다(편집기는 전체 목록을 저장한다). */
+    /**
+     * 주석을 통째로 바꾼다(편집기는 전체 목록을 저장한다).
+     * 유물 행의 수정 시각을 먼저 바꿔 행을 잠근다. 서버가 켜질 때의 시드 주석 동기화도 같은 행을 잠그고 바꾸므로
+     * 둘이 엇갈려 주석이 섞이지 않는다(db/seed.ts의 refreshUntouchedSeedArtifacts).
+     */
     async replaceAnnotations(artifactId: string, inputs: (AnnotationInput & { id?: string })[], now = new Date()) {
       await db.transaction(async (tx) => {
+        await tx.update(artifacts).set({ updatedAt: now }).where(eq(artifacts.id, artifactId));
         await tx.delete(annotations).where(eq(annotations.artifactId, artifactId));
         if (inputs.length) {
           await tx.insert(annotations).values(
@@ -230,7 +235,6 @@ export function createArtifactRepository(db: Database) {
             })),
           );
         }
-        await tx.update(artifacts).set({ updatedAt: now }).where(eq(artifacts.id, artifactId));
       });
     },
 

@@ -63,7 +63,7 @@ async function insertSeedArtifacts(
 }
 
 /** 시드 주석을 넣는다. 아이디가 정해져 있어 여러 인스턴스가 동시에 넣어도 한 번만 들어간다(늦은 쪽은 고유 키 위반). */
-async function insertSeedAnnotations(db: Database, slugs: string[]) {
+async function insertSeedAnnotations(db: Pick<Database, "insert">, slugs: string[]) {
   const wanted = new Set(slugs);
   const rows = Object.entries(SEED_ANNOTATIONS)
     .filter(([slug]) => wanted.has(slug))
@@ -138,11 +138,17 @@ export async function refreshUntouchedSeedArtifacts(db: Database, manifest: Seed
 
     const wanted = (SEED_ANNOTATIONS[row.slug] ?? []).map((a) => [a.title, a.body, a.region.x, a.region.y, a.region.w, a.region.h]);
     if (stable(notesOf(row.id)) !== stable(wanted)) {
-      const [still] = await db.select({ id: artifacts.id }).from(artifacts).where(untouched);
-      if (!still) continue;
-      await db.delete(annotations).where(eq(annotations.artifactId, row.id));
-      await insertSeedAnnotations(db, [row.slug]);
-      counts.annotations++;
+      // 확인·지우기·넣기를 한 트랜잭션에서 유물 행을 잠그고 한다. 큐레이터의 주석 저장(replaceAnnotations)도
+      // 같은 행을 먼저 잠그므로 둘은 차례로 돈다. 큐레이터가 먼저 저장했으면 잠금이 풀린 뒤 다시 읽은 행이
+      // '손댄' 상태라 건너뛰고, 이쪽이 먼저면 큐레이터의 저장이 이 시드 주석까지 지우고 자기 목록을 넣는다.
+      const replaced = await db.transaction(async (tx) => {
+        const [still] = await tx.select({ id: artifacts.id }).from(artifacts).where(untouched).for("update");
+        if (!still) return false;
+        await tx.delete(annotations).where(eq(annotations.artifactId, row.id));
+        await insertSeedAnnotations(tx, [row.slug]);
+        return true;
+      });
+      if (replaced) counts.annotations++;
     }
   }
   return counts;

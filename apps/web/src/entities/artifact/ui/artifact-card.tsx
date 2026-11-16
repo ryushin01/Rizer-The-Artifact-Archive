@@ -29,6 +29,8 @@ export function ArtifactCard({ artifact, priority = false }: { artifact: Artifac
           // 카드는 넓어야 340px이라 긴 변 960px 썸네일로 충분하다(썸네일이 없던 때 올린 이미지는 미리보기).
           // eslint-disable-next-line @next/next/no-img-element -- 타일 서버의 미리보기라 next/image 최적화를 거치지 않는다
           <img
+            // 이미지가 바뀌면 새 요소로 그려 미리보기로 바꾼 표시(data-fallback)도 처음부터 다시 쓴다.
+            key={`${image.thumbUrl ?? ""}|${image.previewUrl}`}
             src={image.thumbUrl ?? image.previewUrl}
             // 썸네일을 받지 못하면(없는 파일 등) 한 번만 미리보기로 바꿔 그린다.
             onError={(event) => {
