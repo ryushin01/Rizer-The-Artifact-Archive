@@ -1,9 +1,11 @@
 "use client";
 
 import { type FormEvent, useActionState, useRef } from "react";
+import { unstable_rethrow } from "next/navigation";
 import { toast } from "sonner";
 
-import type { FormState } from "./form";
+import { formDataToObject, type FormState } from "./form";
+import { ACTION_ERROR_MESSAGE } from "./use-guarded-action";
 
 type PageFormState = FormState & { attempt: number };
 type FormValues = Record<string, string | string[]>;
@@ -12,17 +14,25 @@ type FormValues = Record<string, string | string[]>;
  * 화면 전체를 차지하는 폼을 서버 액션으로 제출한다.
  * 성공하면 알림을 띄우고, 실패하면 입력값과 필드 오류를 돌려준다.
  * attempt를 form의 key로 써서 다시 마운트해야 defaultValue가 복원된다.
+ * 액션이 던지면(연결 끊김, 서버 오류) 오류 화면으로 넘기지 않고 입력값을 그대로 둔 채 안내한다.
  */
 export function usePageForm(
   action: (prev: FormState, formData: FormData) => Promise<FormState>,
   defaults: FormValues,
 ) {
   // pending은 다음 렌더에야 true가 되어 빠른 연속 클릭을 못 막으므로 ref로 잠근다.
-  // 성공해서 화면을 떠나는 경우(redirect)에는 잠금을 풀지 않는다(액션이 던지므로 아래에 닿지 않는다).
+  // 성공해서 화면을 떠나는 경우(redirect)에는 잠금을 풀지 않는다(이동 신호를 다시 던지므로 아래에 닿지 않는다).
   const locked = useRef(false);
   const [state, formAction, pending] = useActionState(
     async (prev: PageFormState, formData: FormData): Promise<PageFormState> => {
-      const result = await action(prev, formData);
+      let result: FormState;
+      try {
+        result = await action(prev, formData);
+      } catch (error) {
+        unstable_rethrow(error);
+        console.error(error);
+        result = { status: "error", formError: ACTION_ERROR_MESSAGE, fieldErrors: {}, values: formDataToObject(formData) };
+      }
       locked.current = false;
       const attempt = prev.attempt + 1;
       if (result.status === "success") {

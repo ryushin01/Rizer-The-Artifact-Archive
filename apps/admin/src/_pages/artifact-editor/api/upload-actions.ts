@@ -6,7 +6,14 @@ import { getDb } from "@/db/server";
 import { READ_ONLY_MESSAGE } from "@/entities/user";
 import { createArtifactRepository } from "@/server/artifacts/repository";
 import { getEditor } from "@/server/auth/guard";
-import { ACCEPTED_TYPES, extensionOf, MAX_UPLOAD_BYTES, originalKey, tileAndUpload } from "@/server/images/process";
+import {
+  ACCEPTED_TYPES,
+  extensionOf,
+  imageErrorMessage,
+  MAX_UPLOAD_BYTES,
+  originalKey,
+  tileAndUpload,
+} from "@/server/images/process";
 import { notifyWeb } from "@/server/revalidate";
 import { getStorage } from "@/server/storage";
 import type { ActionResult } from "@/shared/lib/form";
@@ -47,7 +54,17 @@ export async function processUploadAction(id: string, key: string): Promise<Acti
   const storage = getStorage();
   const body = await storage.get(key);
   if (!body) return { ok: false, message: "올린 원본을 찾지 못했습니다. 다시 올려 주세요." };
-  const image = await tileAndUpload(storage, id, { key, body }, artifact.image);
+  let image;
+  try {
+    image = await tileAndUpload(storage, id, { key, body }, artifact.image);
+  } catch (error) {
+    // 손상된 파일, 너무 큰 이미지는 안내를 돌려준다(로컬 업로드 라우트와 같다). 스토리지 업로드 실패 등은
+    // 이미지를 탓하지 않도록 그대로 던져, 화면이 "다시 시도해 주세요"를 보이게 한다.
+    const message = imageErrorMessage(error);
+    if (!message) throw error;
+    console.error("[upload] 타일링 실패", error);
+    return { ok: false, message };
+  }
   await repo.setImage(id, image);
   await notifyWeb([artifact.slug]);
   revalidatePath(`/artifacts/${id}`);

@@ -50,3 +50,26 @@ export const LoadMore: StoryObj<typeof meta> = {
 export const Empty: StoryObj<typeof meta> = {
   parameters: { store: { archive: { query: { sort: "featured" }, items: [], total: 0, status: "idle", error: null, more: "idle" } } },
 };
+
+/** 공개 API에 닿지 못했을 때: "결과 없음"이 아니라 오류와 다시 시도 버튼. 다시 시도하면 브라우저에서 읽는다. */
+export const Offline: StoryObj<typeof meta> = {
+  parameters: {
+    store: {
+      archive: {
+        query: { sort: "featured" },
+        items: [],
+        total: 0,
+        status: "error",
+        error: "유물 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+        more: "idle",
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText(/유물 목록을 불러오지 못했습니다/)).toBeVisible();
+    await expect(canvas.queryByText(/조건에 맞는 유물이 없습니다/)).toBeNull();
+    await userEvent.click(canvas.getByRole("button", { name: "다시 시도" }));
+    await waitFor(() => expect(canvas.getAllByRole("listitem")).toHaveLength(2));
+  },
+};

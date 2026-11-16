@@ -20,6 +20,8 @@ export const nextAppConfig = [
   },
   {
     rules: {
+      // Pages Router용 규칙이다. App Router 모노레포에서는 pages 폴더를 찾지 못해 경고를 내고, 실행 위치에 따라 결과가 달라진다.
+      "@next/next/no-html-link-for-pages": "off",
       // 구조 분해에서 일부러 빼는 값은 _로 시작한다.
       "@typescript-eslint/no-unused-vars": [
         "warn",

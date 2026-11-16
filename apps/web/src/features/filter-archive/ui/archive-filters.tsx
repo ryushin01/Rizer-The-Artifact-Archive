@@ -1,13 +1,22 @@
 "use client";
 
-import { GALLERIES, galleryName, KINDS, kindName, type ArtifactQuery, type GalleryId, type KindId } from "@rizer/domain";
+import {
+  GALLERIES,
+  galleryName,
+  KINDS,
+  kindName,
+  SEARCH_MAX_LENGTH,
+  type ArtifactQuery,
+  type GalleryId,
+  type KindId,
+} from "@rizer/domain";
 import { useId } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 
 import { useLocale, useMessages } from "@/shared/i18n";
 import { media } from "@/shared/config";
-import { IconSearch, MonoLabel } from "@/shared/ui";
+import { IconChevronDown, IconSearch, MonoLabel } from "@/shared/ui";
 
 import { cleared, hasActiveFilters, queryChanged, selectArchive } from "../model/slice";
 
@@ -26,7 +35,7 @@ export function ArchiveFilters() {
   const dispatch = useDispatch();
   const locale = useLocale();
   const t = useMessages().archive;
-  const { query, total, status } = useSelector(selectArchive);
+  const { query, total, status, error } = useSelector(selectArchive);
   const id = useId();
 
   return (
@@ -43,6 +52,7 @@ export function ArchiveFilters() {
               type="search"
               placeholder={t.placeholder}
               defaultValue={query.q ?? ""}
+              maxLength={SEARCH_MAX_LENGTH}
               onChange={(e) => dispatch(queryChanged({ q: e.target.value.trim() || undefined }))}
               autoComplete="off"
             />
@@ -52,34 +62,40 @@ export function ArchiveFilters() {
           <label htmlFor={`${id}-kind`}>
             <MonoLabel>{t.kind}</MonoLabel>
           </label>
-          <select
-            id={`${id}-kind`}
-            value={query.kind ?? ""}
-            onChange={(e) => dispatch(queryChanged({ kind: (e.target.value || undefined) as KindId | undefined }))}
-          >
-            <option value="">{t.allKinds}</option>
-            {KINDS.map((k) => (
-              <option key={k.id} value={k.id}>
-                {kindName(k.id, locale)}
-              </option>
-            ))}
-          </select>
+          <SelectBox>
+            <select
+              id={`${id}-kind`}
+              value={query.kind ?? ""}
+              onChange={(e) => dispatch(queryChanged({ kind: (e.target.value || undefined) as KindId | undefined }))}
+            >
+              <option value="">{t.allKinds}</option>
+              {KINDS.map((k) => (
+                <option key={k.id} value={k.id}>
+                  {kindName(k.id, locale)}
+                </option>
+              ))}
+            </select>
+            <IconChevronDown />
+          </SelectBox>
         </SelectField>
         <SelectField>
           <label htmlFor={`${id}-sort`}>
             <MonoLabel>{t.sort}</MonoLabel>
           </label>
-          <select
-            id={`${id}-sort`}
-            value={query.sort}
-            onChange={(e) => dispatch(queryChanged({ sort: e.target.value as ArtifactQuery["sort"] }))}
-          >
-            {SORTS.map((s) => (
-              <option key={s.value} value={s.value}>
-                {t[s.label]}
-              </option>
-            ))}
-          </select>
+          <SelectBox>
+            <select
+              id={`${id}-sort`}
+              value={query.sort}
+              onChange={(e) => dispatch(queryChanged({ sort: e.target.value as ArtifactQuery["sort"] }))}
+            >
+              {SORTS.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {t[s.label]}
+                </option>
+              ))}
+            </select>
+            <IconChevronDown />
+          </SelectBox>
         </SelectField>
       </Row>
 
@@ -104,9 +120,8 @@ export function ArchiveFilters() {
       </Chips>
 
       <Summary>
-        <p role="status" aria-live="polite">
-          {status === "loading" ? t.searching : t.total(total)}
-        </p>
+        {/* 처음부터 있는 알림 영역. 찾는 중·결과 수·불러오기 실패를 여기서 알린다(role="status"가 polite를 뜻한다). */}
+        <p role="status">{status === "loading" ? t.searching : status === "error" ? error : t.total(total)}</p>
         {hasActiveFilters(query) && (
           <ResetButton type="button" onClick={() => dispatch(cleared())}>
             {t.clear}
@@ -167,14 +182,38 @@ const SearchBox = styled.div`
 const SelectField = styled.div`
   display: grid;
   gap: 8px;
+`;
+/** 셀렉트 안쪽 여백(테두리 안쪽). 화살표도 오른쪽 끝에서 같은 거리에 둔다. */
+const SELECT_INSET = 14;
+/** 화살표 그림의 너비(IconChevronDown은 상자 끝이 곧 그림 끝이다) */
+const SELECT_ICON = 14;
+/**
+ * 셀렉트와 직접 그린 화살표. 브라우저 기본 화살표는 위치를 맞출 수 없어 appearance: none으로 지우고,
+ * 화살표를 칸 오른쪽 끝에서 왼쪽 글자와 같은 거리(테두리 + 안쪽 여백)에 둔다. 화살표는 꾸밈이라 누르기·낭독에서 뺀다.
+ */
+const SelectBox = styled.div`
+  position: relative;
   select {
+    width: 100%;
     min-height: 52px;
-    padding: 0 14px;
+    padding: 0 ${SELECT_INSET + SELECT_ICON + 8}px 0 ${SELECT_INSET}px;
     border: 1px solid ${({ theme }) => theme.color.lineStrong};
     border-radius: ${({ theme }) => theme.radius.sm};
     background: ${({ theme }) => theme.color.surface};
     color: inherit;
     font: inherit;
+    appearance: none;
+    cursor: pointer;
+  }
+  svg {
+    position: absolute;
+    top: 50%;
+    right: ${SELECT_INSET + 1}px;
+    width: ${SELECT_ICON}px;
+    height: ${(SELECT_ICON * 9) / 14}px;
+    transform: translateY(-50%);
+    color: ${({ theme }) => theme.color.muted};
+    pointer-events: none;
   }
 `;
 const Chips = styled.fieldset`

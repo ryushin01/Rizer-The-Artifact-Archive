@@ -78,7 +78,7 @@ test.describe("공개 사이트", () => {
     await skipGate(page);
     await page.goto("/artifacts");
     await page.getByRole("radio", { name: /북유럽/ }).check();
-    await expect(page.getByRole("status")).toHaveText(/^유물 \d+점$/);
+    await expect(page.getByRole("search").getByRole("status")).toHaveText(/^유물 \d+점$/);
     await shoot(page, "web-archive");
   });
 });

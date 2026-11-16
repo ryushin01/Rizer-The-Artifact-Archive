@@ -12,6 +12,7 @@ export {
 export {
   IconArrowLeft,
   IconArrowRight,
+  IconChevronDown,
   IconExpand,
   IconExternal,
   IconHome,

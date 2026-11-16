@@ -126,3 +126,38 @@ test.describe("어드민: 큐레이터", () => {
     }).toPass({ timeout: 20_000 });
   });
 });
+
+test.describe("어드민: 접근성", () => {
+  test("로그인 화면에 접근성 위반이 없다", async ({ page }) => {
+    await page.goto(`${ADMIN_URL}/login`);
+    await expect(page.getByRole("heading", { name: "Rizer Archive 관리" })).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+
+  test("큐레이터의 대시보드·유물 목록·새 유물·주석 편집기에 접근성 위반이 없다", async ({ page }) => {
+    await loginAsCurator(page);
+    await expectNoA11yViolations(page);
+    await page.goto(`${ADMIN_URL}/artifacts`);
+    await expect(page.getByRole("link", { name: "엑스칼리버" })).toBeVisible();
+    await expectNoA11yViolations(page);
+    await page.goto(`${ADMIN_URL}/artifacts/new`);
+    await expect(page.getByRole("button", { name: "만들기" })).toBeVisible();
+    await expectNoA11yViolations(page);
+    await page.goto(`${ADMIN_URL}/artifacts/art_excalibur/annotations`);
+    await expect(page.locator(".openseadragon-canvas")).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+
+  test("유물 폼의 오류는 칸에 이어지고, 실패하면 첫 오류 칸으로 초점이 간다", async ({ page }) => {
+    await loginAsCurator(page);
+    await page.goto(`${ADMIN_URL}/artifacts/new`);
+    await page.getByRole("button", { name: "만들기" }).click();
+    const title = page.getByLabel("이름", { exact: true });
+    await expect(title).toBeFocused();
+    await expect(title).toHaveAttribute("aria-invalid", "true");
+    await expect(title).toHaveAccessibleDescription(/이름을 입력하세요/);
+    // Next.js의 경로 알림(route announcer)도 role="alert"라 문구로 고른다.
+    await expect(page.getByRole("alert").filter({ hasText: /입력값 \d+곳을 확인해 주세요/ })).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+});

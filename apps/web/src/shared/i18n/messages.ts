@@ -77,6 +77,8 @@ const ko = {
     description:
       "전설은 입에서 입으로 먼저 전해졌습니다. 이 연표는 각 유물이 문헌에 처음 기록된 때를 따라갑니다.",
     eras: "시대",
+    /** 가로로 넘기는 연표 영역의 이름. 섹션 제목과 같으면 같은 이름의 영역이 둘이 된다. */
+    scroller: "연표 목록",
     all: "전체",
     ancient: "기원전",
     classical: "1~1000년",
@@ -147,7 +149,11 @@ const ko = {
       `${added}점을 더 불러왔습니다. ${total}점 중 ${shown}점을 보고 있습니다.`,
     loadError: "유물 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
   },
-  card: { firstRecord: (year: string) => `${year} 첫 기록` },
+  card: {
+    firstRecord: (year: string) => `${year} 첫 기록`,
+    /** 검색어가 맞은 주석. 번호는 두 자리(02) */
+    note: (number: string, title: string) => `주석 ${number} · ${title}`,
+  },
   artifact: {
     offline: "아카이브에 잠시 연결할 수 없습니다. 잠시 후 새로고침해 주세요.",
     preparing: "이미지를 준비하고 있습니다.",
@@ -285,6 +291,7 @@ const en: Messages = {
     description:
       "Legends passed from mouth to mouth long before anyone wrote them down. This timeline follows the moment each artifact first appears in a text.",
     eras: "Era",
+    scroller: "Timeline list",
     all: "All",
     ancient: "BCE",
     classical: "1–1000",
@@ -356,7 +363,10 @@ const en: Messages = {
     loadError:
       "Could not load the artifact list. Please try again in a moment.",
   },
-  card: { firstRecord: (year: string) => `First recorded ${year}` },
+  card: {
+    firstRecord: (year: string) => `First recorded ${year}`,
+    note: (number: string, title: string) => `Note ${number} · ${title}`,
+  },
   artifact: {
     offline:
       "The archive is temporarily unavailable. Please refresh in a moment.",

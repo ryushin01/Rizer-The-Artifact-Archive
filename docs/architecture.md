@@ -45,7 +45,7 @@
 
 ## 딥줌과 주석
 
-1. 원본을 `packages/tiles`(sharp)가 겹침 1px WebP 타일의 DZI 피라미드로 자른다. 업로드와 시드 이미지는 510px 타일이다(254px보다 파일 수가 약 4분의 1이라 Vercel Blob 업로드 작업 한도를 덜 쓴다). 라이브러리 기본값과 `pnpm tiles` CLI는 254px이다. 미리보기(긴 변 1600px), LQIP(24px data URL), 대표 색도 만든다.
+1. 원본을 `packages/tiles`(sharp)가 겹침 1px WebP 타일의 DZI 피라미드로 자른다. 업로드와 시드 이미지는 510px 타일이다(254px보다 파일 수가 약 4분의 1이라 Vercel Blob 업로드 작업 한도를 덜 쓴다). 라이브러리 기본값과 `pnpm tiles` CLI는 254px이다. 미리보기(긴 변 1600px, 첫 화면·공유 이미지), 썸네일(긴 변 960px, 카드·관리 목록), LQIP(24px data URL), 대표 색도 만든다. 원본은 타일과 미리보기에 한 번씩만 해독하고 나머지는 미리보기에서 만든다. 서버 업로드는 약 2억 6800만 픽셀까지 자르고, 더 큰 원본은 CLI(10억까지)로 자른다.
 2. 키에 버전(`artifacts/<id>/v<시각>/`)을 넣어, CDN이 1년 캐시해도 새 타일이 바로 보인다. 새로 자르면 이전 버전은 지운다.
 3. 운영에서는 브라우저가 서명된 주소로 Vercel Blob(또는 R2)에 원본을 직접 올리고(서버리스 요청 크기 제한 회피), 서버가 타일을 만든다. 80MB를 넘는 원본은 `pnpm tiles` CLI로 자른다.
 4. 주석은 W3C Web Annotation의 부분 집합이고, 영역은 **백분율**(`xywh=percent:x,y,w,h`)로 저장한다. 다시 타일링하거나 해상도가 바뀌어도 위치가 맞는다. `toWebAnnotation()`으로 JSON-LD를 내보낼 수 있다.
@@ -64,6 +64,8 @@
 - **화면 문구:** `shared/i18n/messages.ts`의 사전과 `useMessages()`를 쓴다. 번역 도구를 넣지 않은 것은 Cache Components와 맞추려면 요청 정보를 읽지 않는 편이 단순하기 때문이다. 언어는 라우트가 정적으로 넘긴다.
 - **유물 내용:** 번역 원본은 `packages/domain/src/seed/en`이다. 공개 API는 `locale=en`일 때 **DB 값이 시드 한국어와 같은 필드만** 번역으로 바꾼다. 큐레이터가 고친 내용을 낡은 번역으로 덮지 않기 위해서이고, 제목이나 해설이 번역되지 않으면 `contentLang: "ko"`로 알려 화면에 `lang`을 표시한다.
 - **영어 검색:** DB에 영어가 없으므로 `searchEnglish()`가 시드 번역에서 찾은 slug를 저장소 질의의 `alsoSlugs`·`rankSlugs`로 넘긴다.
+- **주석에서 맞은 결과:** 검색어가 이름이 아니라 주석에서 맞으면 공개 API가 그 주석의 투어 번호·제목(`matchedNote`)을 붙이고(영어판은 번역 주석에서 찾음), 카드는 `?note=N`으로 그 주석을 바로 연다.
+- **검색 조건:** `parseArtifactQuery()`가 조건마다 따로 검증해 틀린 값만 버린다. 검색어는 앞의 60자를 쓴다.
 
 ## 접근성 (KWCAG 2.2)
 
@@ -78,4 +80,5 @@
 - 두 앱 모두 `packages/config/security-headers.mjs`의 CSP를 쓴다. 이미지·연결은 공개 API와 타일 도메인만 허용한다.
 - 관리 화면만 `'unsafe-eval'`을 허용한다. 주석 편집기(Annotorious)가 자기 번들에 넣은 PixiJS가 eval로 셰이더 코드를 만들어, 외부 패치(`@pixi/unsafe-eval`)를 쓸 수 없기 때문이다. 외부 스크립트는 여전히 막혀 있다.
 - 공개 API는 공개 상태의 유물만 내보내고 CORS는 읽기(`GET`)만 연다. `/api/revalidate`는 Bearer 비밀값을 시간 차 없는 비교로 확인한다.
+- 로그인은 이메일마다 15분에 5번 틀리면 15분 잠근다. 실패는 쿼리 하나(upsert + `CASE`)로 세어 동시 요청으로 피할 수 없다. 비밀번호가 공개된 게스트 계정은 잠그지 않는다(잠그면 데모를 막을 수 있다).
 - 스토리지 키는 `safeKey`로 경로 조작(`../`)을 막는다. 업로드는 형식(JPG·PNG·WebP·TIFF)과 크기(80MB)를 서버에서 다시 확인한다.

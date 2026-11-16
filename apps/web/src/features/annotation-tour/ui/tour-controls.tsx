@@ -29,7 +29,8 @@ export function TourControls() {
       <IconButton type="button" aria-label={t.prev} onClick={() => dispatch(prev())} disabled={index <= 0}>
         <IconArrowLeft />
       </IconButton>
-      <Counter aria-live="polite" aria-atomic="true">
+      {/* 고른 주석은 해설 패널(ArtifactDossier)의 알림 영역이 제목·설명으로 알린다. 번호까지 알리면 두 번 읽힌다. */}
+      <Counter>
         {index >= 0 ? `${pad2(index + 1)} / ${pad2(ids.length)}` : t.count(ids.length)}
       </Counter>
       <IconButton type="button" aria-label={t.next} onClick={() => dispatch(next())} disabled={index >= ids.length - 1}>

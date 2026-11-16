@@ -23,6 +23,16 @@ export const Default: Story = {
   },
 };
 
+/** 검색어가 주석에서 맞은 결과: 그 주석을 한 줄로 보이고, 링크가 그 주석으로 바로 연다. */
+export const MatchedNote: Story = {
+  args: { artifact: { ...ARTIFACT_FIXTURES[0]!, matchedNote: { number: 2, title: "십자형 코등이" } } },
+  play: async ({ canvasElement }) => {
+    const link = within(canvasElement).getByRole("link", { name: "엑스칼리버" });
+    await expect(link).toHaveAttribute("href", "/artifacts/fixture-0?note=2");
+    await expect(link).toHaveAccessibleDescription("주석 02 · 십자형 코등이");
+  },
+};
+
 /** 이미지가 없는 유물 */
 export const WithoutImage: Story = {
   args: { artifact: { ...ARTIFACT_FIXTURES[1]!, image: null } },

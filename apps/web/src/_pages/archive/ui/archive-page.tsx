@@ -1,4 +1,4 @@
-import { artifactQuerySchema, type ArtifactQuery, type Locale } from "@rizer/domain";
+import { type ArtifactQuery, type Locale, parseArtifactQuery } from "@rizer/domain";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -19,20 +19,24 @@ export const metadataEn: Metadata = { title: MESSAGES.en.meta.archiveTitle, desc
 
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
+/** 화면 주소의 조건(검색어·전시실·종류·정렬). 잘못된 값만 버리고 나머지는 지킨다. */
 function parseQuery(params: Record<string, string | string[] | undefined>): ArtifactQuery {
-  const raw = Object.fromEntries(
-    ["q", "gallery", "kind", "sort"].flatMap((k) => (one(params[k]) ? [[k, one(params[k])]] : [])),
-  );
-  return artifactQuerySchema.safeParse(raw).data ?? { sort: "featured" };
+  return parseArtifactQuery(Object.fromEntries(["q", "gallery", "kind", "sort"].map((k) => [k, one(params[k])])));
 }
 
 async function Results({ searchParams, locale }: Props & { locale: Locale }) {
   const parsed = parseQuery(await searchParams);
   const query: ArtifactQuery = locale === "ko" ? parsed : { ...parsed, locale };
-  const { items, total } = await getArtifacts({ ...query, limit: ARCHIVE_PAGE_SIZE });
+  const { items, total, offline } = await getArtifacts({ ...query, limit: ARCHIVE_PAGE_SIZE });
   return (
     <>
-      <ArchiveHydrator key={JSON.stringify(query)} query={query} items={items} total={total} />
+      <ArchiveHydrator
+        key={JSON.stringify(query)}
+        query={query}
+        items={items}
+        total={total}
+        error={offline ? MESSAGES[locale].archive.loadError : undefined}
+      />
       <ArchiveFilters key={`f-${JSON.stringify(query)}`} />
       <ArchiveGrid />
     </>

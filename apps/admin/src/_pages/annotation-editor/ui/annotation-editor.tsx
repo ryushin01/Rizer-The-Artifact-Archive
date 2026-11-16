@@ -20,7 +20,7 @@ import {
   ZoomOut,
 } from "lucide-react";
 import type OpenSeadragon from "openseadragon";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@rizer/ui/components/badge";
@@ -28,6 +28,8 @@ import { Button } from "@rizer/ui/components/button";
 import { Field, FieldGroup, FieldLabel } from "@rizer/ui/components/field";
 import { Input } from "@rizer/ui/components/input";
 import { Textarea } from "@rizer/ui/components/textarea";
+
+import { useGuardedAction } from "@/shared/lib/use-guarded-action";
 
 import { saveAnnotationsAction } from "../api/actions";
 import { pixelsToRegion, regionFromViewport, toAnnotoriousShape, type PixelRect } from "../model/region";
@@ -68,7 +70,8 @@ export function AnnotationEditor({
   const [selected, setSelected] = useState<string | null>(null);
   const [drawing, setDrawing] = useState(false);
   const [dirty, setDirty] = useState(false);
-  const [saving, startSaving] = useTransition();
+  const { pending: saving, run: runSave } = useGuardedAction();
+  const hintId = useId();
   const size = { width: image.width, height: image.height };
 
   // 뷰어와 Annotorious는 브라우저에서만 돈다. 한 번 만들고 화면을 떠날 때 정리한다.
@@ -218,11 +221,9 @@ export function AnnotationEditor({
     }
   };
 
-  const saveLock = useRef(false);
-  const save = () => {
-    if (saveLock.current) return;
-    saveLock.current = true;
-    startSaving(async () => {
+  // 저장이 실패해도(연결 끊김 등) 편집 중인 목록은 그대로 두고 알림만 띄운다.
+  const save = () =>
+    runSave(async () => {
       const payload = items.map((i, order) => ({
         id: i.id.startsWith("ann_") ? i.id : undefined,
         title: i.title,
@@ -230,17 +231,12 @@ export function AnnotationEditor({
         region: i.region,
         order,
       }));
-      try {
-        const result = await saveAnnotationsAction(artifactId, payload);
-        if (result.ok) {
-          toast.success(result.message);
-          setDirty(false);
-        } else toast.error(result.message);
-      } finally {
-        saveLock.current = false;
-      }
+      const result = await saveAnnotationsAction(artifactId, payload);
+      if (result.ok) {
+        toast.success(result.message);
+        setDirty(false);
+      } else toast.error(result.message);
     });
-  };
 
   const zoom = (factor: number) => viewerRef.current?.viewport.zoomBy(factor).applyConstraints();
 
@@ -294,14 +290,15 @@ export function AnnotationEditor({
             </Button>
           </div>
         </div>
+        {/* 뷰어 안에 초점을 받는 캔버스가 있어 role="img"를 쓰지 않는다(자식이 장식으로 바뀐다). 사진 설명은 글로 둔다. */}
+        <p className="sr-only">사진: {imageAlt}</p>
         <div
           ref={containerRef}
-          role="img"
-          aria-label={imageAlt}
+          aria-describedby={hintId}
           className="relative h-[60vh] min-h-80 overflow-hidden rounded-lg border bg-neutral-900 lg:h-[calc(100vh-14rem)]"
           style={{ backgroundColor: image.dominantColor }}
         />
-        <p className="text-xs text-muted-foreground">
+        <p id={hintId} className="text-xs text-muted-foreground">
           {drawing ? "이미지 위를 끌어 사각형을 그립니다. 다 그렸으면 '영역 그리기'를 다시 눌러 끕니다." : "끌어서 움직이고, 휠이나 두 손가락으로 확대합니다."}
         </p>
       </section>
