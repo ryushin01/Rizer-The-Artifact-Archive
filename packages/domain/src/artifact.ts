@@ -106,8 +106,10 @@ export type ArtifactSource = z.infer<typeof sourceSchema>;
 export const deepZoomImageSchema = z.object({
   /** DZI 설명 파일(.dzi)의 공개 주소 */
   dziUrl: z.string().min(1),
-  /** 목록·카드에 쓰는 미리보기(WebP, 긴 변 1600px) */
+  /** 첫 화면의 큰 사진과 공유 이미지에 쓰는 미리보기(WebP, 긴 변 1600px) */
   previewUrl: z.string().min(1),
+  /** 유물 카드·목록에 쓰는 썸네일(WebP, 긴 변 960px). 썸네일이 없던 때 올린 이미지는 없으므로 previewUrl을 대신 쓴다. */
+  thumbUrl: z.string().min(1).optional(),
   /** 원본 크기(px) */
   width: z.number().int().positive(),
   height: z.number().int().positive(),
@@ -158,9 +160,14 @@ export const artifactSchema = artifactInputSchema.extend({
 });
 export type Artifact = z.infer<typeof artifactSchema>;
 
-/** 목록용 요약 (해설 본문 제외) */
 /** 목록용 요약. 해설 본문과 사진 출처는 상세에서만 쓰므로 뺀다(목록 응답을 가볍게). */
-export const artifactSummarySchema = artifactSchema.omit({ story: true, source: true });
+export const artifactSummarySchema = artifactSchema.omit({ story: true, source: true }).extend({
+  /**
+   * 검색어가 이름이 아니라 주석에서 맞았으면 그 주석. number는 1부터 세는 투어 순서라 주석 바로가기(?note=N)에 그대로 쓴다.
+   * 검색할 때만 있다.
+   */
+  matchedNote: z.object({ number: z.number().int().positive(), title: z.string() }).optional(),
+});
 export type ArtifactSummary = z.infer<typeof artifactSummarySchema>;
 
 /** 해설 본문을 문단으로 나눈다. */

@@ -13,6 +13,7 @@ import {
   fetchFailed,
   fetchSucceeded,
   hasActiveFilters,
+  hydrated,
   moreFailed,
   moreSucceeded,
   queryChanged,
@@ -29,6 +30,15 @@ describe("archive slice", () => {
     expect(state.status).toBe("loading");
     expect(hasActiveFilters(state.query)).toBe(true);
     expect(hasActiveFilters({ sort: "featured" })).toBe(false);
+  });
+
+  it("서버가 공개 API에 닿지 못한 첫 목록은 '결과 없음'이 아니라 오류로 둔다", () => {
+    const query = { sort: "featured" as const };
+    const offline = archiveSlice.reducer(undefined, hydrated({ query, items: [], total: 0, error: "불러오지 못했습니다." }));
+    expect(offline).toMatchObject({ status: "error", error: "불러오지 못했습니다.", items: [] });
+    expect(offline).not.toHaveProperty("query.error");
+    const ok = archiveSlice.reducer(offline, hydrated({ query, items: [item], total: 1 }));
+    expect(ok).toMatchObject({ status: "idle", error: null, total: 1 });
   });
 });
 

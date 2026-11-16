@@ -29,9 +29,16 @@ export const archiveSlice = createSlice({
   name: "archive",
   initialState: initialArchiveState,
   reducers: {
-    /** 서버에서 그린 첫 목록으로 채운다. */
-    hydrated(state, action: PayloadAction<{ query: ArtifactQuery; items: ArtifactSummary[]; total: number }>) {
-      Object.assign(state, action.payload, { status: "idle", error: null, more: "idle" });
+    /**
+     * 서버에서 그린 첫 목록으로 채운다. 서버가 공개 API에 닿지 못했으면(error) 빈 목록을 "결과 없음"이 아니라
+     * 오류로 보여 주고, 다시 시도(retried)는 브라우저에서 읽는다.
+     */
+    hydrated(
+      state,
+      action: PayloadAction<{ query: ArtifactQuery; items: ArtifactSummary[]; total: number; error?: string }>,
+    ) {
+      const { error, ...data } = action.payload;
+      Object.assign(state, data, { status: error ? "error" : "idle", error: error ?? null, more: "idle" });
     },
     /** 검색 조건을 바꾼다. 일부만 넘기면 나머지는 그대로 둔다. undefined는 그 조건을 지운다. */
     queryChanged(state, action: PayloadAction<Partial<ArtifactQuery>>) {

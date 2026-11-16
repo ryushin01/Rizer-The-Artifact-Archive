@@ -5,7 +5,7 @@ import path from "node:path";
 import sharp from "sharp";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { contentTypeOf, generateDeepZoom, listFiles } from "./index";
+import { contentTypeOf, generateDeepZoom, listFiles, PixelLimitError } from "./index";
 
 let dir: string;
 
@@ -43,6 +43,27 @@ describe("generateDeepZoom", () => {
 
     const preview = await sharp(path.join(dir, "preview.webp")).metadata();
     expect(Math.max(preview.width!, preview.height!)).toBe(1600);
+    // 카드용 썸네일(긴 변 960px)
+    expect(result.thumbPath).toBe("thumb.webp");
+    const thumb = await sharp(path.join(dir, "thumb.webp")).metadata();
+    expect([thumb.width, thumb.height]).toEqual([960, 640]);
+    expect(result.dominantColor).toMatch(/^#c[0-9a-f]1[0-9a-f]2[0-9a-f]$/);
+  });
+
+  it("작은 원본은 미리보기·썸네일을 키우지 않는다", async () => {
+    const out = path.join(dir, "small");
+    const tiny = await sharp({ create: { width: 300, height: 200, channels: 3, background: "#123456" } }).png().toBuffer();
+    await generateDeepZoom(tiny, out);
+    for (const file of ["preview.webp", "thumb.webp"]) {
+      const meta = await sharp(path.join(out, file)).metadata();
+      expect([meta.width, meta.height]).toEqual([300, 200]);
+    }
+  });
+
+  it("픽셀 한도를 넘는 원본은 해독하기 전에 PixelLimitError로 거절한다", async () => {
+    await expect(generateDeepZoom(await sample(), path.join(dir, "limit"), { maxPixels: 1_000_000 })).rejects.toBeInstanceOf(
+      PixelLimitError,
+    );
   });
 });
 

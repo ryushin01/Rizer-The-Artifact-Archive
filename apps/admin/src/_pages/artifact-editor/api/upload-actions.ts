@@ -6,7 +6,14 @@ import { getDb } from "@/db/server";
 import { READ_ONLY_MESSAGE } from "@/entities/user";
 import { createArtifactRepository } from "@/server/artifacts/repository";
 import { getEditor } from "@/server/auth/guard";
-import { ACCEPTED_TYPES, extensionOf, MAX_UPLOAD_BYTES, originalKey, tileAndUpload } from "@/server/images/process";
+import {
+  ACCEPTED_TYPES,
+  extensionOf,
+  MAX_UPLOAD_BYTES,
+  originalKey,
+  tileAndUpload,
+  tilingErrorMessage,
+} from "@/server/images/process";
 import { notifyWeb } from "@/server/revalidate";
 import { getStorage } from "@/server/storage";
 import type { ActionResult } from "@/shared/lib/form";
@@ -47,7 +54,14 @@ export async function processUploadAction(id: string, key: string): Promise<Acti
   const storage = getStorage();
   const body = await storage.get(key);
   if (!body) return { ok: false, message: "올린 원본을 찾지 못했습니다. 다시 올려 주세요." };
-  const image = await tileAndUpload(storage, id, { key, body }, artifact.image);
+  let image;
+  try {
+    image = await tileAndUpload(storage, id, { key, body }, artifact.image);
+  } catch (error) {
+    // 손상된 파일, 너무 큰 이미지 등. 로컬 업로드 라우트(server/api/upload-image.ts)와 같은 안내를 돌려준다.
+    console.error("[upload] 타일링 실패", error);
+    return { ok: false, message: tilingErrorMessage(error) };
+  }
   await repo.setImage(id, image);
   await notifyWeb([artifact.slug]);
   revalidatePath(`/artifacts/${id}`);

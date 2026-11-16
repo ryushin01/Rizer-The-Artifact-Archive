@@ -7,9 +7,14 @@ import styled from "styled-components";
 import { selectReducedMotion } from "@/features/motion-preference";
 import { theme } from "@/shared/config";
 
+/** 점이 포인터에 이만큼(px) 가까워지면 멈춘다. */
+const SETTLE_PX = 0.1;
+const INTERACTIVE = "a, button, [role='button'], input, select, label";
+
 /**
  * 마우스를 따라오는 붉은 점. 시스템 커서는 그대로 두고 장식으로만 더한다.
  * 정밀 포인터(마우스)일 때만, 움직임을 끄지 않았을 때만 보인다.
+ * 포인터가 움직일 때만 프레임을 돌리고, 점이 포인터에 닿으면 멈춘다(가만히 보는 동안 매 프레임 그리지 않는다).
  */
 export function CursorDot() {
   const ref = useRef<HTMLDivElement>(null);
@@ -24,23 +29,40 @@ export function CursorDot() {
     let cx = x;
     let cy = y;
     let frame = 0;
-    const loop = () => {
+    let visible = false;
+    let hover = false;
+    const step = () => {
       cx += (x - cx) * 0.18;
       cy += (y - cy) * 0.18;
+      const settled = Math.abs(x - cx) < SETTLE_PX && Math.abs(y - cy) < SETTLE_PX;
+      if (settled) {
+        cx = x;
+        cy = y;
+      }
       dot.style.transform = `translate3d(${cx}px, ${cy}px, 0)`;
-      frame = requestAnimationFrame(loop);
+      frame = settled ? 0 : requestAnimationFrame(step);
     };
     const onMove = (e: PointerEvent) => {
       x = e.clientX;
       y = e.clientY;
-      dot.dataset.visible = "true";
-      const target = e.target as Element | null;
-      dot.dataset.hover = target?.closest("a, button, [role='button'], input, select, label") ? "true" : "false";
+      if (!visible) {
+        visible = true;
+        dot.dataset.visible = "true";
+      }
+      // 속성은 바뀔 때만 쓴다(움직일 때마다 스타일을 다시 계산하지 않게).
+      const over = Boolean((e.target as Element | null)?.closest?.(INTERACTIVE));
+      if (over !== hover) {
+        hover = over;
+        dot.dataset.hover = String(over);
+      }
+      if (!frame) frame = requestAnimationFrame(step);
     };
-    const onLeave = () => (dot.dataset.visible = "false");
+    const onLeave = () => {
+      visible = false;
+      dot.dataset.visible = "false";
+    };
     window.addEventListener("pointermove", onMove, { passive: true });
     document.addEventListener("pointerleave", onLeave);
-    frame = requestAnimationFrame(loop);
     return () => {
       window.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerleave", onLeave);

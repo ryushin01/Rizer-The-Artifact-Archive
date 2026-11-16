@@ -45,7 +45,7 @@ export function ArtifactTable({ items }: { items: ArtifactSummary[] }) {
             <TableRow key={a.id}>
               <TableCell>
                 <div className="flex items-center gap-3">
-                  <ArtifactThumb src={a.image?.previewUrl} alt="" color={a.image?.dominantColor} />
+                  <ArtifactThumb src={a.image?.thumbUrl ?? a.image?.previewUrl} alt="" color={a.image?.dominantColor} />
                   <div className="flex min-w-0 flex-col">
                     <Link href={`/artifacts/${a.id}`} className="font-medium underline-offset-4 hover:underline">
                       {a.title}

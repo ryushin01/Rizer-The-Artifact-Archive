@@ -1,7 +1,6 @@
 "use client";
 
 import { Loader2, Trash2 } from "lucide-react";
-import { useRef, useTransition } from "react";
 import { toast } from "sonner";
 
 import {
@@ -17,24 +16,19 @@ import {
 } from "@rizer/ui/components/alert-dialog";
 import { Button } from "@rizer/ui/components/button";
 
+import { useGuardedAction } from "@/shared/lib/use-guarded-action";
+
 import { deleteArtifactAction } from "../api/actions";
 
 /** 삭제 확인 대화상자. 원본과 타일, 주석도 함께 지워진다. */
 export function DeleteArtifactButton({ id, title }: { id: string; title: string }) {
-  const [pending, startTransition] = useTransition();
-  const locked = useRef(false);
-  const onConfirm = () => {
-    if (locked.current) return;
-    locked.current = true;
-    startTransition(async () => {
-      // 성공하면 서버가 목록으로 보내므로(화면을 떠남) 실패했을 때만 잠금을 푼다.
+  const { pending, run } = useGuardedAction();
+  // 성공하면 서버가 목록으로 보내므로(화면을 떠남) 잠금이 풀리지 않는다. 실패하면 알리고 다시 누를 수 있다.
+  const onConfirm = () =>
+    run(async () => {
       const result = await deleteArtifactAction(id);
-      if (result && !result.ok) {
-        toast.error(result.message);
-        locked.current = false;
-      }
+      if (result && !result.ok) toast.error(result.message);
     });
-  };
 
   return (
     <AlertDialog>

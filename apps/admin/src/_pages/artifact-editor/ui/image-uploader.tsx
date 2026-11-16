@@ -8,7 +8,12 @@ import { toast } from "sonner";
 import { Button } from "@rizer/ui/components/button";
 import { Field, FieldDescription, FieldLabel } from "@rizer/ui/components/field";
 
+import { ACTION_ERROR_MESSAGE, isNavigationSignal } from "@/shared/lib/use-guarded-action";
+
 import { processUploadAction, requestUploadAction } from "../api/upload-actions";
+
+/** 큐레이터에게 그대로 보여 줄 안내. 그 밖의 오류(서버 액션 호출 실패 등)는 공통 안내로 바꾼다. */
+class UploadError extends Error {}
 
 type Phase = { kind: "idle" } | { kind: "uploading"; percent: number } | { kind: "tiling" };
 
@@ -20,7 +25,7 @@ function send(method: "PUT" | "POST", url: string, body: Blob | FormData, conten
     if (contentType) xhr.setRequestHeader("content-type", contentType);
     xhr.upload.onprogress = (e) => e.lengthComputable && onProgress(Math.round((e.loaded / e.total) * 100));
     xhr.onload = () => resolve({ status: xhr.status, text: xhr.responseText });
-    xhr.onerror = () => reject(new Error("네트워크 오류로 올리지 못했습니다."));
+    xhr.onerror = () => reject(new UploadError("네트워크 오류로 올리지 못했습니다."));
     xhr.send(body);
   });
 }
@@ -39,23 +44,28 @@ export function ImageUploader({ artifactId, hasImage, disabled }: { artifactId: 
 
   async function upload(file: File) {
     const ticket = await requestUploadAction(artifactId, file.type, file.size);
-    if (!ticket.ok) throw new Error(ticket.message);
+    if (!ticket.ok) throw new UploadError(ticket.message);
     setPhase({ kind: "uploading", percent: 0 });
     const progress = (percent: number) => setPhase(percent >= 100 ? { kind: "tiling" } : { kind: "uploading", percent });
 
     if (ticket.mode === "presigned") {
       const res = await send("PUT", ticket.url, file, file.type, progress);
-      if (res.status >= 300) throw new Error(`스토리지가 업로드를 거절했습니다(${res.status}).`);
+      if (res.status >= 300) throw new UploadError(`스토리지가 업로드를 거절했습니다(${res.status}).`);
       setPhase({ kind: "tiling" });
       const result = await processUploadAction(artifactId, ticket.key);
-      if (!result.ok) throw new Error(result.message);
+      if (!result.ok) throw new UploadError(result.message);
       return result.message;
     }
     const data = new FormData();
     data.append("file", file);
     const res = await send("POST", ticket.url, data, null, progress);
-    const body = JSON.parse(res.text || "{}") as { message?: string };
-    if (res.status >= 300) throw new Error(body.message ?? `업로드에 실패했습니다(${res.status}).`);
+    let body: { message?: string } = {};
+    try {
+      body = JSON.parse(res.text || "{}") as { message?: string };
+    } catch {
+      /* JSON이 아닌 응답(프록시 오류 화면 등)은 상태 코드로 안내한다. */
+    }
+    if (res.status >= 300) throw new UploadError(body.message ?? `업로드에 실패했습니다(${res.status}).`);
     return body.message ?? "이미지를 올렸습니다.";
   }
 
@@ -69,7 +79,10 @@ export function ImageUploader({ artifactId, hasImage, disabled }: { artifactId: 
       toast.success(await upload(file));
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "올리지 못했습니다.");
+      // 로그인이 만료돼 로그인 화면으로 보내는 신호 등은 Next.js가 이미 화면을 옮기고 있다.
+      if (isNavigationSignal(error)) return;
+      if (!(error instanceof UploadError)) console.error(error);
+      toast.error(error instanceof UploadError ? error.message : ACTION_ERROR_MESSAGE);
     } finally {
       setPhase({ kind: "idle" });
       locked.current = false;

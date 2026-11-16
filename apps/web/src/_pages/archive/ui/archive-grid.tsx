@@ -13,6 +13,8 @@ import { Button, VisuallyHidden } from "@/shared/ui";
  * 검색 결과 격자. 불러오는 동안에는 이전 결과를 흐리게 두고 aria-busy로 알린다.
  * 결과가 많으면 한 묶음씩 보여 주고 "더 보기"로 이어 붙인다. 이어 붙이면 새로 붙은 첫 카드로 초점을 옮기고
  * 몇 점을 더 불러왔는지 화면 낭독기에 알린다(KWCAG 6.1.2, 7.2.1).
+ * 알림은 처음부터 있는 영역에서 내용만 바꾼다. 목록 전체의 상태(찾는 중·결과 수·불러오기 실패)는
+ * 검색 영역의 알림(ArchiveFilters의 role="status")이, "더 보기"의 결과는 아래 영역이 알린다.
  */
 export function ArchiveGrid() {
   const dispatch = useDispatch();
@@ -36,54 +38,59 @@ export function ArchiveGrid() {
   const loadMore = () => {
     if (more === "loading") return;
     focusFrom.current = items.length;
+    setAnnouncement("");
     dispatch(moreRequested());
   };
 
+  let body;
   if (status === "error") {
-    return (
-      <Notice role="alert">
+    body = (
+      <Notice>
         <p>{error}</p>
         <Button type="button" $variant="ghost" onClick={() => dispatch(retried())}>
           {t.retry}
         </Button>
       </Notice>
     );
-  }
-  if (items.length === 0 && status === "idle") {
-    return (
+  } else if (items.length === 0 && status === "idle") {
+    body = (
       <Notice>
         <p>{t.empty}</p>
       </Notice>
     );
+  } else {
+    body = (
+      <>
+        {/* 쪽 제목(h1) 아래 카드 제목(h3)이 이어지도록, 결과 목록의 제목(h2)을 화면 낭독기에만 둔다. */}
+        <VisuallyHidden as="h2" id={headingId}>
+          {t.results}
+        </VisuallyHidden>
+        <Grid ref={listRef} aria-busy={status === "loading"} aria-labelledby={headingId} $loading={status === "loading"}>
+          {items.map((a, i) => (
+            <li key={a.id}>
+              <ArtifactCard artifact={a} priority={i < 4} />
+            </li>
+          ))}
+        </Grid>
+        <Footer>
+          <p>{t.shown(total, items.length)}</p>
+          {canLoadMore && status !== "loading" && (
+            // 불러오는 동안에도 버튼을 끄지 않는다(초점을 잃지 않게). 중복 요청은 위와 사가(takeLeading)가 막는다.
+            <Button type="button" $variant="ghost" onClick={loadMore} aria-busy={more === "loading"}>
+              {more === "loading" ? t.moreLoading : t.more}
+            </Button>
+          )}
+          {more === "error" && <p>{t.moreError}</p>}
+        </Footer>
+      </>
+    );
   }
+
   return (
     <>
-      {/* 쪽 제목(h1) 아래 카드 제목(h3)이 이어지도록, 결과 목록의 제목(h2)을 화면 낭독기에만 둔다. */}
-      <VisuallyHidden as="h2" id={headingId}>
-        {t.results}
-      </VisuallyHidden>
-      <Grid ref={listRef} aria-busy={status === "loading"} aria-labelledby={headingId} $loading={status === "loading"}>
-        {items.map((a, i) => (
-          <li key={a.id}>
-            <ArtifactCard artifact={a} priority={i < 4} />
-          </li>
-        ))}
-      </Grid>
-      <Footer>
-        <p>
-          {t.shown(total, items.length)}
-        </p>
-        {canLoadMore && status !== "loading" && (
-          // 불러오는 동안에도 버튼을 끄지 않는다(초점을 잃지 않게). 중복 요청은 위와 사가(takeLeading)가 막는다.
-          <Button type="button" $variant="ghost" onClick={loadMore} aria-busy={more === "loading"}>
-            {more === "loading" ? t.moreLoading : t.more}
-          </Button>
-        )}
-        {more === "error" && <p role="alert">{t.moreError}</p>}
-      </Footer>
-      <VisuallyHidden aria-live="polite">
-        {announcement}
-      </VisuallyHidden>
+      {body}
+      {/* "더 보기"가 실패하면 같은 영역에서 알린다(새로 생기는 role="alert"는 읽히지 않을 수 있다). */}
+      <VisuallyHidden role="status">{more === "error" ? t.moreError : announcement}</VisuallyHidden>
     </>
   );
 }

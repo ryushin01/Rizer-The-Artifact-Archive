@@ -13,27 +13,45 @@ const GATE_KEY = "rizer:gate";
 /**
  * 입장 화면. 한 번 지나가면 같은 탭에서는 다시 보이지 않는다(sessionStorage).
  * 돌아온 방문자에게 깜박이지 않도록, 루트 레이아웃의 인라인 스크립트가 그리기 전에 html[data-gate="seen"]을 붙인다.
- * 열려 있는 동안 본문은 inert로 막고, 입장 버튼에 초점을 둔다. Esc로도 들어간다.
+ * 열려 있는 동안 입장 화면 말고는 모두 inert로 막고(본문만이 아니라 바로가기 링크·아래쪽 메뉴도),
+ * 입장 버튼에 초점을 둔다. Esc로도 들어간다.
  */
 const subscribeNothing = () => () => {};
 /** 이번 탭에서 이미 지나갔는지. 서버에서는 알 수 없으므로 false(입장 화면은 CSS가 숨긴다). */
 const useSeenOnLoad = () =>
   useSyncExternalStore(subscribeNothing, () => document.documentElement.dataset.gate === "seen", () => false);
 
+/**
+ * 입장 화면을 품은 body의 자식만 남기고 나머지를 inert로 막는다. 이미 inert였던 요소는 건드리지 않는다.
+ * 돌려주는 함수가 막은 것만 푼다.
+ */
+function blockOutside(overlay: HTMLElement): () => void {
+  let top: HTMLElement = overlay;
+  while (top.parentElement && top.parentElement !== document.body) top = top.parentElement;
+  const blocked = [...document.body.children].filter((el) => el !== top && !el.hasAttribute("inert"));
+  for (const el of blocked) el.setAttribute("inert", "");
+  return () => {
+    for (const el of blocked.splice(0)) el.removeAttribute("inert");
+  };
+}
+
 export function IntroGate() {
   const t = useMessages().gate;
   const seen = useSeenOnLoad();
   const [phase, setPhase] = useState<"open" | "leaving" | "gone">("open");
+  const overlayRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const releaseRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    if (seen) return;
-    const page = document.getElementById("page");
-    page?.setAttribute("inert", "");
+    if (seen || !overlayRef.current) return;
+    const release = blockOutside(overlayRef.current);
+    releaseRef.current = release;
     document.body.style.overflow = "hidden";
     buttonRef.current?.focus();
     return () => {
-      page?.removeAttribute("inert");
+      release();
+      releaseRef.current = null;
       document.body.style.overflow = "";
     };
   }, [seen]);
@@ -42,7 +60,8 @@ export function IntroGate() {
     if (phase !== "open") return;
     sessionFlag.set(GATE_KEY);
     document.documentElement.dataset.gate = "seen";
-    document.getElementById("page")?.removeAttribute("inert");
+    releaseRef.current?.();
+    releaseRef.current = null;
     document.body.style.overflow = "";
     const reduced = document.documentElement.dataset.motion === "reduce";
     setPhase(reduced ? "gone" : "leaving");
@@ -53,6 +72,7 @@ export function IntroGate() {
   if (phase === "gone" || (seen && phase === "open")) return null;
   return (
     <Overlay
+      ref={overlayRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="gate-title"

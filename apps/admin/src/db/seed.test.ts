@@ -1,10 +1,15 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
+
 import { SEED_ANNOTATIONS, SEED_ARTIFACTS } from "@rizer/domain/seed";
 import { count, eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 
+import type { SeedImageManifest } from "@/entities/artifact";
 import { createArtifactRepository } from "@/server/artifacts/repository";
 
-import { annotations, artifacts } from "./schema";
+import { annotations, artifacts, deletedSeedSlugs } from "./schema";
+import bundledSeedImages from "./seed-images.json";
 import { insertMissingSeedArtifacts, refreshUntouchedSeedArtifacts, syncSeedImages } from "./seed";
 import { createTestDb } from "./testing";
 
@@ -29,6 +34,20 @@ describe("시드 동기화", () => {
     const repo = createArtifactRepository(db);
     expect((await repo.getBySlug("vajra"))?.title).toBe("바즈라");
     expect((await repo.getBySlug("excalibur"))?.title).toBe("고친 이름");
+  });
+
+  it("관리 화면에서 지운 시드 유물은 서버가 켜질 때 되살리지 않는다", async () => {
+    const db = await createTestDb();
+    const repo = createArtifactRepository(db);
+    const vajra = (await repo.getBySlug("vajra"))!;
+    expect(await repo.remove(vajra.id)).toEqual({ slug: "vajra" });
+    expect(await insertMissingSeedArtifacts(db, {})).toBe(0);
+    expect(await repo.getBySlug("vajra")).toBeNull();
+    // 시드가 아닌 유물을 지우면 기록하지 않는다.
+    const { id: _id, slug: _slug, createdAt: _c, updatedAt: _u, image: _i, annotationCount: _n, source, ...input } = (await repo.getBySlug("gram"))!;
+    const custom = await repo.create({ ...input, slug: "custom-relic", title: "새 유물" }, source);
+    await repo.remove(custom);
+    expect((await db.select().from(deletedSeedSlugs)).map((r) => r.slug)).toEqual(["vajra"]);
   });
 
   it("카탈로그와 같으면 아무것도 쓰지 않는다(jsonb 키 순서, real 좌표 오차에 흔들리지 않음)", async () => {
@@ -65,7 +84,27 @@ describe("시드 동기화", () => {
   it("이미지가 빈 시드 유물에만 이미지를 붙인다", async () => {
     const db = await createTestDb();
     const image = { dziKey: "tiles/x/image.dzi", previewKey: "tiles/x/preview.webp", originalKey: "", width: 10, height: 10, tileSize: 254, format: "webp" as const, lqip: "data:image/webp;base64,AA", dominantColor: "#000000", tileCount: 1, version: "1" };
-    expect(await syncSeedImages(db, { vajra: image })).toBe(1);
+    expect(await syncSeedImages(db, { vajra: image, gram: image })).toBe(2);
     expect(await syncSeedImages(db, { vajra: { ...image, version: "2" } })).toBe(0);
+    expect(await syncSeedImages(db, {})).toBe(0);
+  });
+
+  it("손대지 않은 시드 유물에 썸네일이 새로 생기면 붙인다", async () => {
+    const db = await createTestDb();
+    const image = { dziKey: "tiles/art_vajra/v2/image.dzi", previewKey: "tiles/art_vajra/v2/preview.webp", originalKey: "", width: 10, height: 10, lqip: "data:image/webp;base64,AA", dominantColor: "#000000", tileCount: 1, version: "2" };
+    await refreshUntouchedSeedArtifacts(db, { vajra: image });
+    const withThumb = { ...image, thumbKey: "tiles/art_vajra/v2/thumb.webp" };
+    expect(await refreshUntouchedSeedArtifacts(db, { vajra: withThumb })).toMatchObject({ images: 1 });
+    expect((await createArtifactRepository(db).getBySlug("vajra"))?.image?.thumbKey).toBe(withThumb.thumbKey);
+  });
+
+  it("저장소에 넣은 시드 목록의 미리보기·썸네일이 공개 사이트의 정적 파일에 모두 있다", () => {
+    const manifest = bundledSeedImages as SeedImageManifest;
+    expect(Object.keys(manifest).sort()).toEqual(SEED_ARTIFACTS.map((a) => a.slug).sort());
+    for (const image of Object.values(manifest)) {
+      for (const key of [image.dziKey, image.previewKey, image.thumbKey!]) {
+        expect(existsSync(path.join(process.cwd(), "../web/public", key)), key).toBe(true);
+      }
+    }
   });
 });

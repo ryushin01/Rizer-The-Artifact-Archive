@@ -48,6 +48,15 @@ export const artifacts = pgTable(
   (t) => [index("artifacts_status_idx").on(t.status), index("artifacts_gallery_idx").on(t.gallery)],
 );
 
+/**
+ * 큐레이터가 지운 시드 유물의 주소. 서버가 켜질 때 카탈로그에 새로 더한 시드 유물만 넣고(insertMissingSeedArtifacts),
+ * 여기 있는 주소는 다시 넣지 않는다. 되살리려면 이 줄을 지운다.
+ */
+export const deletedSeedSlugs = pgTable("deleted_seed_slugs", {
+  slug: text("slug").primaryKey(),
+  deletedAt: timestamp("deleted_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const annotations = pgTable(
   "annotations",
   {

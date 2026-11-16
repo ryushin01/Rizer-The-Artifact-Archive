@@ -2,7 +2,7 @@
 
 import type { Annotation, DeepZoomImage } from "@rizer/domain";
 import type OpenSeadragon from "openseadragon";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 
@@ -23,18 +23,30 @@ type Props = {
   transitionKey?: string;
 };
 
+const subscribeFullscreen = (onChange: () => void) => {
+  document.addEventListener("fullscreenchange", onChange);
+  return () => document.removeEventListener("fullscreenchange", onChange);
+};
+/** 요소 전체 화면을 쓸 수 있는지. 서버에서는 알 수 없으므로 있다고 보고, 없는 브라우저는 하이드레이션 뒤 숨긴다. */
+const useFullscreenEnabled = () =>
+  useSyncExternalStore(subscribeFullscreen, () => Boolean(document.fullscreenEnabled), () => true);
+
 /**
  * 딥줌 뷰어(OpenSeadragon). 화면에 보이는 타일만 내려받는다.
  * - 주석은 사진 위에 번호 버튼으로 얹는다. 실제 <button>이라 Tab으로 차례로 지나가며 고를 수 있다.
  * - 고른 주석(스토어의 activeId)으로 확대한다. 안내 투어(사가)도 같은 값을 바꾼다.
  * - 키보드: 사진에 초점을 두고 화살표로 움직이고, +/-로 확대·축소, 0으로 전체 보기.
  * - 끌기 없이 한 번 누르기로도 옮길 수 있게 이동 버튼을 둔다(KWCAG 6.5.1 단일 포인터).
+ * - 전체 화면은 사진만이 아니라 뷰어 틀 전체(도구 막대·이동 버튼 포함)를 표준 Fullscreen API로 띄운다.
+ *   요소 전체 화면을 지원하지 않는 브라우저(iPhone Safari)에서는 버튼을 숨긴다. OpenSeadragon의 setFullScreen은
+ *   그런 브라우저에서 빠져나올 버튼이 없는 "전체 페이지" 모드로 바꾸기 때문이다.
  */
 export function DeepZoomViewer({ title, image, imageAlt, annotations, transitionKey }: Props) {
   const t = useMessages().viewer;
   const dispatch = useDispatch();
   const { activeId, markersVisible } = useSelector(selectTour);
   const reduced = useSelector(selectReducedMotion);
+  const wrapRef = useRef<HTMLElement>(null);
   const hostRef = useRef<HTMLDivElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -42,6 +54,13 @@ export function DeepZoomViewer({ title, image, imageAlt, annotations, transition
   const [ready, setReady] = useState(false);
   const [zoomPercent, setZoomPercent] = useState(100);
   const helpId = useId();
+  const canFullscreen = useFullscreenEnabled();
+  const [fullscreen, setFullscreen] = useState(false);
+  // Esc 등 브라우저가 전체 화면을 끝내도 버튼의 눌림 상태를 맞춘다.
+  useEffect(
+    () => subscribeFullscreen(() => setFullscreen(document.fullscreenElement !== null && document.fullscreenElement === wrapRef.current)),
+    [],
+  );
   const size = { width: image.width, height: image.height };
 
   useEffect(() => {
@@ -181,9 +200,13 @@ export function DeepZoomViewer({ title, image, imageAlt, annotations, transition
     dispatch(selected(null));
     viewerRef.current?.viewport.goHome(reduced);
   };
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) void document.exitFullscreen().catch(() => {});
+    else void wrapRef.current?.requestFullscreen().catch(() => {});
+  };
 
   return (
-    <Wrap aria-label={t.label(title)} $markers={markersVisible} data-zoom-enter-key={transitionKey}>
+    <Wrap ref={wrapRef} aria-label={t.label(title)} $markers={markersVisible} data-zoom-enter-key={transitionKey}>
       {/* 뷰어 안에 초점을 받는 캔버스와 주석 버튼이 있어 role="img"를 쓰지 않고, 사진 설명은 글로 둔다. */}
       <p className="sr-only">{t.photo}: {imageAlt}</p>
       <Stage
@@ -207,14 +230,17 @@ export function DeepZoomViewer({ title, image, imageAlt, annotations, transition
           <IconButton type="button" aria-label={t.home} onClick={home} disabled={!ready}>
             <IconHome />
           </IconButton>
-          <IconButton
-            type="button"
-            aria-label={t.fullscreen}
-            onClick={() => viewerRef.current?.setFullScreen(!viewerRef.current.isFullPage())}
-            disabled={!ready}
-          >
-            <IconExpand />
-          </IconButton>
+          {canFullscreen && (
+            <IconButton
+              type="button"
+              aria-label={t.fullscreen}
+              aria-pressed={fullscreen}
+              onClick={toggleFullscreen}
+              disabled={!ready}
+            >
+              <IconExpand />
+            </IconButton>
+          )}
         </Zoom>
       </Toolbar>
       <Bottom ref={bottomRef}>
@@ -254,6 +280,10 @@ const Wrap = styled.section<{ $markers: boolean }>`
   overflow: hidden;
   border-radius: ${({ theme }) => theme.radius.lg};
   background: ${({ theme }) => theme.color.surface};
+  /* 전체 화면에서는 화면 모서리까지 채운다. */
+  &:fullscreen {
+    border-radius: 0;
+  }
 
   /* OpenSeadragon이 오버레이마다 감싸는 div. 영역이 겹치면(한 영역이 다른 영역 안) 바깥 영역의 감싸개가
      안쪽 번호 버튼의 클릭을 가로채므로, 감싸개와 영역은 포인터를 통과시키고 번호 버튼만 받는다. */

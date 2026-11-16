@@ -69,6 +69,16 @@ export const IconMotionOff = (p: SVGProps<SVGSVGElement>) => (
     <path d="M3 12h18" />
   </svg>
 );
+/**
+ * 셀렉트의 펼침 화살표. 다른 아이콘과 달리 그림 둘레의 빈 곳 없이 상자에 맞춘 viewBox라(가로 14 : 세로 9),
+ * 상자 끝이 곧 그림 끝이다. 셀렉트의 좌우 간격을 맞출 때 그대로 잴 수 있다.
+ */
+export const IconChevronDown = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base({ viewBox: "5 7.5 14 9", ...p })}>
+    <path d="M6 9l6 6 6-6" />
+  </svg>
+);
+
 export const IconSearch = (p: SVGProps<SVGSVGElement>) => (
   <svg {...base(p)}>
     <circle cx="11" cy="11" r="7" />

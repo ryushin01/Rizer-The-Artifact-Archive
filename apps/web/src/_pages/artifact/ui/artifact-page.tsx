@@ -5,7 +5,10 @@ import { Suspense } from "react";
 
 import { TourSync } from "@/features/annotation-tour";
 import { getArtifact, getArtifacts } from "@/shared/api/index.server";
+import { siteUrl } from "@/shared/config";
 import { localePath, MESSAGES } from "@/shared/i18n";
+
+import { artifactStructuredData, jsonLdText } from "../model/structured-data";
 import { ArtifactDossier } from "./artifact-dossier";
 import { DeepZoomViewer } from "./deep-zoom-viewer";
 
@@ -51,6 +54,11 @@ async function Content({ params, locale = "ko" }: LocaleProps) {
   const { artifact, annotations, related } = detail;
   return (
     <ArtifactLayout>
+      <script
+        type="application/ld+json"
+        // 구조화 데이터는 JSON 문자열로 넣는다(큐레이터가 쓴 글의 <는 jsonLdText가 이스케이프한다).
+        dangerouslySetInnerHTML={{ __html: jsonLdText(artifactStructuredData(artifact, locale, siteUrl())) }}
+      />
       <TourSync key={artifact.id} ids={annotations.map((a) => a.id)} />
       <ViewerColumn>
         {artifact.image ? (

@@ -15,6 +15,7 @@ export function ErrorPage({ error, retry }: { error: unknown; retry: () => void 
   useEffect(() => reportError(error), [error]);
   return (
     <NotFoundPage
+      code="ERROR"
       title="Broken Seal"
       message={`${t.error}${digest ? t.errorCode(digest) : ""}`}
       action={

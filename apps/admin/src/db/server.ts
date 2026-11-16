@@ -35,11 +35,14 @@ export function getDb(): Promise<Database> {
 }
 
 /**
- * 시드 이미지 목록. 스토리지에 있으면(pnpm seed:images로 만든 로컬 타일) 그것을,
+ * 시드 이미지 목록. 로컬 스토리지에 있으면(pnpm seed:images로 만든 로컬 타일) 그것을,
  * 없으면 저장소에 넣은 목록(공개 사이트의 정적 타일, scripts/export-seed-tiles.mts)을 쓴다.
+ * 운영 스토리지(Blob·R2)에서는 읽지 않는다. 시드 타일은 정적 파일이라 목록도 저장소에 있고,
+ * 원격에서 읽으면 서버가 켜질 때마다 요청이 하나 늘어 첫 응답이 늦어진다.
  */
 async function readManifest(): Promise<SeedImageManifest> {
-  const raw = await getStorage().get(SEED_MANIFEST_KEY);
+  const storage = getStorage();
+  const raw = storage.driver === "local" ? await storage.get(SEED_MANIFEST_KEY) : null;
   if (raw) {
     try {
       return JSON.parse(raw.toString("utf8")) as SeedImageManifest;

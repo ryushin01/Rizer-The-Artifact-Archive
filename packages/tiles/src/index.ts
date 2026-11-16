@@ -1,4 +1,4 @@
-import { mkdir, readdir, rm, stat } from "node:fs/promises";
+import { mkdir, readdir, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import sharp from "sharp";
@@ -8,9 +8,11 @@ import sharp from "sharp";
  *
  * - 타일: 256px(겹침 1px을 더해 254 + 1 + 1), WebP. 화면에 보이는 영역의 타일만 내려받으므로
  *   원본이 수백 MB여도 처음 화면은 수십 KB로 열린다.
- * - 미리보기: 긴 변 1600px WebP. 목록 카드와 뷰어가 열리기 전 화면에 쓴다.
+ * - 미리보기: 긴 변 1600px WebP. 첫 화면의 큰 사진과 공유 이미지에 쓴다.
+ * - 썸네일: 긴 변 960px WebP. 유물 카드(넓어야 340px, 3배 화면까지)와 관리 화면 목록에 쓴다. 미리보기의 3분의 1 크기.
  * - LQIP: 긴 변 24px WebP를 data URL로. 미리보기가 오기 전 흐린 자리 표시자.
  * - 대표 색: 배경과 스켈레톤 색.
+ * 미리보기·썸네일·LQIP·대표 색은 원본을 한 번만 줄인 미리보기에서 만든다(큰 원본을 여러 번 해독하지 않는다).
  *
  * 경로의 turbopackIgnore 표시: 출력 폴더는 실행 중에 정해지는 작업 폴더라서, 번들러가 프로젝트 전체를
  * 서버 번들에 넣지 않게 한다.
@@ -19,8 +21,9 @@ import sharp from "sharp";
 export const TILE_SIZE = 254;
 export const TILE_OVERLAP = 1;
 export const PREVIEW_SIZE = 1600;
+export const THUMB_SIZE = 960;
 
-// 매우 큰 이미지(파노라마·고해상도 스캔)도 열 수 있게 픽셀 수 제한을 1기가픽셀로 둔다.
+/** 기본 픽셀 수 제한: 매우 큰 이미지(파노라마·고해상도 스캔)도 열 수 있게 1기가픽셀(CLI용). */
 const LIMIT_INPUT_PIXELS = 1_000_000_000;
 
 export type TileResult = {
@@ -29,6 +32,7 @@ export type TileResult = {
   /** outDir 기준 상대 경로 */
   dziPath: string;
   previewPath: string;
+  thumbPath: string;
   tileCount: number;
   lqip: string;
   dominantColor: string;
@@ -43,17 +47,37 @@ export type TileOptions = {
   tileSize?: number;
   /** 원본의 긴 변을 이 크기까지 줄인 뒤 자른다. 기본값은 줄이지 않음. */
   maxSize?: number;
+  /**
+   * 읽을 수 있는 최대 픽셀 수. 넘으면 PixelLimitError를 던진다. 기본값 10억(CLI).
+   * 서버(메모리 2GB 안팎)에서 자를 때는 낮게 둔다. 해독한 원본이 메모리에 올라가기 때문이다.
+   */
+  maxPixels?: number;
 };
+
+/** 원본이 maxPixels보다 크다. 서버 업로드라면 CLI(pnpm tiles)로 잘라야 한다. */
+export class PixelLimitError extends Error {
+  constructor(
+    readonly pixels: number,
+    readonly limit: number,
+  ) {
+    super(`이미지가 ${pixels.toLocaleString("en-US")}픽셀로 한도(${limit.toLocaleString("en-US")})보다 큽니다.`);
+    this.name = "PixelLimitError";
+  }
+}
 
 const hex = (n: number) => n.toString(16).padStart(2, "0");
 
-/** input(파일 경로 또는 Buffer)을 outDir 안에 <name>.dzi, <name>_files/, preview.webp로 만든다. */
+/** input(파일 경로 또는 Buffer)을 outDir 안에 <name>.dzi, <name>_files/, preview.webp, thumb.webp로 만든다. */
 export async function generateDeepZoom(
   input: string | Buffer,
   outDir: string,
-  { name = "image", quality = 82, tileSize = TILE_SIZE, maxSize }: TileOptions = {},
+  { name = "image", quality = 82, tileSize = TILE_SIZE, maxSize, maxPixels = LIMIT_INPUT_PIXELS }: TileOptions = {},
 ): Promise<TileResult> {
-  const original = () => sharp(input, { limitInputPixels: LIMIT_INPUT_PIXELS }).rotate();
+  // 크기(머리글)만 먼저 읽어, 한도를 넘는 원본은 해독하기 전에 거절한다.
+  const header = await sharp(input, { limitInputPixels: false }).metadata();
+  const pixels = (header.width ?? 0) * (header.height ?? 0);
+  if (pixels > maxPixels) throw new PixelLimitError(pixels, maxPixels);
+  const original = () => sharp(input, { limitInputPixels: maxPixels }).rotate();
   const meta = await original().metadata();
   // rotate()가 EXIF 방향을 반영하므로, 90도 회전된 사진은 가로세로를 바꾼다.
   const swapped = (meta.orientation ?? 1) >= 5;
@@ -67,8 +91,7 @@ export async function generateDeepZoom(
   const height = Math.round(fullHeight * scale);
   const resized =
     scale < 1 ? await original().resize(width, height, { fit: "fill" }).png({ compressionLevel: 1 }).toBuffer() : null;
-  const source = () =>
-    resized ? sharp(resized, { limitInputPixels: LIMIT_INPUT_PIXELS }) : original();
+  const source = () => (resized ? sharp(resized, { limitInputPixels: maxPixels }) : original());
 
   await rm(path.join(/*turbopackIgnore: true*/ outDir, `${name}_files`), { recursive: true, force: true });
   await mkdir(outDir, { recursive: true });
@@ -80,20 +103,26 @@ export async function generateDeepZoom(
     .tile({ size: tileSize, overlap: TILE_OVERLAP, layout: "dz", container: "fs" })
     .toFile(dziBase);
 
-  const previewPath = path.join(/*turbopackIgnore: true*/ outDir, "preview.webp");
-  await source()
+  // 원본은 미리보기를 만들 때 한 번만 더 해독하고, 작은 결과물은 미리보기에서 만든다.
+  const preview = await source()
     .resize(PREVIEW_SIZE, PREVIEW_SIZE, { fit: "inside", withoutEnlargement: true })
     .webp({ quality: 80 })
-    .toFile(previewPath);
-
-  const lqipBuffer = await source().resize(24, 24, { fit: "inside" }).webp({ quality: 40 }).toBuffer();
-  const { dominant } = await source().resize(64, 64, { fit: "inside" }).stats();
+    .toBuffer();
+  await writeFile(path.join(/*turbopackIgnore: true*/ outDir, "preview.webp"), preview);
+  const small = () => sharp(preview);
+  await small()
+    .resize(THUMB_SIZE, THUMB_SIZE, { fit: "inside", withoutEnlargement: true })
+    .webp({ quality: 80 })
+    .toFile(path.join(/*turbopackIgnore: true*/ outDir, "thumb.webp"));
+  const lqipBuffer = await small().resize(24, 24, { fit: "inside" }).webp({ quality: 40 }).toBuffer();
+  const { dominant } = await small().resize(64, 64, { fit: "inside" }).stats();
 
   return {
     width,
     height,
     dziPath: `${name}.dzi`,
     previewPath: "preview.webp",
+    thumbPath: "thumb.webp",
     tileCount: await countFiles(path.join(/*turbopackIgnore: true*/ outDir, `${name}_files`)),
     lqip: `data:image/webp;base64,${lqipBuffer.toString("base64")}`,
     dominantColor: `#${hex(dominant.r)}${hex(dominant.g)}${hex(dominant.b)}`,

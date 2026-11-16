@@ -2,27 +2,34 @@
 
 import { galleryOf, kindName, type ArtifactSummary } from "@rizer/domain";
 import Link from "next/link";
+import { useId } from "react";
 import styled from "styled-components";
 
 import { useLocale, useLocalePath, useMessages, yearLabel } from "@/shared/i18n";
+import { pad2 } from "@/shared/lib/format";
 import { MonoLabel } from "@/shared/ui";
 
 /**
  * 유물 카드. 카드 전체가 링크이고 이름이 링크 텍스트다(KWCAG 6.4.3).
  * 미리보기 위에 흐린 저해상도 이미지(LQIP)를 먼저 깔아 둔다.
+ * 검색어가 주석에서 맞았으면(matchedNote) 그 주석을 한 줄로 보이고, 링크가 그 주석으로 바로 연다(?note=N).
+ * 그 줄은 링크의 설명(aria-describedby)으로도 읽힌다.
  */
 export function ArtifactCard({ artifact, priority = false }: { artifact: ArtifactSummary; priority?: boolean }) {
-  const { image } = artifact;
+  const { image, matchedNote } = artifact;
   const locale = useLocale();
   const t = useMessages().card;
   const path = useLocalePath();
+  const noteId = useId();
+  const href = path(`/artifacts/${artifact.slug}${matchedNote ? `?note=${matchedNote.number}` : ""}`);
   return (
     <Card lang={locale === "en" && artifact.contentLang === "ko" ? "ko" : undefined}>
       <Media style={{ backgroundColor: image?.dominantColor, backgroundImage: image ? `url(${image.lqip})` : undefined }}>
         {image && (
+          // 카드는 넓어야 340px이라 긴 변 960px 썸네일로 충분하다(썸네일이 없던 때 올린 이미지는 미리보기).
           // eslint-disable-next-line @next/next/no-img-element -- 타일 서버의 미리보기라 next/image 최적화를 거치지 않는다
           <img
-            src={image.previewUrl}
+            src={image.thumbUrl ?? image.previewUrl}
             alt={artifact.imageAlt}
             // 상세 화면의 딥줌 뷰어(data-zoom-enter-key)로 커지는 화면 전환의 출발점
             data-zoom-exit-key={artifact.slug}
@@ -38,9 +45,16 @@ export function ArtifactCard({ artifact, priority = false }: { artifact: Artifac
       </Media>
       <Body>
         <Title>
-          <Link href={path(`/artifacts/${artifact.slug}`)}>{artifact.title}</Link>
+          <Link href={href} aria-describedby={matchedNote ? noteId : undefined}>
+            {artifact.title}
+          </Link>
         </Title>
         <Original>{artifact.titleOriginal}</Original>
+        {matchedNote && (
+          <MatchedNote id={noteId}>
+            <MonoLabel $tone="accent">{t.note(pad2(matchedNote.number), matchedNote.title)}</MonoLabel>
+          </MatchedNote>
+        )}
         <Power>{artifact.power}</Power>
         <Meta>
           <MonoLabel>{kindName(artifact.kind, locale)}</MonoLabel>
@@ -127,6 +141,9 @@ const Title = styled.h3`
 const Original = styled.p`
   font-size: 13px;
   color: ${({ theme }) => theme.color.muted};
+`;
+const MatchedNote = styled.p`
+  margin-top: 4px;
 `;
 const Power = styled.p`
   margin-top: 6px;

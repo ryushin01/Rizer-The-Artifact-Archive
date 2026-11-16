@@ -12,9 +12,15 @@ export const PUBLIC_API = {
   artifact: (slug: string) => `/api/public/artifacts/${encodeURIComponent(slug)}`,
 } as const;
 
+/** 검색어 최대 길이. 더 길면 앞부분만 쓴다(검색 칸의 maxLength도 같다). */
+export const SEARCH_MAX_LENGTH = 60;
+
 /** 목록 검색 조건. 공개 사이트의 주소 쿼리와 같은 이름을 쓴다. */
 export const artifactQuerySchema = z.object({
-  q: z.string().trim().max(60).optional(),
+  q: z
+    .string()
+    .transform((s) => s.trim().slice(0, SEARCH_MAX_LENGTH).trim())
+    .optional(),
   gallery: galleryIdSchema.optional(),
   kind: kindIdSchema.optional(),
   sort: z.enum(["featured", "oldest", "newest", "title"]).default("featured"),
@@ -26,6 +32,23 @@ export const artifactQuerySchema = z.object({
   locale: localeSchema.optional(),
 });
 export type ArtifactQuery = z.infer<typeof artifactQuerySchema>;
+
+/**
+ * 주소 쿼리 같은 바깥 값을 검색 조건으로 읽는다. 조건마다 따로 검증해 **잘못된 값만 버린다.**
+ * 한꺼번에 검증하면 하나만 틀려도(limit=500, 없는 전시실 등) 다른 조건까지 모두 기본값으로 돌아가,
+ * 거른 결과 대신 유물 전체가 나온다.
+ */
+export function parseArtifactQuery(raw: Record<string, unknown>): ArtifactQuery {
+  const shape = artifactQuerySchema.shape;
+  const picked: Record<string, unknown> = {};
+  for (const key of Object.keys(shape) as (keyof typeof shape)[]) {
+    const value = raw[key];
+    if (value === undefined || value === null || value === "") continue;
+    const parsed = shape[key].safeParse(value);
+    if (parsed.success && parsed.data !== undefined && parsed.data !== "") picked[key] = parsed.data;
+  }
+  return artifactQuerySchema.parse(picked);
+}
 
 export const artifactListResponseSchema = z.object({
   items: z.array(artifactSummarySchema),

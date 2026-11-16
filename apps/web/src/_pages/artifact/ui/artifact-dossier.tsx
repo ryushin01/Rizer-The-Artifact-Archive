@@ -99,7 +99,7 @@ export function ArtifactDossier({
               </li>
             ))}
           </Notes>
-          <p className="sr-only" aria-live="polite">
+          <p className="sr-only" role="status">
             {active ? `${active.title}. ${active.body}` : ""}
           </p>
         </Section>

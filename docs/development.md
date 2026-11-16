@@ -8,7 +8,8 @@
   - 네트워크 없이 확인하려면 `pnpm --filter @rizer/admin seed:images --synthetic`(무늬 이미지, CI·E2E용).
   - 한 점만: `pnpm --filter @rizer/admin seed:images --only excalibur,gram`
   - 새로 추가한 시드 유물만: `pnpm --filter @rizer/admin seed:images --missing` (기본 타일 510px, 긴 변 최대 3000px)
-  - 시드 유물을 추가하면 이미 데이터가 있는 DB에도 서버가 시작할 때 없는 슬러그만 골라 넣습니다(주석 포함).
+  - 시드 유물을 추가하면 이미 데이터가 있는 DB에도 서버가 시작할 때 없는 슬러그만 골라 넣습니다(주석 포함). 관리 화면에서 지운 시드 유물은 `deleted_seed_slugs`에 남아 다시 넣지 않습니다(되살리려면 그 줄을 지웁니다).
+  - 타일과 함께 미리보기(긴 변 1600px, 첫 화면·공유 이미지)와 썸네일(긴 변 960px, 유물 카드·관리 목록)을 만듭니다. 0.7.0 전에 올린 이미지처럼 썸네일이 없으면 카드는 미리보기를 씁니다.
   - 카탈로그의 해설·출처·사진·주석을 고치면, 시드로 넣은 뒤 아무도 고치지 않은 유물(수정 시각 = 생성 시각)은 서버가 시작할 때 맞춰집니다. 큐레이터가 고친 유물은 건드리지 않습니다.
 - 개발 DB는 PGlite(`apps/admin/.data/pglite`)입니다. 비어 있으면 시드(계정 2개, 유물 전부, 주석)를 넣고, 이미지가 빈 유물에는 `seed/manifest.json`의 이미지를 붙입니다. 처음부터 다시: `pnpm --filter @rizer/admin db:reset`.
 
@@ -37,7 +38,7 @@
 | `guest@rizer.dev` | `guest1234` (로그인 화면의 **게스트로 둘러보기**) | 모든 화면 보기. 저장·삭제·업로드는 거절 |
 | `curator@rizer.dev` | 개발 `rizer1234`, 운영은 `CURATOR_PASSWORD` | 편집 |
 
-로그인을 15분 안에 5번 틀리면 그 이메일은 15분 동안 잠깁니다.
+로그인을 15분 안에 5번 틀리면 그 이메일은 15분 동안 잠깁니다(실패는 쿼리 하나로 세어 동시 요청으로도 피할 수 없습니다). 게스트 계정은 비밀번호가 공개돼 있어 잠그지 않습니다. 잠그면 누구든 게스트 버튼을 막을 수 있습니다.
 
 ## 환경 변수
 
@@ -90,6 +91,8 @@
 | 라우트 파일을 옮긴 뒤 `.next/dev/types`에서 타입 오류 | 옛 경로의 생성 타입이 남음 | `apps/web/.next/dev`를 지우고 다시 검사 |
 | 운영 404 화면 제목이 사이트 기본 제목으로 나옴 | `metadata`는 루트 `app/not-found`만 지원. 언어별 라우트 그룹의 not-found에서 내보낸 값은 운영의 미리 그린 404 셸에 빠짐(로컬 `next start`에서는 우연히 보임) | `NotFoundScreen`이 `document.title`을 맞춘다. `<title>`을 새로 그리면 제목 요소가 두 개가 됨 |
 | 스크립트(tsx)에서 top-level await 오류 | `apps/admin`은 CommonJS 패키지 | 스크립트는 `.mts`로 작성 |
+| 저장 중 연결이 끊기면 화면 전체가 오류 화면으로 바뀌고 편집 내용이 사라짐 | React 19는 `startTransition`·`useActionState` 안에서 던진 오류를 가장 가까운 오류 경계로 보냄 | 버튼 액션은 `useGuardedAction`, 화면 폼은 `usePageForm`이 잡아 알림으로 바꾼다. 서버 액션의 `redirect()`는 브라우저에서 액션 Promise의 거부로 오므로 `unstable_rethrow`로 다시 던진다 |
+| 테스트가 끝난 뒤 목이 한 번 더 불려 실패 | `beforeEach(() => mock.mockReset())`처럼 함수를 돌려주면 Vitest가 정리 함수로 여겨 테스트 뒤에 부른다 | `beforeEach(() => { mock.mockReset(); })`처럼 중괄호로 감싼다 |
 | 주석 개수가 0으로 나옴 | 서브쿼리 안의 `artifacts.id`가 따옴표 없는 `"id"`로 그려져 `annotations.id`로 읽힘 | 테이블 이름을 직접 씀(`repository.ts`) |
 
 ## 품질 예산

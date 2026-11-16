@@ -18,7 +18,7 @@ export function ImageCard({ artifact, readOnly }: { artifact: Artifact; readOnly
         </CardTitle>
         <CardDescription>
           {image
-            ? `${image.width.toLocaleString("ko-KR")} × ${image.height.toLocaleString("ko-KR")}px · 254px 타일(WebP)`
+            ? `${image.width.toLocaleString("ko-KR")} × ${image.height.toLocaleString("ko-KR")}px · 딥줌 타일(WebP)`
             : "원본을 올리면 딥줌 타일로 잘라 저장합니다. 이미지가 있어야 공개할 수 있습니다."}
         </CardDescription>
       </CardHeader>
@@ -29,7 +29,7 @@ export function ImageCard({ artifact, readOnly }: { artifact: Artifact; readOnly
         >
           {image ? (
             <img
-              src={image.previewUrl}
+              src={image.thumbUrl ?? image.previewUrl}
               alt={artifact.imageAlt}
               className="size-full object-contain"
               style={{ backgroundImage: `url(${image.lqip})`, backgroundSize: "cover" }}

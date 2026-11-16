@@ -18,6 +18,25 @@ test.describe("첫 화면", () => {
     await expect(page.getByRole("dialog")).toBeHidden();
   });
 
+  test("입장 화면이 열린 동안에는 초점이 가려진 메뉴·바로가기 링크로 빠지지 않는다", async ({ page }) => {
+    await page.goto("/");
+    const enter = page.getByRole("button", { name: /아카이브 입장/ });
+    await expect(enter).toBeFocused();
+    const focusOutside = () =>
+      page.evaluate(() => {
+        const el = document.activeElement;
+        return el && el !== document.body && !el.closest('[role="dialog"]') ? el.outerHTML.slice(0, 80) : null;
+      });
+    for (const key of ["Tab", "Tab", "Tab", "Shift+Tab", "Shift+Tab", "Shift+Tab", "Shift+Tab"]) {
+      await page.keyboard.press(key);
+      expect(await focusOutside()).toBeNull();
+    }
+    await enter.click();
+    await expect(page.getByRole("dialog")).toBeHidden();
+    // 들어가면 막았던 것을 모두 푼다.
+    expect(await page.evaluate(() => [...document.body.children].filter((el) => el.hasAttribute("inert")).length)).toBe(0);
+  });
+
   test("섹션과 메뉴가 있고 접근성 위반이 없다", async ({ page }) => {
     await skipGate(page);
     await page.goto("/");
@@ -49,16 +68,16 @@ test.describe("아카이브", () => {
   test("검색어와 전시실로 거르고 주소에 남긴다", async ({ page }) => {
     await page.goto("/artifacts");
     // 다른 테스트가 동시에 유물을 공개할 수 있어 정확한 개수는 단위 테스트에서 확인한다.
-    await expect(page.getByRole("status")).toHaveText(/^유물 \d+점$/);
+    await expect(page.getByRole("search").getByRole("status")).toHaveText(/^유물 \d+점$/);
     await page.getByRole("searchbox", { name: "검색" }).fill("토르");
     // 해설과 주석까지 찾으므로 여러 점이 나오고, 이름이 맞는 쪽이 앞에 온다.
-    await expect(page.getByRole("status")).toHaveText(/^유물 \d+점$/);
+    await expect(page.getByRole("search").getByRole("status")).toHaveText(/^유물 \d+점$/);
     await expect(page.getByRole("link", { name: "묠니르" })).toBeVisible();
     await expect(page).toHaveURL(/q=%ED%86%A0%EB%A5%B4/);
 
     await page.getByRole("button", { name: "조건 지우기" }).click();
     await page.getByRole("radio", { name: "한국 신화와 설화" }).check();
-    await expect(page.getByRole("status")).toHaveText("유물 4점");
+    await expect(page.getByRole("search").getByRole("status")).toHaveText("유물 4점");
     await expect(page).toHaveURL(/gallery=korean/);
     await expectNoA11yViolations(page);
   });
@@ -81,9 +100,25 @@ test.describe("아카이브", () => {
     await expectNoA11yViolations(page);
   });
 
+  test("주석에서 맞은 검색 결과는 카드에 그 주석을 보이고, 누르면 그 주석으로 바로 연다", async ({ page }) => {
+    await page.goto("/artifacts?q=%EB%8D%A9%EA%B5%B4");
+    const card = page.getByRole("link", { name: "성배", exact: true });
+    await expect(card).toHaveAttribute("href", "/artifacts/holy-grail?note=2");
+    await expect(card).toHaveAccessibleDescription("주석 02 · 포도 덩굴 속 인물");
+    await card.click();
+    await expect(page).toHaveURL(/\/artifacts\/holy-grail\?note=2$/);
+    await expect(page.getByRole("button", { name: /포도 덩굴 속 인물/, pressed: true })).toBeVisible();
+  });
+
+  test("60자를 넘는 검색어도 다른 조건을 지우지 않는다", async ({ page }) => {
+    await page.goto(`/artifacts?gallery=norse&q=${"가".repeat(70)}`);
+    await expect(page.getByRole("radio", { name: "북유럽·게르만 신화" })).toBeChecked();
+    await expect(page.getByRole("searchbox")).toHaveValue("가".repeat(60));
+  });
+
   test("주소의 조건으로 서버에서 바로 거른다", async ({ page }) => {
     await page.goto("/artifacts?gallery=norse");
-    await expect(page.getByRole("status")).toHaveText("유물 18점");
+    await expect(page.getByRole("search").getByRole("status")).toHaveText("유물 18점");
     await expect(
       page.getByRole("radio", { name: "북유럽·게르만 신화" }),
     ).toBeChecked();
@@ -152,6 +187,29 @@ test.describe("유물 화면", () => {
     await expectNoA11yViolations(page);
   });
 
+  test("전체 화면은 도구 막대·이동 버튼까지 함께 띄우고, 다시 누르면 끝난다", async ({ page }) => {
+    await page.goto("/artifacts/excalibur");
+    const viewer = page.getByRole("region", { name: "엑스칼리버 딥줌 뷰어" });
+    await expect(viewer.getByRole("button", { name: /^주석 1: / })).toBeVisible({ timeout: 20_000 });
+    const button = viewer.getByRole("button", { name: "전체 화면" });
+    await button.click();
+    await expect(button).toHaveAttribute("aria-pressed", "true");
+    expect(await page.evaluate(() => document.fullscreenElement?.getAttribute("aria-label"))).toBe("엑스칼리버 딥줌 뷰어");
+    await expect(viewer.getByRole("button", { name: "확대" })).toBeVisible();
+    await expect(viewer.getByRole("group", { name: "사진 이동" })).toBeVisible();
+    await button.click();
+    await expect(button).toHaveAttribute("aria-pressed", "false");
+    expect(await page.evaluate(() => document.fullscreenElement)).toBeNull();
+  });
+
+  test("요소 전체 화면을 지원하지 않는 브라우저(iPhone)에서는 전체 화면 버튼을 숨긴다", async ({ page }) => {
+    await page.addInitScript(() => Object.defineProperty(Document.prototype, "fullscreenEnabled", { get: () => false }));
+    await page.goto("/artifacts/excalibur");
+    const viewer = page.getByRole("region", { name: "엑스칼리버 딥줌 뷰어" });
+    await expect(viewer.getByRole("button", { name: "확대" })).toBeVisible();
+    await expect(viewer.getByRole("button", { name: "전체 화면" })).toHaveCount(0);
+  });
+
   test("끌기 없이 이동 버튼으로 사진을 옮긴다", async ({ page }) => {
     await page.goto("/artifacts/excalibur");
     const marker = page.getByRole("button", { name: /^주석 1: / });
@@ -205,6 +263,15 @@ test.describe("유물 화면", () => {
     // 다시 누르면 닫히고 주소에서도 빠진다.
     await tip.click();
     await expect(page).toHaveURL(/\/artifacts\/excalibur$/);
+  });
+
+  test("구조화 데이터(JSON-LD)와 사이트맵의 언어 대체 주소가 있다", async ({ page, request }) => {
+    await page.goto("/artifacts/excalibur");
+    const data = JSON.parse((await page.locator('script[type="application/ld+json"]').textContent())!);
+    expect(data["@graph"][0]).toMatchObject({ "@type": "CreativeWork", name: "엑스칼리버", inLanguage: "ko" });
+    expect(data["@graph"][1]["@type"]).toBe("BreadcrumbList");
+    const sitemap = await (await request.get("/sitemap.xml")).text();
+    expect(sitemap).toMatch(/<xhtml:link rel="alternate" hreflang="en" href="[^"]*\/en\/artifacts\/excalibur"/);
   });
 
   test("유물마다 공유 이미지가 있다", async ({ page, request }) => {

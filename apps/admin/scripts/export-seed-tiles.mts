@@ -39,6 +39,7 @@ for (const { slug } of SEED_ARTIFACTS) {
     ...image,
     dziKey: image.dziKey.replace(/^artifacts\//, "tiles/"),
     previewKey: image.previewKey.replace(/^artifacts\//, "tiles/"),
+    ...(image.thumbKey && { thumbKey: image.thumbKey.replace(/^artifacts\//, "tiles/") }),
     // 원본은 내보내지 않는다(다시 타일링하려면 seed:images).
     originalKey: "",
   };

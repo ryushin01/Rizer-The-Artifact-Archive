@@ -6,11 +6,12 @@ import type {
   ArtifactStatus,
   GalleryId,
 } from "@rizer/domain";
+import { SEED_ARTIFACTS } from "@rizer/domain/seed";
 import { and, asc, count, desc, eq, getTableColumns, ilike, inArray, ne, or, sql, type SQL } from "drizzle-orm";
 
 import type { Database } from "@/db/index";
 import { newId } from "@/db/ids";
-import { annotations, artifacts } from "@/db/schema";
+import { annotations, artifacts, deletedSeedSlugs } from "@/db/schema";
 import type { StoredImage } from "@/entities/artifact";
 
 export type ArtifactRow = typeof artifacts.$inferSelect;
@@ -26,6 +27,8 @@ export type AdminArtifactQuery = Omit<Partial<ArtifactQuery>, "sort"> & {
   /** 검색 결과 맨 앞에 둘 주소(영어판에서 이름이 맞은 유물) */
   rankSlugs?: string[];
 };
+
+const SEED_SLUGS = new Set(SEED_ARTIFACTS.map((a) => a.slug));
 
 /** LIKE 패턴의 특수 문자를 그대로 찾도록 이스케이프한다. */
 const escapeLike = (s: string) => s.replace(/[\\%_]/g, (c) => `\\${c}`);
@@ -110,8 +113,8 @@ export function createArtifactRepository(db: Database) {
     list,
     page,
 
-    /** 최근 수정한 순서 */
-    recent: (limit: number) => list({ sort: "updated" }).then((rows) => rows.slice(0, limit)),
+    /** 최근 수정한 순서로 limit개만 읽는다. */
+    recent: (limit: number) => list({ sort: "updated", limit }),
 
     async get(id: string): Promise<ArtifactWithCount | null> {
       const [row] = await db.select(columns).from(artifacts).where(eq(artifacts.id, id));
@@ -167,9 +170,15 @@ export function createArtifactRepository(db: Database) {
       return rows[0] ?? null;
     },
 
+    /** 지운다(주석은 함께 지워진다). 시드 유물이면 서버가 켜질 때 다시 넣지 않도록 주소를 남긴다. */
     async remove(id: string) {
-      const rows = await db.delete(artifacts).where(eq(artifacts.id, id)).returning({ slug: artifacts.slug });
-      return rows[0] ?? null;
+      return db.transaction(async (tx) => {
+        const [removed] = await tx.delete(artifacts).where(eq(artifacts.id, id)).returning({ slug: artifacts.slug });
+        if (removed && SEED_SLUGS.has(removed.slug)) {
+          await tx.insert(deletedSeedSlugs).values({ slug: removed.slug }).onConflictDoNothing();
+        }
+        return removed ?? null;
+      });
     },
 
     /** 같은 전시실의 다른 공개 유물 */
@@ -223,6 +232,23 @@ export function createArtifactRepository(db: Database) {
         }
         await tx.update(artifacts).set({ updatedAt: now }).where(eq(artifacts.id, artifactId));
       });
+    },
+
+    /** 여러 유물의 주석을 유물별로, 투어 순서대로 */
+    async annotationsOf(artifactIds: string[]): Promise<Map<string, AnnotationRow[]>> {
+      const byArtifact = new Map<string, AnnotationRow[]>();
+      if (!artifactIds.length) return byArtifact;
+      const rows = await db
+        .select()
+        .from(annotations)
+        .where(inArray(annotations.artifactId, artifactIds))
+        .orderBy(asc(annotations.artifactId), asc(annotations.order));
+      for (const row of rows) {
+        const list = byArtifact.get(row.artifactId);
+        if (list) list.push(row);
+        else byArtifact.set(row.artifactId, [row]);
+      }
+      return byArtifact;
     },
 
     async annotationCounts(ids: string[]) {

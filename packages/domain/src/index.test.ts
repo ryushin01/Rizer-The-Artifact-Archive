@@ -6,6 +6,8 @@ import {
   formatYear,
   fromFragment,
   fromWebAnnotations,
+  parseArtifactQuery,
+  SEARCH_MAX_LENGTH,
   toAnnotationPage,
   storyParagraphs,
   toFragment,
@@ -140,5 +142,27 @@ describe("유물", () => {
     for (const seed of SEED_ARTIFACTS) {
       expect(SEED_ANNOTATIONS[seed.slug]?.length ?? 0, seed.slug).toBeGreaterThanOrEqual(2);
     }
+  });
+});
+
+describe("검색 조건 읽기", () => {
+  it("잘못된 조건만 버리고 나머지는 지킨다", () => {
+    expect(parseArtifactQuery({ gallery: "norse", kind: "spaceship", limit: "500", offset: "24", sort: "oldest" })).toEqual({
+      gallery: "norse",
+      offset: 24,
+      sort: "oldest",
+    });
+    expect(parseArtifactQuery({ gallery: "atlantis" })).toEqual({ sort: "featured" });
+  });
+
+  it("긴 검색어는 버리지 않고 앞의 60자만 쓴다", () => {
+    const query = parseArtifactQuery({ q: `  ${"검".repeat(80)}  `, gallery: "greek" });
+    expect(query.q).toHaveLength(SEARCH_MAX_LENGTH);
+    expect(query.gallery).toBe("greek");
+  });
+
+  it("빈 값과 공백뿐인 검색어는 조건에 넣지 않는다", () => {
+    expect(parseArtifactQuery({ q: "   ", gallery: "", locale: "fr" })).toEqual({ sort: "featured" });
+    expect(parseArtifactQuery({ q: " 묠니르 ", locale: "en" })).toEqual({ q: "묠니르", locale: "en", sort: "featured" });
   });
 });

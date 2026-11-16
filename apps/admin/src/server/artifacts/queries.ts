@@ -1,12 +1,12 @@
 import "server-only";
 
 import {
-  artifactQuerySchema,
   type ArtifactDetailResponse,
   type ArtifactListResponse,
   type ArtifactQuery,
   type Locale,
   localeSchema,
+  parseArtifactQuery,
 } from "@rizer/domain";
 
 import { connection } from "next/server";
@@ -16,6 +16,7 @@ import { getStorage } from "@/server/storage";
 
 import { localizeAnnotations, localizeArtifact, searchEnglish } from "./localize";
 import { toAnnotation, toArtifact, toArtifactSummary } from "./public";
+import { withMatchedNotes } from "./matched-notes";
 import { type AdminArtifactQuery, createArtifactRepository } from "./repository";
 
 /** DB는 요청마다 읽는다(처음 열 때 시드가 현재 시각을 쓰므로 프리렌더 중에 열지 않는다). */
@@ -49,13 +50,9 @@ export async function getStats() {
   return { stats, recent: recent.map((row) => toArtifactSummary(row, storage)) };
 }
 
-/** 주소 쿼리를 공개 API 조건으로. 잘못된 값은 무시한다. */
+/** 주소 쿼리를 공개 API 조건으로. 잘못된 값만 버리고(다른 조건은 지킨다), 긴 검색어는 앞부분만 쓴다. */
 export function parsePublicQuery(params: URLSearchParams): ArtifactQuery {
-  const raw = Object.fromEntries(
-    ["q", "gallery", "kind", "sort", "limit", "offset", "locale"].flatMap((k) => (params.get(k) ? [[k, params.get(k)]] : [])),
-  );
-  const parsed = artifactQuerySchema.safeParse(raw);
-  return parsed.success ? parsed.data : artifactQuerySchema.parse({});
+  return parseArtifactQuery(Object.fromEntries(params));
 }
 
 /** 주소의 언어 값. 잘못된 값은 한국어로 본다. */
@@ -68,7 +65,7 @@ export async function listPublished(query: ArtifactQuery): Promise<ArtifactListR
   const { locale, ...rest } = query;
   if (locale !== "en") {
     const { rows, total } = await r.page({ ...rest, status: "published" });
-    return { items: rows.map((row) => toArtifactSummary(row, storage)), total };
+    return { items: await withMatchedNotes(r, rows.map((row) => toArtifactSummary(row, storage)), rest.q), total };
   }
   const matched = rest.q ? searchEnglish(rest.q) : undefined;
   const filter = { ...rest, status: "published" as const, alsoSlugs: matched?.all, rankSlugs: matched?.titles };
@@ -78,10 +75,12 @@ export async function listPublished(query: ArtifactQuery): Promise<ArtifactListR
     const sorted = (await r.list(all))
       .map((row) => localizeArtifact(toArtifactSummary(row, storage)))
       .sort((a, b) => a.title.localeCompare(b.title, "en"));
-    return { items: limit ? sorted.slice(offset, offset + limit) : sorted, total: sorted.length };
+    const items = limit ? sorted.slice(offset, offset + limit) : sorted;
+    return { items: await withMatchedNotes(r, items, rest.q, "en"), total: sorted.length };
   }
   const { rows, total } = await r.page(filter);
-  return { items: rows.map((row) => localizeArtifact(toArtifactSummary(row, storage))), total };
+  const items = rows.map((row) => localizeArtifact(toArtifactSummary(row, storage)));
+  return { items: await withMatchedNotes(r, items, rest.q, "en"), total };
 }
 
 /** 공개 API: 공개 유물 상세 */

@@ -51,7 +51,11 @@ export function Timeline({ artifacts }: { artifacts: TimelineItem[] }) {
           ))}
         </Eras>
       </Container>
-      <Scroller tabIndex={0} aria-labelledby="timeline-title">
+      {/*
+        키보드로도 가로로 넘기도록 초점을 받는 영역. 이름을 붙이려면 역할이 있어야 해서 region으로 두고,
+        섹션(같은 제목의 region)과 구별되는 짧은 이름을 준다(같은 이름의 영역이 둘이면 axe landmark-unique).
+      */}
+      <Scroller role="region" tabIndex={0} aria-label={t.scroller}>
         <List key={era}>
           {shown.map((a) => (
             <Item key={a.id}>

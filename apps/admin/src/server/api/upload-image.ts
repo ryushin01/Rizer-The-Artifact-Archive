@@ -7,7 +7,14 @@ import { getDb } from "@/db/server";
 import { READ_ONLY_MESSAGE } from "@/entities/user";
 import { createArtifactRepository } from "@/server/artifacts/repository";
 import { getEditor } from "@/server/auth/guard";
-import { ACCEPTED_TYPES, extensionOf, MAX_UPLOAD_BYTES, originalKey, tileAndUpload } from "@/server/images/process";
+import {
+  ACCEPTED_TYPES,
+  extensionOf,
+  MAX_UPLOAD_BYTES,
+  originalKey,
+  tileAndUpload,
+  tilingErrorMessage,
+} from "@/server/images/process";
 import { notifyWeb } from "@/server/revalidate";
 import { getStorage } from "@/server/storage";
 
@@ -41,6 +48,6 @@ export async function uploadImageHandler(request: NextRequest, { params }: { par
     return NextResponse.json({ message: `타일 ${image.tileCount.toLocaleString("ko-KR")}개를 만들었습니다.` });
   } catch (error) {
     console.error("[upload] 타일링 실패", error);
-    return NextResponse.json({ message: "이미지를 읽지 못했습니다. 손상되지 않은 이미지인지 확인해 주세요." }, { status: 422 });
+    return NextResponse.json({ message: tilingErrorMessage(error) }, { status: 422 });
   }
 }

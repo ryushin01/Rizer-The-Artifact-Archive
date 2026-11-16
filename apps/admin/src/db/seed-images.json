@@ -2,6 +2,7 @@
   "excalibur": {
     "dziKey": "tiles/art_excalibur/v20261107100227/image.dzi",
     "previewKey": "tiles/art_excalibur/v20261107100227/preview.webp",
+    "thumbKey": "tiles/art_excalibur/v20261107100227/thumb.webp",
     "originalKey": "",
     "width": 1998,
     "height": 4000,
@@ -13,6 +14,7 @@
   "holy-grail": {
     "dziKey": "tiles/art_holy_grail/v20261107100234/image.dzi",
     "previewKey": "tiles/art_holy_grail/v20261107100234/preview.webp",
+    "thumbKey": "tiles/art_holy_grail/v20261107100234/thumb.webp",
     "originalKey": "",
     "width": 2978,
     "height": 3722,
@@ -24,6 +26,7 @@
   "durandal": {
     "dziKey": "tiles/art_durandal/v20261107100239/image.dzi",
     "previewKey": "tiles/art_durandal/v20261107100239/preview.webp",
+    "thumbKey": "tiles/art_durandal/v20261107100239/thumb.webp",
     "originalKey": "",
     "width": 2857,
     "height": 4000,
@@ -35,6 +38,7 @@
   "mjolnir": {
     "dziKey": "tiles/art_mjolnir/v20261107100243/image.dzi",
     "previewKey": "tiles/art_mjolnir/v20261107100243/preview.webp",
+    "thumbKey": "tiles/art_mjolnir/v20261107100243/thumb.webp",
     "originalKey": "",
     "width": 2419,
     "height": 4000,
@@ -46,6 +50,7 @@
   "gungnir": {
     "dziKey": "tiles/art_gungnir/v20261107100252/image.dzi",
     "previewKey": "tiles/art_gungnir/v20261107100252/preview.webp",
+    "thumbKey": "tiles/art_gungnir/v20261107100252/thumb.webp",
     "originalKey": "",
     "width": 2250,
     "height": 4000,
@@ -57,6 +62,7 @@
   "gram": {
     "dziKey": "tiles/art_gram/v20261107100255/image.dzi",
     "previewKey": "tiles/art_gram/v20261107100255/preview.webp",
+    "thumbKey": "tiles/art_gram/v20261107100255/thumb.webp",
     "originalKey": "",
     "width": 1411,
     "height": 3722,
@@ -68,6 +74,7 @@
   "draupnir": {
     "dziKey": "tiles/art_draupnir/v20261107100258/image.dzi",
     "previewKey": "tiles/art_draupnir/v20261107100258/preview.webp",
+    "thumbKey": "tiles/art_draupnir/v20261107100258/thumb.webp",
     "originalKey": "",
     "width": 4000,
     "height": 4000,
@@ -79,6 +86,7 @@
   "aegis": {
     "dziKey": "tiles/art_aegis/v20261107100314/image.dzi",
     "previewKey": "tiles/art_aegis/v20261107100314/preview.webp",
+    "thumbKey": "tiles/art_aegis/v20261107100314/thumb.webp",
     "originalKey": "",
     "width": 4000,
     "height": 4000,
@@ -90,6 +98,7 @@
   "golden-fleece": {
     "dziKey": "tiles/art_golden_fleece/v20261107110731/image.dzi",
     "previewKey": "tiles/art_golden_fleece/v20261107110731/preview.webp",
+    "thumbKey": "tiles/art_golden_fleece/v20261107110731/thumb.webp",
     "originalKey": "",
     "width": 4000,
     "height": 3854,
@@ -101,6 +110,7 @@
   "shield-of-achilles": {
     "dziKey": "tiles/art_shield_of_achilles/v20261107110736/image.dzi",
     "previewKey": "tiles/art_shield_of_achilles/v20261107110736/preview.webp",
+    "thumbKey": "tiles/art_shield_of_achilles/v20261107110736/thumb.webp",
     "originalKey": "",
     "width": 4000,
     "height": 2952,
@@ -112,6 +122,7 @@
   "spear-of-longinus": {
     "dziKey": "tiles/art_spear_of_longinus/v20261107100324/image.dzi",
     "previewKey": "tiles/art_spear_of_longinus/v20261107100324/preview.webp",
+    "thumbKey": "tiles/art_spear_of_longinus/v20261107100324/thumb.webp",
     "originalKey": "",
     "width": 2120,
     "height": 3722,
@@ -123,6 +134,7 @@
   "seal-of-solomon": {
     "dziKey": "tiles/art_seal_of_solomon/v20261107100329/image.dzi",
     "previewKey": "tiles/art_seal_of_solomon/v20261107100329/preview.webp",
+    "thumbKey": "tiles/art_seal_of_solomon/v20261107100329/thumb.webp",
     "originalKey": "",
     "width": 4000,
     "height": 3200,
@@ -134,6 +146,7 @@
   "kusanagi": {
     "dziKey": "tiles/art_kusanagi/v20261107110740/image.dzi",
     "previewKey": "tiles/art_kusanagi/v20261107110740/preview.webp",
+    "thumbKey": "tiles/art_kusanagi/v20261107110740/thumb.webp",
     "originalKey": "",
     "width": 3453,
     "height": 2554,
@@ -145,6 +158,7 @@
   "yata-no-kagami": {
     "dziKey": "tiles/art_yata_no_kagami/v20261107110743/image.dzi",
     "previewKey": "tiles/art_yata_no_kagami/v20261107110743/preview.webp",
+    "thumbKey": "tiles/art_yata_no_kagami/v20261107110743/thumb.webp",
     "originalKey": "",
     "width": 4000,
     "height": 2667,
@@ -156,6 +170,7 @@
   "manpasikjeok": {
     "dziKey": "tiles/art_manpasikjeok/v20261107110746/image.dzi",
     "previewKey": "tiles/art_manpasikjeok/v20261107110746/preview.webp",
+    "thumbKey": "tiles/art_manpasikjeok/v20261107110746/thumb.webp",
     "originalKey": "",
     "width": 2988,
     "height": 4000,
@@ -167,6 +182,7 @@
   "cheonbuin": {
     "dziKey": "tiles/art_cheonbuin/v20261107110832/image.dzi",
     "previewKey": "tiles/art_cheonbuin/v20261107110832/preview.webp",
+    "thumbKey": "tiles/art_cheonbuin/v20261107110832/thumb.webp",
     "originalKey": "",
     "width": 10199,
     "height": 4200,
@@ -178,6 +194,7 @@
   "clarent": {
     "dziKey": "tiles/art_clarent/v20261107170614/image.dzi",
     "previewKey": "tiles/art_clarent/v20261107170614/preview.webp",
+    "thumbKey": "tiles/art_clarent/v20261107170614/thumb.webp",
     "originalKey": "",
     "width": 1140,
     "height": 1888,
@@ -189,6 +206,7 @@
   "carnwennan": {
     "dziKey": "tiles/art_carnwennan/v20261107170617/image.dzi",
     "previewKey": "tiles/art_carnwennan/v20261107170617/preview.webp",
+    "thumbKey": "tiles/art_carnwennan/v20261107170617/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 1097,
@@ -200,6 +218,7 @@
   "rhongomyniad": {
     "dziKey": "tiles/art_rhongomyniad/v20261107170619/image.dzi",
     "previewKey": "tiles/art_rhongomyniad/v20261107170619/preview.webp",
+    "thumbKey": "tiles/art_rhongomyniad/v20261107170619/thumb.webp",
     "originalKey": "",
     "width": 918,
     "height": 1942,
@@ -211,6 +230,7 @@
   "prydwen": {
     "dziKey": "tiles/art_prydwen/v20261107170622/image.dzi",
     "previewKey": "tiles/art_prydwen/v20261107170622/preview.webp",
+    "thumbKey": "tiles/art_prydwen/v20261107170622/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2400,
@@ -222,6 +242,7 @@
   "hauteclere": {
     "dziKey": "tiles/art_hauteclere/v20261107170625/image.dzi",
     "previewKey": "tiles/art_hauteclere/v20261107170625/preview.webp",
+    "thumbKey": "tiles/art_hauteclere/v20261107170625/thumb.webp",
     "originalKey": "",
     "width": 2400,
     "height": 3000,
@@ -233,6 +254,7 @@
   "joyeuse": {
     "dziKey": "tiles/art_joyeuse/v20261107170628/image.dzi",
     "previewKey": "tiles/art_joyeuse/v20261107170628/preview.webp",
+    "thumbKey": "tiles/art_joyeuse/v20261107170628/thumb.webp",
     "originalKey": "",
     "width": 2134,
     "height": 3000,
@@ -244,6 +266,7 @@
   "tizona": {
     "dziKey": "tiles/art_tizona/v20261107170632/image.dzi",
     "previewKey": "tiles/art_tizona/v20261107170632/preview.webp",
+    "thumbKey": "tiles/art_tizona/v20261107170632/thumb.webp",
     "originalKey": "",
     "width": 657,
     "height": 3000,
@@ -255,6 +278,7 @@
   "colada": {
     "dziKey": "tiles/art_colada/v20261107170634/image.dzi",
     "previewKey": "tiles/art_colada/v20261107170634/preview.webp",
+    "thumbKey": "tiles/art_colada/v20261107170634/thumb.webp",
     "originalKey": "",
     "width": 1289,
     "height": 3000,
@@ -266,6 +290,7 @@
   "curtana": {
     "dziKey": "tiles/art_curtana/v20261107170640/image.dzi",
     "previewKey": "tiles/art_curtana/v20261107170640/preview.webp",
+    "thumbKey": "tiles/art_curtana/v20261107170640/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 3000,
@@ -277,6 +302,7 @@
   "tyrfing": {
     "dziKey": "tiles/art_tyrfing/v20261107170643/image.dzi",
     "previewKey": "tiles/art_tyrfing/v20261107170643/preview.webp",
+    "thumbKey": "tiles/art_tyrfing/v20261107170643/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 1051,
@@ -288,6 +314,7 @@
   "hrunting": {
     "dziKey": "tiles/art_hrunting/v20261107170645/image.dzi",
     "previewKey": "tiles/art_hrunting/v20261107170645/preview.webp",
+    "thumbKey": "tiles/art_hrunting/v20261107170645/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 1688,
@@ -299,6 +326,7 @@
   "giant-sword": {
     "dziKey": "tiles/art_giant_sword/v20261107170647/image.dzi",
     "previewKey": "tiles/art_giant_sword/v20261107170647/preview.webp",
+    "thumbKey": "tiles/art_giant_sword/v20261107170647/thumb.webp",
     "originalKey": "",
     "width": 492,
     "height": 1716,
@@ -310,6 +338,7 @@
   "naegling": {
     "dziKey": "tiles/art_naegling/v20261107170649/image.dzi",
     "previewKey": "tiles/art_naegling/v20261107170649/preview.webp",
+    "thumbKey": "tiles/art_naegling/v20261107170649/thumb.webp",
     "originalKey": "",
     "width": 1342,
     "height": 3000,
@@ -321,6 +350,7 @@
   "skofnung": {
     "dziKey": "tiles/art_skofnung/v20261107170652/image.dzi",
     "previewKey": "tiles/art_skofnung/v20261107170652/preview.webp",
+    "thumbKey": "tiles/art_skofnung/v20261107170652/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2250,
@@ -332,6 +362,7 @@
   "gjallarhorn": {
     "dziKey": "tiles/art_gjallarhorn/v20261107170654/image.dzi",
     "previewKey": "tiles/art_gjallarhorn/v20261107170654/preview.webp",
+    "thumbKey": "tiles/art_gjallarhorn/v20261107170654/thumb.webp",
     "originalKey": "",
     "width": 2048,
     "height": 1069,
@@ -343,6 +374,7 @@
   "megingjord": {
     "dziKey": "tiles/art_megingjord/v20261107170656/image.dzi",
     "previewKey": "tiles/art_megingjord/v20261107170656/preview.webp",
+    "thumbKey": "tiles/art_megingjord/v20261107170656/thumb.webp",
     "originalKey": "",
     "width": 1946,
     "height": 1868,
@@ -354,6 +386,7 @@
   "jarngreipr": {
     "dziKey": "tiles/art_jarngreipr/v20261107170659/image.dzi",
     "previewKey": "tiles/art_jarngreipr/v20261107170659/preview.webp",
+    "thumbKey": "tiles/art_jarngreipr/v20261107170659/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 1993,
@@ -365,6 +398,7 @@
   "brisingamen": {
     "dziKey": "tiles/art_brisingamen/v20261107170701/image.dzi",
     "previewKey": "tiles/art_brisingamen/v20261107170701/preview.webp",
+    "thumbKey": "tiles/art_brisingamen/v20261107170701/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2441,
@@ -376,6 +410,7 @@
   "andvaranaut": {
     "dziKey": "tiles/art_andvaranaut/v20261107170705/image.dzi",
     "previewKey": "tiles/art_andvaranaut/v20261107170705/preview.webp",
+    "thumbKey": "tiles/art_andvaranaut/v20261107170705/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 3000,
@@ -387,6 +422,7 @@
   "skidbladnir": {
     "dziKey": "tiles/art_skidbladnir/v20261107170708/image.dzi",
     "previewKey": "tiles/art_skidbladnir/v20261107170708/preview.webp",
+    "thumbKey": "tiles/art_skidbladnir/v20261107170708/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2400,
@@ -398,6 +434,7 @@
   "sleipnir": {
     "dziKey": "tiles/art_sleipnir/v20261107170710/image.dzi",
     "previewKey": "tiles/art_sleipnir/v20261107170710/preview.webp",
+    "thumbKey": "tiles/art_sleipnir/v20261107170710/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2745,
@@ -409,6 +446,7 @@
   "aegishjalmur": {
     "dziKey": "tiles/art_aegishjalmur/v20261107170713/image.dzi",
     "previewKey": "tiles/art_aegishjalmur/v20261107170713/preview.webp",
+    "thumbKey": "tiles/art_aegishjalmur/v20261107170713/thumb.webp",
     "originalKey": "",
     "width": 1457,
     "height": 1941,
@@ -420,6 +458,7 @@
   "tarnhelm": {
     "dziKey": "tiles/art_tarnhelm/v20261107170715/image.dzi",
     "previewKey": "tiles/art_tarnhelm/v20261107170715/preview.webp",
+    "thumbKey": "tiles/art_tarnhelm/v20261107170715/thumb.webp",
     "originalKey": "",
     "width": 2143,
     "height": 3000,
@@ -431,6 +470,7 @@
   "harpe": {
     "dziKey": "tiles/art_harpe/v20261107170717/image.dzi",
     "previewKey": "tiles/art_harpe/v20261107170717/preview.webp",
+    "thumbKey": "tiles/art_harpe/v20261107170717/thumb.webp",
     "originalKey": "",
     "width": 2260,
     "height": 3000,
@@ -442,6 +482,7 @@
   "poseidon-trident": {
     "dziKey": "tiles/art_poseidon_trident/v20261108080615/image.dzi",
     "previewKey": "tiles/art_poseidon_trident/v20261108080615/preview.webp",
+    "thumbKey": "tiles/art_poseidon_trident/v20261108080615/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2900,
@@ -453,6 +494,7 @@
   "zeus-thunderbolt": {
     "dziKey": "tiles/art_zeus_thunderbolt/v20261107170723/image.dzi",
     "previewKey": "tiles/art_zeus_thunderbolt/v20261107170723/preview.webp",
+    "thumbKey": "tiles/art_zeus_thunderbolt/v20261107170723/thumb.webp",
     "originalKey": "",
     "width": 1960,
     "height": 1976,
@@ -464,6 +506,7 @@
   "helm-of-darkness": {
     "dziKey": "tiles/art_helm_of_darkness/v20261107170725/image.dzi",
     "previewKey": "tiles/art_helm_of_darkness/v20261107170725/preview.webp",
+    "thumbKey": "tiles/art_helm_of_darkness/v20261107170725/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 3000,
@@ -475,6 +518,7 @@
   "nemean-lion": {
     "dziKey": "tiles/art_nemean_lion/v20261107170728/image.dzi",
     "previewKey": "tiles/art_nemean_lion/v20261107170728/preview.webp",
+    "thumbKey": "tiles/art_nemean_lion/v20261107170728/thumb.webp",
     "originalKey": "",
     "width": 2000,
     "height": 2000,
@@ -486,6 +530,7 @@
   "golden-apples": {
     "dziKey": "tiles/art_golden_apples/v20261107170730/image.dzi",
     "previewKey": "tiles/art_golden_apples/v20261107170730/preview.webp",
+    "thumbKey": "tiles/art_golden_apples/v20261107170730/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 3000,
@@ -497,6 +542,7 @@
   "ambrosia": {
     "dziKey": "tiles/art_ambrosia/v20261107170733/image.dzi",
     "previewKey": "tiles/art_ambrosia/v20261107170733/preview.webp",
+    "thumbKey": "tiles/art_ambrosia/v20261107170733/thumb.webp",
     "originalKey": "",
     "width": 2431,
     "height": 3000,
@@ -508,6 +554,7 @@
   "necklace-of-harmonia": {
     "dziKey": "tiles/art_necklace_of_harmonia/v20261107170738/image.dzi",
     "previewKey": "tiles/art_necklace_of_harmonia/v20261107170738/preview.webp",
+    "thumbKey": "tiles/art_necklace_of_harmonia/v20261107170738/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 3000,
@@ -519,6 +566,7 @@
   "eros-arrows": {
     "dziKey": "tiles/art_eros_arrows/v20261107170741/image.dzi",
     "previewKey": "tiles/art_eros_arrows/v20261107170741/preview.webp",
+    "thumbKey": "tiles/art_eros_arrows/v20261107170741/thumb.webp",
     "originalKey": "",
     "width": 1208,
     "height": 1960,
@@ -530,6 +578,7 @@
   "pegasus": {
     "dziKey": "tiles/art_pegasus/v20261107170744/image.dzi",
     "previewKey": "tiles/art_pegasus/v20261107170744/preview.webp",
+    "thumbKey": "tiles/art_pegasus/v20261107170744/thumb.webp",
     "originalKey": "",
     "width": 2250,
     "height": 3000,
@@ -541,6 +590,7 @@
   "argo": {
     "dziKey": "tiles/art_argo/v20261107170747/image.dzi",
     "previewKey": "tiles/art_argo/v20261107170747/preview.webp",
+    "thumbKey": "tiles/art_argo/v20261107170747/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 1891,
@@ -552,6 +602,7 @@
   "cestus-of-aphrodite": {
     "dziKey": "tiles/art_cestus_of_aphrodite/v20261107170749/image.dzi",
     "previewKey": "tiles/art_cestus_of_aphrodite/v20261107170749/preview.webp",
+    "thumbKey": "tiles/art_cestus_of_aphrodite/v20261107170749/thumb.webp",
     "originalKey": "",
     "width": 2250,
     "height": 3000,
@@ -563,6 +614,7 @@
   "ring-of-gyges": {
     "dziKey": "tiles/art_ring_of_gyges/v20261107170751/image.dzi",
     "previewKey": "tiles/art_ring_of_gyges/v20261107170751/preview.webp",
+    "thumbKey": "tiles/art_ring_of_gyges/v20261107170751/thumb.webp",
     "originalKey": "",
     "width": 2908,
     "height": 2492,
@@ -574,6 +626,7 @@
   "ascalon": {
     "dziKey": "tiles/art_ascalon/v20261107170759/image.dzi",
     "previewKey": "tiles/art_ascalon/v20261107170759/preview.webp",
+    "thumbKey": "tiles/art_ascalon/v20261107170759/thumb.webp",
     "originalKey": "",
     "width": 2186,
     "height": 2400,
@@ -585,6 +638,7 @@
   "noahs-ark": {
     "dziKey": "tiles/art_noahs_ark/v20261107170807/image.dzi",
     "previewKey": "tiles/art_noahs_ark/v20261107170807/preview.webp",
+    "thumbKey": "tiles/art_noahs_ark/v20261107170807/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2330,
@@ -596,6 +650,7 @@
   "sword-of-peter": {
     "dziKey": "tiles/art_sword_of_peter/v20261107170810/image.dzi",
     "previewKey": "tiles/art_sword_of_peter/v20261107170810/preview.webp",
+    "thumbKey": "tiles/art_sword_of_peter/v20261107170810/thumb.webp",
     "originalKey": "",
     "width": 1913,
     "height": 3000,
@@ -607,6 +662,7 @@
   "zulfiqar": {
     "dziKey": "tiles/art_zulfiqar/v20261107170813/image.dzi",
     "previewKey": "tiles/art_zulfiqar/v20261107170813/preview.webp",
+    "thumbKey": "tiles/art_zulfiqar/v20261107170813/thumb.webp",
     "originalKey": "",
     "width": 2084,
     "height": 3000,
@@ -618,6 +674,7 @@
   "flying-carpet": {
     "dziKey": "tiles/art_flying_carpet/v20261107170822/image.dzi",
     "previewKey": "tiles/art_flying_carpet/v20261107170822/preview.webp",
+    "thumbKey": "tiles/art_flying_carpet/v20261107170822/thumb.webp",
     "originalKey": "",
     "width": 1314,
     "height": 3000,
@@ -629,6 +686,7 @@
   "ring-of-the-jinn": {
     "dziKey": "tiles/art_ring_of_the_jinn/v20261107170824/image.dzi",
     "previewKey": "tiles/art_ring_of_the_jinn/v20261107170824/preview.webp",
+    "thumbKey": "tiles/art_ring_of_the_jinn/v20261107170824/thumb.webp",
     "originalKey": "",
     "width": 1140,
     "height": 893,
@@ -640,6 +698,7 @@
   "book-of-the-dead": {
     "dziKey": "tiles/art_book_of_the_dead/v20261107170826/image.dzi",
     "previewKey": "tiles/art_book_of_the_dead/v20261107170826/preview.webp",
+    "thumbKey": "tiles/art_book_of_the_dead/v20261107170826/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 1020,
@@ -651,6 +710,7 @@
   "emerald-tablet": {
     "dziKey": "tiles/art_emerald_tablet/v20261108025740/image.dzi",
     "previewKey": "tiles/art_emerald_tablet/v20261108025740/preview.webp",
+    "thumbKey": "tiles/art_emerald_tablet/v20261108025740/thumb.webp",
     "originalKey": "",
     "width": 1333,
     "height": 2000,
@@ -662,6 +722,7 @@
   "solar-barque": {
     "dziKey": "tiles/art_solar_barque/v20261107170829/image.dzi",
     "previewKey": "tiles/art_solar_barque/v20261107170829/preview.webp",
+    "thumbKey": "tiles/art_solar_barque/v20261107170829/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2000,
@@ -673,6 +734,7 @@
   "rakhsh": {
     "dziKey": "tiles/art_rakhsh/v20261107170831/image.dzi",
     "previewKey": "tiles/art_rakhsh/v20261107170831/preview.webp",
+    "thumbKey": "tiles/art_rakhsh/v20261107170831/thumb.webp",
     "originalKey": "",
     "width": 1970,
     "height": 3000,
@@ -684,6 +746,7 @@
   "bucephalus": {
     "dziKey": "tiles/art_bucephalus/v20261107170834/image.dzi",
     "previewKey": "tiles/art_bucephalus/v20261107170834/preview.webp",
+    "thumbKey": "tiles/art_bucephalus/v20261107170834/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2492,
@@ -695,6 +758,7 @@
   "claiomh-solais": {
     "dziKey": "tiles/art_claiomh_solais/v20261107170837/image.dzi",
     "previewKey": "tiles/art_claiomh_solais/v20261107170837/preview.webp",
+    "thumbKey": "tiles/art_claiomh_solais/v20261107170837/thumb.webp",
     "originalKey": "",
     "width": 2400,
     "height": 3000,
@@ -706,6 +770,7 @@
   "spear-of-lugh": {
     "dziKey": "tiles/art_spear_of_lugh/v20261107170841/image.dzi",
     "previewKey": "tiles/art_spear_of_lugh/v20261107170841/preview.webp",
+    "thumbKey": "tiles/art_spear_of_lugh/v20261107170841/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2000,
@@ -717,6 +782,7 @@
   "gae-bulg": {
     "dziKey": "tiles/art_gae_bulg/v20261107170846/image.dzi",
     "previewKey": "tiles/art_gae_bulg/v20261107170846/preview.webp",
+    "thumbKey": "tiles/art_gae_bulg/v20261107170846/thumb.webp",
     "originalKey": "",
     "width": 1688,
     "height": 3000,
@@ -728,6 +794,7 @@
   "fragarach": {
     "dziKey": "tiles/art_fragarach/v20261108025748/image.dzi",
     "previewKey": "tiles/art_fragarach/v20261108025748/preview.webp",
+    "thumbKey": "tiles/art_fragarach/v20261108025748/thumb.webp",
     "originalKey": "",
     "width": 1175,
     "height": 3000,
@@ -739,6 +806,7 @@
   "caladbolg": {
     "dziKey": "tiles/art_caladbolg/v20261107170848/image.dzi",
     "previewKey": "tiles/art_caladbolg/v20261107170848/preview.webp",
+    "thumbKey": "tiles/art_caladbolg/v20261107170848/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 1025,
@@ -750,6 +818,7 @@
   "cauldron-of-dagda": {
     "dziKey": "tiles/art_cauldron_of_dagda/v20261107170850/image.dzi",
     "previewKey": "tiles/art_cauldron_of_dagda/v20261107170850/preview.webp",
+    "thumbKey": "tiles/art_cauldron_of_dagda/v20261107170850/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2250,
@@ -761,6 +830,7 @@
   "vajra": {
     "dziKey": "tiles/art_vajra/v20261107170853/image.dzi",
     "previewKey": "tiles/art_vajra/v20261107170853/preview.webp",
+    "thumbKey": "tiles/art_vajra/v20261107170853/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2249,
@@ -772,6 +842,7 @@
   "trishula": {
     "dziKey": "tiles/art_trishula/v20261107170855/image.dzi",
     "previewKey": "tiles/art_trishula/v20261107170855/preview.webp",
+    "thumbKey": "tiles/art_trishula/v20261107170855/thumb.webp",
     "originalKey": "",
     "width": 2374,
     "height": 3000,
@@ -783,6 +854,7 @@
   "sudarshana-chakra": {
     "dziKey": "tiles/art_sudarshana_chakra/v20261107170905/image.dzi",
     "previewKey": "tiles/art_sudarshana_chakra/v20261107170905/preview.webp",
+    "thumbKey": "tiles/art_sudarshana_chakra/v20261107170905/thumb.webp",
     "originalKey": "",
     "width": 1736,
     "height": 3000,
@@ -794,6 +866,7 @@
   "gandiva": {
     "dziKey": "tiles/art_gandiva/v20261107170908/image.dzi",
     "previewKey": "tiles/art_gandiva/v20261107170908/preview.webp",
+    "thumbKey": "tiles/art_gandiva/v20261107170908/thumb.webp",
     "originalKey": "",
     "width": 1852,
     "height": 3000,
@@ -805,6 +878,7 @@
   "amrita": {
     "dziKey": "tiles/art_amrita/v20261107170911/image.dzi",
     "previewKey": "tiles/art_amrita/v20261107170911/preview.webp",
+    "thumbKey": "tiles/art_amrita/v20261107170911/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2700,
@@ -816,6 +890,7 @@
   "kavacha-kundala": {
     "dziKey": "tiles/art_kavacha_kundala/v20261108023452/image.dzi",
     "previewKey": "tiles/art_kavacha_kundala/v20261108023452/preview.webp",
+    "thumbKey": "tiles/art_kavacha_kundala/v20261108023452/thumb.webp",
     "originalKey": "",
     "width": 2249,
     "height": 3000,
@@ -827,6 +902,7 @@
   "cintamani": {
     "dziKey": "tiles/art_cintamani/v20261107170916/image.dzi",
     "previewKey": "tiles/art_cintamani/v20261107170916/preview.webp",
+    "thumbKey": "tiles/art_cintamani/v20261107170916/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2155,
@@ -838,6 +914,7 @@
   "gan-jiang-mo-ye": {
     "dziKey": "tiles/art_gan_jiang_mo_ye/v20261107170919/image.dzi",
     "previewKey": "tiles/art_gan_jiang_mo_ye/v20261107170919/preview.webp",
+    "thumbKey": "tiles/art_gan_jiang_mo_ye/v20261107170919/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 1688,
@@ -849,6 +926,7 @@
   "ruyi-jingu-bang": {
     "dziKey": "tiles/art_ruyi_jingu_bang/v20261108080619/image.dzi",
     "previewKey": "tiles/art_ruyi_jingu_bang/v20261108080619/preview.webp",
+    "thumbKey": "tiles/art_ruyi_jingu_bang/v20261108080619/thumb.webp",
     "originalKey": "",
     "width": 2681,
     "height": 3000,
@@ -860,6 +938,7 @@
   "green-dragon-crescent-blade": {
     "dziKey": "tiles/art_green_dragon_crescent_blade/v20261107170924/image.dzi",
     "previewKey": "tiles/art_green_dragon_crescent_blade/v20261107170924/preview.webp",
+    "thumbKey": "tiles/art_green_dragon_crescent_blade/v20261107170924/thumb.webp",
     "originalKey": "",
     "width": 2250,
     "height": 3000,
@@ -871,6 +950,7 @@
   "sky-piercer": {
     "dziKey": "tiles/art_sky_piercer/v20261107170928/image.dzi",
     "previewKey": "tiles/art_sky_piercer/v20261107170928/preview.webp",
+    "thumbKey": "tiles/art_sky_piercer/v20261107170928/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2400,
@@ -882,6 +962,7 @@
   "red-hare": {
     "dziKey": "tiles/art_red_hare/v20261107170934/image.dzi",
     "previewKey": "tiles/art_red_hare/v20261107170934/preview.webp",
+    "thumbKey": "tiles/art_red_hare/v20261107170934/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2238,
@@ -893,6 +974,7 @@
   "nine-tripods": {
     "dziKey": "tiles/art_nine_tripods/v20261107170939/image.dzi",
     "previewKey": "tiles/art_nine_tripods/v20261107170939/preview.webp",
+    "thumbKey": "tiles/art_nine_tripods/v20261107170939/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2250,
@@ -904,6 +986,7 @@
   "heirloom-seal": {
     "dziKey": "tiles/art_heirloom_seal/v20261107170941/image.dzi",
     "previewKey": "tiles/art_heirloom_seal/v20261107170941/preview.webp",
+    "thumbKey": "tiles/art_heirloom_seal/v20261107170941/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2000,
@@ -915,6 +998,7 @@
   "banana-leaf-fan": {
     "dziKey": "tiles/art_banana_leaf_fan/v20261107170944/image.dzi",
     "previewKey": "tiles/art_banana_leaf_fan/v20261107170944/preview.webp",
+    "thumbKey": "tiles/art_banana_leaf_fan/v20261107170944/thumb.webp",
     "originalKey": "",
     "width": 2780,
     "height": 3000,
@@ -926,6 +1010,7 @@
   "peaches-of-immortality": {
     "dziKey": "tiles/art_peaches_of_immortality/v20261107170947/image.dzi",
     "previewKey": "tiles/art_peaches_of_immortality/v20261107170947/preview.webp",
+    "thumbKey": "tiles/art_peaches_of_immortality/v20261107170947/thumb.webp",
     "originalKey": "",
     "width": 2251,
     "height": 3000,
@@ -937,6 +1022,7 @@
   "golden-headband": {
     "dziKey": "tiles/art_golden_headband/v20261107170954/image.dzi",
     "previewKey": "tiles/art_golden_headband/v20261107170954/preview.webp",
+    "thumbKey": "tiles/art_golden_headband/v20261107170954/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 3000,
@@ -948,6 +1034,7 @@
   "somersault-cloud": {
     "dziKey": "tiles/art_somersault_cloud/v20261107170957/image.dzi",
     "previewKey": "tiles/art_somersault_cloud/v20261107170957/preview.webp",
+    "thumbKey": "tiles/art_somersault_cloud/v20261107170957/thumb.webp",
     "originalKey": "",
     "width": 1074,
     "height": 3000,
@@ -959,6 +1046,7 @@
   "yasakani-no-magatama": {
     "dziKey": "tiles/art_yasakani_no_magatama/v20261107170959/image.dzi",
     "previewKey": "tiles/art_yasakani_no_magatama/v20261107170959/preview.webp",
+    "thumbKey": "tiles/art_yasakani_no_magatama/v20261107170959/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2251,
@@ -970,6 +1058,7 @@
   "ame-no-nuboko": {
     "dziKey": "tiles/art_ame_no_nuboko/v20261107171002/image.dzi",
     "previewKey": "tiles/art_ame_no_nuboko/v20261107171002/preview.webp",
+    "thumbKey": "tiles/art_ame_no_nuboko/v20261107171002/thumb.webp",
     "originalKey": "",
     "width": 1688,
     "height": 3000,
@@ -981,6 +1070,7 @@
   "kurikara": {
     "dziKey": "tiles/art_kurikara/v20261107171004/image.dzi",
     "previewKey": "tiles/art_kurikara/v20261107171004/preview.webp",
+    "thumbKey": "tiles/art_kurikara/v20261107171004/thumb.webp",
     "originalKey": "",
     "width": 2250,
     "height": 3000,
@@ -992,6 +1082,7 @@
   "totsuka-no-tsurugi": {
     "dziKey": "tiles/art_totsuka_no_tsurugi/v20261107171007/image.dzi",
     "previewKey": "tiles/art_totsuka_no_tsurugi/v20261107171007/preview.webp",
+    "thumbKey": "tiles/art_totsuka_no_tsurugi/v20261107171007/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 1581,
@@ -1003,6 +1094,7 @@
   "futsunomitama": {
     "dziKey": "tiles/art_futsunomitama/v20261107171009/image.dzi",
     "previewKey": "tiles/art_futsunomitama/v20261107171009/preview.webp",
+    "thumbKey": "tiles/art_futsunomitama/v20261107171009/thumb.webp",
     "originalKey": "",
     "width": 1432,
     "height": 3000,
@@ -1014,6 +1106,7 @@
   "jamyeonggo": {
     "dziKey": "tiles/art_jamyeonggo/v20261107171011/image.dzi",
     "previewKey": "tiles/art_jamyeonggo/v20261107171011/preview.webp",
+    "thumbKey": "tiles/art_jamyeonggo/v20261107171011/thumb.webp",
     "originalKey": "",
     "width": 1032,
     "height": 693,
@@ -1025,6 +1118,7 @@
   "cheonsa-okdae": {
     "dziKey": "tiles/art_cheonsa_okdae/v20261108023456/image.dzi",
     "previewKey": "tiles/art_cheonsa_okdae/v20261108023456/preview.webp",
+    "thumbKey": "tiles/art_cheonsa_okdae/v20261108023456/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2934,
@@ -1036,6 +1130,7 @@
   "pandoras-box": {
     "dziKey": "tiles/art_pandoras_box/v20261108031224/image.dzi",
     "previewKey": "tiles/art_pandoras_box/v20261108031224/preview.webp",
+    "thumbKey": "tiles/art_pandoras_box/v20261108031224/thumb.webp",
     "originalKey": "",
     "width": 2048,
     "height": 2048,
@@ -1047,6 +1142,7 @@
   "caduceus": {
     "dziKey": "tiles/art_caduceus/v20261108031231/image.dzi",
     "previewKey": "tiles/art_caduceus/v20261108031231/preview.webp",
+    "thumbKey": "tiles/art_caduceus/v20261108031231/thumb.webp",
     "originalKey": "",
     "width": 2250,
     "height": 3000,
@@ -1058,6 +1154,7 @@
   "rod-of-asclepius": {
     "dziKey": "tiles/art_rod_of_asclepius/v20261108031234/image.dzi",
     "previewKey": "tiles/art_rod_of_asclepius/v20261108031234/preview.webp",
+    "thumbKey": "tiles/art_rod_of_asclepius/v20261108031234/thumb.webp",
     "originalKey": "",
     "width": 1680,
     "height": 1680,
@@ -1069,6 +1166,7 @@
   "ark-of-the-covenant": {
     "dziKey": "tiles/art_ark_of_the_covenant/v20261108031246/image.dzi",
     "previewKey": "tiles/art_ark_of_the_covenant/v20261108031246/preview.webp",
+    "thumbKey": "tiles/art_ark_of_the_covenant/v20261108031246/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2400,
@@ -1080,6 +1178,7 @@
   "aladdins-lamp": {
     "dziKey": "tiles/art_aladdins_lamp/v20261108031249/image.dzi",
     "previewKey": "tiles/art_aladdins_lamp/v20261108031249/preview.webp",
+    "thumbKey": "tiles/art_aladdins_lamp/v20261108031249/thumb.webp",
     "originalKey": "",
     "width": 3000,
     "height": 2199,
@@ -1091,6 +1190,7 @@
   "uchide-no-kozuchi": {
     "dziKey": "tiles/art_uchide_no_kozuchi/v20261108031251/image.dzi",
     "previewKey": "tiles/art_uchide_no_kozuchi/v20261108031251/preview.webp",
+    "thumbKey": "tiles/art_uchide_no_kozuchi/v20261108031251/thumb.webp",
     "originalKey": "",
     "width": 2676,
     "height": 3000,
