@@ -37,6 +37,24 @@ describe("ArtifactForm", () => {
     await vi.waitFor(() => expect(screen.getByRole("button", { name: "만들기" })).toBeEnabled());
   });
 
+  it("저장하는 동안에는 칸을 고칠 수 없어, 저장이 실패해 폼을 다시 그려도 고친 내용을 잃지 않는다", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.mocked(toast.error).mockClear();
+    let reject!: (error: unknown) => void;
+    saveArtifactAction.mockReturnValue(new Promise((_, r) => (reject = r)));
+    render(<ArtifactForm readOnly={false} />);
+    await userEvent.type(screen.getByLabelText("이름"), "시험의 검");
+    await userEvent.click(screen.getByRole("button", { name: "만들기" }));
+    await vi.waitFor(() => expect(screen.getByLabelText("이름")).toHaveAttribute("readonly"));
+    await userEvent.type(screen.getByLabelText("이름"), " 추가");
+    expect(screen.getByLabelText("이름")).toHaveValue("시험의 검");
+
+    reject(new TypeError("Failed to fetch"));
+    await vi.waitFor(() => expect(toast.error).toHaveBeenCalledWith(ACTION_ERROR_MESSAGE));
+    await vi.waitFor(() => expect(screen.getByLabelText("이름")).not.toHaveAttribute("readonly"));
+    expect(screen.getByLabelText("이름")).toHaveValue("시험의 검");
+  });
+
   it("칸마다 레이블이 있고 필드 오류를 그 칸 아래에 보여 준다", async () => {
     saveArtifactAction.mockResolvedValue({
       status: "error",

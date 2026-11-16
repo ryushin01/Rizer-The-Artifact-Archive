@@ -29,13 +29,29 @@ export const MAX_UPLOAD_PIXELS = 0x3fff * 0x3fff;
  */
 const UPLOAD_TILE_OPTIONS = { tileSize: 510, maxSize: 6000, maxPixels: MAX_UPLOAD_PIXELS } as const;
 
-/** 타일 생성 실패를 큐레이터가 읽을 안내로 바꾼다. */
-export function tilingErrorMessage(error: unknown): string {
-  // 번들이 모듈을 두 번 싣는 경우에도 알아보도록 이름으로도 확인한다.
-  if (error instanceof PixelLimitError || (error instanceof Error && error.name === "PixelLimitError")) {
+/** 원본 이미지를 해독하지 못했다(손상·지원하지 않는 형식). 스토리지·파일 시스템 오류와 구분한다. */
+export class UnreadableImageError extends Error {
+  constructor(cause: unknown) {
+    super("원본 이미지를 해독하지 못했습니다.", { cause });
+    this.name = "UnreadableImageError";
+  }
+}
+
+const isNamed = (error: unknown, name: string) => error instanceof Error && error.name === name;
+
+/**
+ * 이미지 자체의 문제(너무 큼, 해독 실패)면 큐레이터가 읽을 안내를 돌려준다. 그 밖의 실패(스토리지 업로드 등)는 null이다.
+ * 그런 실패는 이미지를 탓하지 않고, 부른 쪽이 다시 시도하라는 일반 안내를 보인다.
+ * 번들이 모듈을 두 번 싣는 경우에도 알아보도록 이름으로 확인한다.
+ */
+export function imageErrorMessage(error: unknown): string | null {
+  if (error instanceof PixelLimitError || isNamed(error, "PixelLimitError")) {
     return "이미지가 너무 커서 서버에서 자를 수 없습니다. pnpm tiles 명령으로 잘라 올려 주세요.";
   }
-  return "이미지를 읽지 못했습니다. 손상되지 않은 이미지인지 확인해 주세요.";
+  if (error instanceof UnreadableImageError || isNamed(error, "UnreadableImageError")) {
+    return "이미지를 읽지 못했습니다. 손상되지 않은 이미지인지 확인해 주세요.";
+  }
+  return null;
 }
 
 /**
@@ -55,7 +71,13 @@ export async function tileAndUpload(
   const prefix = `artifacts/${artifactId}/v${version}`;
   const workDir = await mkdtemp(path.join(tmpdir(), "rizer-tiles-"));
   try {
-    const result = await generateDeepZoom(original.body, workDir, { name: "image", ...options });
+    let result;
+    try {
+      result = await generateDeepZoom(original.body, workDir, { name: "image", ...options });
+    } catch (error) {
+      // 해독·자르기 단계의 실패만 이미지 문제로 본다. 아래 업로드·삭제의 실패는 그대로 던진다.
+      throw error instanceof PixelLimitError ? error : new UnreadableImageError(error);
+    }
     await storage.putFiles(workDir, await listFiles(workDir), prefix, contentTypeOf);
     const image: StoredImage = {
       dziKey: `${prefix}/${result.dziPath}`,

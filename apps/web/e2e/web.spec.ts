@@ -22,14 +22,22 @@ test.describe("첫 화면", () => {
     await page.goto("/");
     const enter = page.getByRole("button", { name: /아카이브 입장/ });
     await expect(enter).toBeFocused();
-    const focusOutside = () =>
+    // 입장 화면 밖이 모두 막혀 있으므로 초점은 입장 버튼과 브라우저 UI(문서 밖이라 body로 보인다) 사이만 오간다.
+    // 네이티브 모달(<dialog>)과 같은 동작이다. 페이지의 다른 요소(바로가기 링크·메뉴)에 닿으면 실패한다.
+    const where = () =>
       page.evaluate(() => {
         const el = document.activeElement;
-        return el && el !== document.body && !el.closest('[role="dialog"]') ? el.outerHTML.slice(0, 80) : null;
+        if (!el || el === document.body) return "browser";
+        return el.closest('[role="dialog"]') ? "dialog" : `outside: ${el.outerHTML.slice(0, 80)}`;
       });
     for (const key of ["Tab", "Tab", "Tab", "Shift+Tab", "Shift+Tab", "Shift+Tab", "Shift+Tab"]) {
       await page.keyboard.press(key);
-      expect(await focusOutside()).toBeNull();
+      expect(await where()).toMatch(/^(dialog|browser)$/);
+      // 브라우저 UI로 나갔다가 한 번 더 누르면 다시 입장 버튼이다.
+      if ((await where()) === "browser") {
+        await page.keyboard.press(key);
+        await expect(enter).toBeFocused();
+      }
     }
     await enter.click();
     await expect(page.getByRole("dialog")).toBeHidden();

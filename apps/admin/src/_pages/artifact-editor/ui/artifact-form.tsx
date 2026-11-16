@@ -43,6 +43,8 @@ function toDefaults(artifact?: Editable): Record<string, string> {
 export function ArtifactForm({ artifact, readOnly }: { artifact?: Editable; readOnly: boolean }) {
   const form = usePageForm(saveArtifactAction, toDefaults(artifact));
   const id = (name: string) => `artifact-${name}`;
+  // 저장하는 동안에는 고칠 수 없게 한다. 저장이 실패하면 보낸 값으로 폼을 다시 그리므로, 그사이 고친 내용이 사라진다.
+  const locked = readOnly || form.pending;
   const formRef = useRef<HTMLFormElement>(null);
 
   // 서버 검증에 실패하면 폼이 다시 마운트된다. 그 뒤 첫 오류 칸으로 초점을 옮겨 레이블과 오류 문구를 읽힌다.
@@ -77,7 +79,7 @@ export function ArtifactForm({ artifact, readOnly }: { artifact?: Editable; read
           type={opts.type ?? "text"}
           defaultValue={form.text(name)}
           placeholder={opts.placeholder}
-          readOnly={readOnly}
+          readOnly={locked}
           {...control}
         />
         {after}
@@ -90,7 +92,7 @@ export function ArtifactForm({ artifact, readOnly }: { artifact?: Editable; read
     return (
       <Field data-invalid={form.invalid(name)}>
         <FieldLabel htmlFor={id(name)}>{label}</FieldLabel>
-        <Textarea id={id(name)} name={name} rows={rows} defaultValue={form.text(name)} readOnly={readOnly} {...control} />
+        <Textarea id={id(name)} name={name} rows={rows} defaultValue={form.text(name)} readOnly={locked} {...control} />
         {after}
       </Field>
     );
@@ -101,7 +103,7 @@ export function ArtifactForm({ artifact, readOnly }: { artifact?: Editable; read
     return (
       <Field data-invalid={form.invalid(name)}>
         <FieldLabel htmlFor={id(name)}>{label}</FieldLabel>
-        <Select name={name} items={items} defaultValue={form.text(name)} readOnly={readOnly}>
+        <Select name={name} items={items} defaultValue={form.text(name)} readOnly={locked}>
           <SelectTrigger id={id(name)} className="w-full" {...control}>
             <SelectValue />
           </SelectTrigger>
@@ -153,7 +155,13 @@ export function ArtifactForm({ artifact, readOnly }: { artifact?: Editable; read
               {text("firstRecord", "첫 기록 문헌", { className: "md:col-span-2" })}
               {text("power", "권능", { className: "md:col-span-2", description: "전설 속 힘을 한 문장으로 적습니다." })}
               <Field orientation="horizontal" className="md:col-span-2">
-                <Checkbox id={id("featured")} name="featured" defaultChecked={form.text("featured") === "on"} disabled={readOnly} />
+                <Checkbox
+                  id={id("featured")}
+                  name="featured"
+                  defaultChecked={form.text("featured") === "on"}
+                  disabled={readOnly}
+                  readOnly={form.pending}
+                />
                 <FieldLabel htmlFor={id("featured")} className="font-normal">
                   대표 유물로 첫 화면에 보이기
                 </FieldLabel>

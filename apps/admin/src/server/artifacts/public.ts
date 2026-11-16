@@ -8,6 +8,8 @@ import type { AnnotationRow, ArtifactWithCount } from "./repository";
 /**
  * 카드용 썸네일 키. 저장된 키가 없어도 공개 사이트의 정적 시드 타일(tiles/…)에는 미리보기 옆에 썸네일이 있으므로
  * 그 경로를 쓴다(큐레이터가 고쳐서 시드 동기화가 건드리지 않는 시드 유물도 썸네일을 받는다).
+ * 정적 시드 타일의 썸네일은 내보내기 스크립트(export:seed-tiles)가 없으면 만들어 두고, 테스트(seed.test.ts)가 확인한다.
+ * 그래도 썸네일을 받지 못하면 카드가 미리보기로 바꿔 그린다(ArtifactCard의 onError).
  */
 function thumbKeyOf(image: StoredImage): string | undefined {
   if (image.thumbKey) return image.thumbKey;

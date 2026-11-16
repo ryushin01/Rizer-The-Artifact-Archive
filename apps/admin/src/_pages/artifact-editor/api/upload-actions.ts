@@ -9,10 +9,10 @@ import { getEditor } from "@/server/auth/guard";
 import {
   ACCEPTED_TYPES,
   extensionOf,
+  imageErrorMessage,
   MAX_UPLOAD_BYTES,
   originalKey,
   tileAndUpload,
-  tilingErrorMessage,
 } from "@/server/images/process";
 import { notifyWeb } from "@/server/revalidate";
 import { getStorage } from "@/server/storage";
@@ -58,9 +58,12 @@ export async function processUploadAction(id: string, key: string): Promise<Acti
   try {
     image = await tileAndUpload(storage, id, { key, body }, artifact.image);
   } catch (error) {
-    // 손상된 파일, 너무 큰 이미지 등. 로컬 업로드 라우트(server/api/upload-image.ts)와 같은 안내를 돌려준다.
+    // 손상된 파일, 너무 큰 이미지는 안내를 돌려준다(로컬 업로드 라우트와 같다). 스토리지 업로드 실패 등은
+    // 이미지를 탓하지 않도록 그대로 던져, 화면이 "다시 시도해 주세요"를 보이게 한다.
+    const message = imageErrorMessage(error);
+    if (!message) throw error;
     console.error("[upload] 타일링 실패", error);
-    return { ok: false, message: tilingErrorMessage(error) };
+    return { ok: false, message };
   }
   await repo.setImage(id, image);
   await notifyWeb([artifact.slug]);

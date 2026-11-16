@@ -9,6 +9,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } fr
 import path from "node:path";
 
 import { SEED_ARTIFACTS } from "@rizer/domain/seed";
+import { writeThumbnail } from "@rizer/tiles";
 
 import { SEED_MANIFEST_KEY, type SeedImageManifest } from "../src/entities/artifact/model/types";
 
@@ -34,12 +35,16 @@ for (const { slug } of SEED_ARTIFACTS) {
   // artifacts/<id>/v<버전>/image.dzi → tiles/<id>/v<버전>/image.dzi
   const versionDir = path.posix.dirname(image.dziKey);
   const target = versionDir.replace(/^artifacts\//, "tiles/");
-  cpSync(path.join(storageRoot, versionDir), path.join(webTiles, "..", target), { recursive: true });
+  const targetDir = path.join(webTiles, "..", target);
+  cpSync(path.join(storageRoot, versionDir), targetDir, { recursive: true });
+  // 공개 API는 정적 시드 타일의 미리보기 옆에 썸네일이 있다고 보므로(server/artifacts/public.ts), 없으면 여기서 만든다.
+  const thumbFile = path.join(targetDir, "thumb.webp");
+  if (!existsSync(thumbFile)) await writeThumbnail(path.join(targetDir, path.posix.basename(image.previewKey)), thumbFile);
   bundled[slug] = {
     ...image,
     dziKey: image.dziKey.replace(/^artifacts\//, "tiles/"),
     previewKey: image.previewKey.replace(/^artifacts\//, "tiles/"),
-    ...(image.thumbKey && { thumbKey: image.thumbKey.replace(/^artifacts\//, "tiles/") }),
+    thumbKey: `${target}/thumb.webp`,
     // 원본은 내보내지 않는다(다시 타일링하려면 seed:images).
     originalKey: "",
   };

@@ -30,6 +30,14 @@ export function ArtifactCard({ artifact, priority = false }: { artifact: Artifac
           // eslint-disable-next-line @next/next/no-img-element -- 타일 서버의 미리보기라 next/image 최적화를 거치지 않는다
           <img
             src={image.thumbUrl ?? image.previewUrl}
+            // 썸네일을 받지 못하면(없는 파일 등) 한 번만 미리보기로 바꿔 그린다.
+            onError={(event) => {
+              const img = event.currentTarget;
+              if (image.thumbUrl && !img.dataset.fallback) {
+                img.dataset.fallback = "preview";
+                img.src = image.previewUrl;
+              }
+            }}
             alt={artifact.imageAlt}
             // 상세 화면의 딥줌 뷰어(data-zoom-enter-key)로 커지는 화면 전환의 출발점
             data-zoom-exit-key={artifact.slug}

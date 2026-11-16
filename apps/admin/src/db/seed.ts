@@ -132,10 +132,14 @@ export async function refreshUntouchedSeedArtifacts(db: Database, manifest: Seed
       patch.image = image;
       counts.images++;
     }
-    if (Object.keys(patch).length) await db.update(artifacts).set(patch).where(eq(artifacts.id, row.id));
+    // 읽은 뒤에 큐레이터가 고쳤으면(수정 시각이 바뀜) 덮어쓰지 않도록 '손대지 않음' 조건을 다시 건다.
+    const untouched = and(eq(artifacts.id, row.id), eq(artifacts.updatedAt, artifacts.createdAt));
+    if (Object.keys(patch).length) await db.update(artifacts).set(patch).where(untouched);
 
     const wanted = (SEED_ANNOTATIONS[row.slug] ?? []).map((a) => [a.title, a.body, a.region.x, a.region.y, a.region.w, a.region.h]);
     if (stable(notesOf(row.id)) !== stable(wanted)) {
+      const [still] = await db.select({ id: artifacts.id }).from(artifacts).where(untouched);
+      if (!still) continue;
       await db.delete(annotations).where(eq(annotations.artifactId, row.id));
       await insertSeedAnnotations(db, [row.slug]);
       counts.annotations++;

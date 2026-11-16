@@ -110,10 +110,7 @@ export async function generateDeepZoom(
     .toBuffer();
   await writeFile(path.join(/*turbopackIgnore: true*/ outDir, "preview.webp"), preview);
   const small = () => sharp(preview);
-  await small()
-    .resize(THUMB_SIZE, THUMB_SIZE, { fit: "inside", withoutEnlargement: true })
-    .webp({ quality: 80 })
-    .toFile(path.join(/*turbopackIgnore: true*/ outDir, "thumb.webp"));
+  await writeThumbnail(preview, path.join(/*turbopackIgnore: true*/ outDir, "thumb.webp"));
   const lqipBuffer = await small().resize(24, 24, { fit: "inside" }).webp({ quality: 40 }).toBuffer();
   const { dominant } = await small().resize(64, 64, { fit: "inside" }).stats();
 
@@ -127,6 +124,14 @@ export async function generateDeepZoom(
     lqip: `data:image/webp;base64,${lqipBuffer.toString("base64")}`,
     dominantColor: `#${hex(dominant.r)}${hex(dominant.g)}${hex(dominant.b)}`,
   };
+}
+
+/** 미리보기(파일 경로 또는 Buffer)에서 카드용 썸네일(긴 변 960px WebP)을 만든다. 작은 이미지는 키우지 않는다. */
+export async function writeThumbnail(preview: string | Buffer, outFile: string): Promise<void> {
+  await sharp(preview)
+    .resize(THUMB_SIZE, THUMB_SIZE, { fit: "inside", withoutEnlargement: true })
+    .webp({ quality: 80 })
+    .toFile(outFile);
 }
 
 async function countFiles(dir: string): Promise<number> {
