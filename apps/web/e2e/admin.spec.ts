@@ -127,6 +127,22 @@ test.describe("어드민: 큐레이터", () => {
   });
 });
 
+test.describe("어드민: 로고", () => {
+  // 파비콘·사이드바와 같은 브랜드 로고(public/brand/logo.png)를 쓴다. 로고를 바꿀 때 로그인 화면에만 예전 아이콘이 남은 적이 있다.
+  test("로그인 화면과 사이드바가 같은 브랜드 로고를 보여 준다", async ({ page }) => {
+    const loaded = (img: HTMLImageElement) => img.complete && img.naturalWidth > 0;
+    await page.goto(`${ADMIN_URL}/login`);
+    const loginLogo = page.getByRole("main").locator('img[src*="brand"]');
+    await expect(loginLogo).toBeVisible();
+    await expect.poll(() => loginLogo.evaluate(loaded)).toBe(true);
+
+    await loginAsCurator(page);
+    const sidebarLogo = page.getByRole("img", { name: "Rizer Archive" });
+    await expect(sidebarLogo).toBeVisible();
+    await expect.poll(() => sidebarLogo.evaluate(loaded)).toBe(true);
+  });
+});
+
 test.describe("어드민: 접근성", () => {
   test("로그인 화면에 접근성 위반이 없다", async ({ page }) => {
     await page.goto(`${ADMIN_URL}/login`);

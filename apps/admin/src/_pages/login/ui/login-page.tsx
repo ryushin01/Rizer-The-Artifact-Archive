@@ -1,5 +1,5 @@
-import { Landmark } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Suspense } from "react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rizer/ui/components/card";
@@ -36,8 +36,9 @@ export function LoginPage({ searchParams }: PageProps<"/login">) {
     <main id="main" tabIndex={-1} className="flex min-h-svh items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Landmark className="size-5" aria-hidden />
+          {/* 사이드바와 같은 브랜드 로고(블랙레터 R). 이름은 아래 제목이 전하므로 꾸밈 그림으로 둔다. */}
+          <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-[#f4f1ea]">
+            <Image src="/brand/logo.png" alt="" width={28} height={28} />
           </div>
           <CardTitle>
             <h1 className="text-xl">Rizer Archive 관리</h1>
