@@ -8,10 +8,18 @@ import { READ_ONLY_MESSAGE } from "@/entities/user";
 import { createArtifactRepository } from "@/server/artifacts/repository";
 import { getEditor } from "@/server/auth/guard";
 import { notifyWeb } from "@/server/revalidate";
-import type { ActionResult } from "@/shared/lib/form";
+import { type ActionResult, CONFLICT_MESSAGE, expectedVersion } from "@/shared/lib/form";
 
-/** 주석 목록 저장. 편집기의 전체 목록으로 바꾼다. */
-export async function saveAnnotationsAction(id: string, list: unknown): Promise<ActionResult> {
+/**
+ * 주석 목록 저장. 편집기의 전체 목록으로 바꾼다.
+ * version은 편집기가 읽은 유물의 수정 시각이다. 그 뒤에 다른 곳이 저장했으면 덮어쓰지 않는다(낙관적 잠금).
+ * 저장하면 새 수정 시각(version)을 돌려줘 다음 저장의 기준으로 쓰게 한다.
+ */
+export async function saveAnnotationsAction(
+  id: string,
+  list: unknown,
+  version?: string,
+): Promise<ActionResult & { version?: string }> {
   if (!(await getEditor())) return { ok: false, message: READ_ONLY_MESSAGE };
   const parsed = annotationListSchema.safeParse(list);
   if (!parsed.success) {
@@ -29,8 +37,11 @@ export async function saveAnnotationsAction(id: string, list: unknown): Promise<
     const y = Math.max(0, Math.min(a.region.y, 100));
     return { ...a, order, region: { x, y, w: Math.min(a.region.w, 100 - x), h: Math.min(a.region.h, 100 - y) } };
   });
-  await repo.replaceAnnotations(id, clamped);
+  const now = new Date();
+  if (!(await repo.replaceAnnotations(id, clamped, now, expectedVersion(version)))) {
+    return { ok: false, message: CONFLICT_MESSAGE };
+  }
   await notifyWeb([artifact.slug]);
   revalidatePath(`/artifacts/${id}/annotations`);
-  return { ok: true, message: `주석 ${clamped.length}개를 저장했습니다.` };
+  return { ok: true, message: `주석 ${clamped.length}개를 저장했습니다.`, version: now.toISOString() };
 }

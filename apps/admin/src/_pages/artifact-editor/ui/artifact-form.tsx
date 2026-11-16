@@ -15,6 +15,7 @@ import { Textarea } from "@rizer/ui/components/textarea";
 import { FormErrorAlert } from "@/shared/ui/form-error-alert";
 import { fieldA11y } from "@/shared/lib/field-a11y";
 import { usePageForm } from "@/shared/lib/use-page-form";
+import { useUnsavedChangesWarning } from "@/shared/lib/use-unsaved-changes";
 
 import { saveArtifactAction } from "../api/actions";
 
@@ -40,8 +41,9 @@ function toDefaults(artifact?: Editable): Record<string, string> {
  * 오류 문구·설명은 칸에 잇고(fieldA11y), 실패하면 첫 오류 칸으로 초점을 옮긴다(KWCAG 7.3.1).
  * 폼 전체 안내는 다시 마운트되는 폼 바깥의 알림 영역 하나로 알린다(칸마다 알리지 않는다).
  */
-export function ArtifactForm({ artifact, readOnly }: { artifact?: Editable; readOnly: boolean }) {
+export function ArtifactForm({ artifact, version, readOnly }: { artifact?: Editable; version?: string; readOnly: boolean }) {
   const form = usePageForm(saveArtifactAction, toDefaults(artifact));
+  useUnsavedChangesWarning(form.dirty && !readOnly);
   const id = (name: string) => `artifact-${name}`;
   // 저장하는 동안에는 고칠 수 없게 한다. 저장이 실패하면 보낸 값으로 폼을 다시 그리므로, 그사이 고친 내용이 사라진다.
   const locked = readOnly || form.pending;
@@ -103,7 +105,8 @@ export function ArtifactForm({ artifact, readOnly }: { artifact?: Editable; read
     return (
       <Field data-invalid={form.invalid(name)}>
         <FieldLabel htmlFor={id(name)}>{label}</FieldLabel>
-        <Select name={name} items={items} defaultValue={form.text(name)} readOnly={locked}>
+        {/* Base UI Select는 값을 바꿔도 폼에 change 이벤트를 내보내지 않으므로, 고쳤다는 기록을 직접 남긴다. */}
+        <Select name={name} items={items} defaultValue={form.text(name)} readOnly={locked} onValueChange={form.onChange}>
           <SelectTrigger id={id(name)} className="w-full" {...control}>
             <SelectValue />
           </SelectTrigger>
@@ -125,8 +128,18 @@ export function ArtifactForm({ artifact, readOnly }: { artifact?: Editable; read
   return (
     <div className="flex flex-col gap-6">
       <FormErrorAlert message={summary} />
-      <form ref={formRef} key={form.formKey} action={form.formAction} onSubmit={form.onSubmit} noValidate className="flex flex-col gap-6">
+      <form
+        ref={formRef}
+        key={form.formKey}
+        action={form.formAction}
+        onSubmit={form.onSubmit}
+        onChange={form.onChange}
+        noValidate
+        className="flex flex-col gap-6"
+      >
         {artifact && <input type="hidden" name="id" value={artifact.id} />}
+        {/* 낙관적 잠금: 이 화면이 읽은 수정 시각. 저장·공개 전환·이미지 업로드 뒤 화면을 다시 읽으면 함께 바뀐다. */}
+        {version && <input type="hidden" name="expectedUpdatedAt" value={version} />}
 
         <Card>
           <CardHeader>

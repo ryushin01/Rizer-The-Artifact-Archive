@@ -95,6 +95,24 @@ describe("artifact repository", () => {
     expect((await repo.get(target.id))?.annotationCount).toBe(2);
   });
 
+  it("낙관적 잠금: 화면이 읽은 뒤 다른 곳이 먼저 저장했으면 유물·주석을 덮어쓰지 않는다", async () => {
+    const repo = createArtifactRepository(await createTestDb());
+    const row = (await repo.getBySlug("gram"))!;
+    const { id, slug, createdAt: _c, updatedAt: read, image: _i, annotationCount: _n, source, ...rest } = row;
+    const input = { ...rest, slug };
+    // 다른 탭이 먼저 저장한다.
+    const first = new Date(read.getTime() + 60_000);
+    expect(await repo.update(id, { ...input, title: "먼저 저장" }, source, first, read)).toEqual({ slug: "gram" });
+    // 처음 읽은 시각으로 저장하면 덮어쓰지 않는다.
+    expect(await repo.update(id, { ...input, title: "늦은 저장" }, source, new Date(first.getTime() + 1000), read)).toBeNull();
+    expect((await repo.get(id))?.title).toBe("먼저 저장");
+    expect(await repo.replaceAnnotations(id, [], new Date(first.getTime() + 2000), read)).toBe(false);
+    expect((await repo.listAnnotations(id)).length).toBeGreaterThan(0);
+    // 새로 읽은 시각이면 저장한다.
+    expect(await repo.replaceAnnotations(id, [], new Date(first.getTime() + 3000), first)).toBe(true);
+    expect(await repo.listAnnotations(id)).toEqual([]);
+  });
+
   it("같은 전시실의 다른 공개 유물을 고른다", async () => {
     const repo = createArtifactRepository(await createTestDb());
     const excalibur = (await repo.getBySlug("excalibur"))!;

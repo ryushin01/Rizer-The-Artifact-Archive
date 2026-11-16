@@ -5,7 +5,9 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./seed": "./src/seed/index.ts"
+    "./seed": "./src/seed/index.ts",
+    "./preview": "./src/preview.ts",
+    "./rate-limit": "./src/rate-limit.ts"
   },
   "scripts": {
     "typecheck": "tsc7 --noEmit",

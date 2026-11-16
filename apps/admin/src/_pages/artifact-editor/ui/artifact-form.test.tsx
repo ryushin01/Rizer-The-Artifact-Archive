@@ -58,6 +58,43 @@ describe("ArtifactForm", () => {
     expect(screen.getByLabelText("이름")).toHaveValue("시험의 검");
   });
 
+  it("셀렉트·체크박스만 바꿔도 저장하지 않은 변경으로 보고, 다른 화면 링크로 떠나기 전에 묻는다", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+    const { unmount } = render(
+      <>
+        {/* jsdom은 실제로 화면을 옮기지 못하므로, 묻지 않고 지나간 클릭도 여기서 멈춘다. */}
+        <a href="/artifacts" onClick={(event) => event.preventDefault()}>
+          유물 목록
+        </a>
+        <ArtifactForm readOnly={false} />
+      </>,
+    );
+    const leave = () => userEvent.click(screen.getByRole("link", { name: "유물 목록" }));
+    await leave();
+    expect(confirm).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole("combobox", { name: "전시실" }));
+    await userEvent.click(await screen.findByRole("option", { name: "북유럽·게르만 신화" }));
+    await leave();
+    expect(confirm).toHaveBeenCalledTimes(1);
+    unmount();
+
+    // 체크박스는 숨은 input의 change 이벤트가 폼까지 올라온다.
+    confirm.mockClear();
+    render(
+      <>
+        <a href="/artifacts" onClick={(event) => event.preventDefault()}>
+          유물 목록
+        </a>
+        <ArtifactForm readOnly={false} />
+      </>,
+    );
+    await userEvent.click(screen.getByRole("checkbox"));
+    await leave();
+    expect(confirm).toHaveBeenCalledTimes(1);
+    confirm.mockRestore();
+  });
+
   it("칸마다 레이블이 있고 필드 오류를 그 칸 아래에 보여 준다", async () => {
     saveArtifactAction.mockResolvedValue({
       status: "error",

@@ -2,6 +2,7 @@
 
 import { galleryName, galleryOf, kindName, storyParagraphs, type Annotation, type Artifact, type ArtifactSummary } from "@rizer/domain";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 
@@ -18,10 +19,13 @@ export function ArtifactDossier({
   artifact,
   annotations,
   related,
+  banner,
 }: {
   artifact: Artifact;
   annotations: Annotation[];
   related: ArtifactSummary[];
+  /** 맨 위에 둘 안내(초안 미리보기) */
+  banner?: ReactNode;
 }) {
   const dispatch = useDispatch();
   const { activeId } = useSelector(selectTour);
@@ -36,6 +40,7 @@ export function ArtifactDossier({
 
   return (
     <Wrap>
+      {banner}
       <Back href={path("/artifacts")}>
         <IconArrowLeft width={16} />
         {t.back}

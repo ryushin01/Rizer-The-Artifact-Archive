@@ -83,11 +83,15 @@ export async function listPublished(query: ArtifactQuery): Promise<ArtifactListR
   return { items: await withMatchedNotes(r, items, rest.q, "en"), total };
 }
 
-/** 공개 API: 공개 유물 상세 */
-export async function getPublished(slug: string, locale?: Locale): Promise<ArtifactDetailResponse | null> {
+/** 공개 API: 공개 유물 상세. includeDrafts면 비공개 유물도 돌려준다(공개 사이트의 초안 미리보기). */
+export async function getPublished(
+  slug: string,
+  locale?: Locale,
+  { includeDrafts = false }: { includeDrafts?: boolean } = {},
+): Promise<ArtifactDetailResponse | null> {
   const r = await repo();
   const row = await r.getBySlug(slug);
-  if (!row || row.status !== "published") return null;
+  if (!row || (row.status !== "published" && !includeDrafts)) return null;
   const storage = getStorage();
   const [annotations, related] = await Promise.all([r.listAnnotations(row.id), r.related(row.gallery, row.id)]);
   const body = {

@@ -87,6 +87,19 @@ async function EditContent({ params, searchParams }: PageProps<"/artifacts/[id]"
                 <span className="sr-only">(새 창)</span>
               </a>
             )}
+            {artifact.status !== "published" && (
+              // 비공개 유물을 공개 화면 모양으로 본다. 누를 때마다 서명한 링크를 만들어 공개 사이트로 보낸다.
+              <a
+                href={`/api/artifacts/${artifact.id}/preview`}
+                target="_blank"
+                rel="noreferrer"
+                className={buttonVariants({ variant: "ghost" })}
+              >
+                공개 사이트에서 미리 보기
+                <ExternalLink aria-hidden />
+                <span className="sr-only">(새 창)</span>
+              </a>
+            )}
             {editable && <PublishToggle id={artifact.id} status={artifact.status} />}
             {editable && <DeleteArtifactButton id={artifact.id} title={artifact.title} />}
           </>
@@ -99,7 +112,7 @@ async function EditContent({ params, searchParams }: PageProps<"/artifacts/[id]"
         </Alert>
       )}
       <ImageCard artifact={artifact} readOnly={!editable} />
-      <ArtifactForm artifact={artifact} readOnly={!editable} />
+      <ArtifactForm artifact={artifact} version={artifact.updatedAt} readOnly={!editable} />
     </>
   );
 }

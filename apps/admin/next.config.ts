@@ -23,6 +23,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactCompiler: true,
   cacheComponents: true,
+  // 지금처럼 링크가 캐시된 화면 전체를 미리 받는다(공개 사이트와 같은 선택, Next 17에서 기본값이 되면 함께 옮긴다).
+  partialPrefetching: false,
   // PGlite는 자기 WASM·데이터 파일을, sharp는 네이티브 모듈을 패키지 폴더에서 읽으므로 번들하지 않는다.
   serverExternalPackages: ["@electric-sql/pglite", "sharp"],
   experimental: {

@@ -15,8 +15,8 @@ describe("ArtifactPagination", () => {
   it("검색 조건을 유지한 쪽 링크를 만들고 지금 쪽을 알린다", () => {
     render(<ArtifactPagination page={2} pageCount={4} params={{ q: "검", gallery: "norse", status: undefined }} />);
     expect(screen.getByRole("navigation", { name: "유물 목록 쪽" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "2쪽" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("link", { name: "1쪽" })).toHaveAttribute("href", "/artifacts?q=%EA%B2%80&gallery=norse");
+    expect(screen.getByRole("link", { name: "2 쪽" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "1 쪽" })).toHaveAttribute("href", "/artifacts?q=%EA%B2%80&gallery=norse");
     expect(screen.getByRole("link", { name: "다음 페이지" })).toHaveAttribute(
       "href",
       "/artifacts?q=%EA%B2%80&gallery=norse&page=3",

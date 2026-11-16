@@ -2,8 +2,8 @@ import { readFile } from "node:fs/promises";
 
 import { expect, test } from "@playwright/test";
 
-import { ADMIN_URL } from "./env";
-import { expectNoA11yViolations, expectNotFound, loginAsCurator, skipGate } from "./helpers";
+import { ADMIN_URL, CURATOR } from "./env";
+import { createArtifact, expectNoA11yViolations, expectNotFound, loginAsCurator, skipGate } from "./helpers";
 
 /** 1×1 PNG. 업로드·타일링 흐름만 확인한다. */
 const PNG = Buffer.from(
@@ -22,11 +22,11 @@ test.describe("어드민: 게스트", () => {
     await expect(page.getByText("게스트로 둘러보는 중입니다")).toBeVisible();
     // 목록은 30점씩 쪽을 나눈다.
     const pages = page.getByRole("navigation", { name: "유물 목록 쪽" });
-    await expect(pages.getByRole("link", { name: "1쪽" })).toHaveAttribute("aria-current", "page");
-    await pages.getByRole("link", { name: "2쪽" }).click();
+    await expect(pages.getByRole("link", { name: "1 쪽" })).toHaveAttribute("aria-current", "page");
+    await pages.getByRole("link", { name: "2 쪽" }).click();
     await expect(page).toHaveURL(/page=2/);
-    await expect(pages.getByRole("link", { name: "2쪽" })).toHaveAttribute("aria-current", "page");
-    await pages.getByRole("link", { name: "1쪽" }).click();
+    await expect(pages.getByRole("link", { name: "2 쪽" })).toHaveAttribute("aria-current", "page");
+    await pages.getByRole("link", { name: "1 쪽" }).click();
     await page.getByRole("link", { name: "엑스칼리버" }).click();
     await page.getByRole("button", { name: "저장" }).click();
     const toast = page.locator("[data-sonner-toast]").filter({ hasText: /게스트 계정은 둘러보기만/ });
@@ -42,25 +42,7 @@ test.describe("어드민: 큐레이터", () => {
   test("유물을 만들고 이미지를 올려 공개하면 공개 사이트에 보이고, 지우면 사라진다", async ({ page }) => {
     const slug = `e2e-relic-${Date.now()}`;
     await loginAsCurator(page);
-    await page.getByRole("link", { name: "새 유물" }).click();
-
-    const fill = (label: string | RegExp, value: string) => page.getByLabel(label, { exact: typeof label === "string" }).fill(value);
-    await fill("이름", "시험의 검");
-    await fill("원어 이름", "Sword of Trial");
-    await fill("주소", slug);
-    await fill("첫 기록 연도", "1200");
-    await fill("첫 기록 문헌", "E2E 문헌");
-    await fill("권능", "테스트를 통과시킨다.");
-    await fill("요약", "E2E에서 만든 유물입니다.");
-    await fill("본문", "첫 문단.\n\n둘째 문단.");
-    await fill("이미지 설명(대체 텍스트)", "검은 점 하나");
-    await fill("소장품 번호", "0");
-    await fill("사진 속 소장품 이름", "Test object");
-    await fill("소장품 페이지", "https://example.com/object");
-    await fill("원본 이미지 주소", "https://example.com/object.jpg");
-    await page.getByRole("button", { name: "만들기" }).click();
-
-    await expect(page.getByText("유물을 만들었습니다")).toBeVisible();
+    await createArtifact(page, { slug, title: "시험의 검" });
     await page.locator('input[type="file"]').setInputFiles({ name: "relic.png", mimeType: "image/png", buffer: PNG });
     await expect(page.getByText(/타일 \d+개를 만들었습니다/)).toBeVisible({ timeout: 30_000 });
 
@@ -175,5 +157,117 @@ test.describe("어드민: 접근성", () => {
     // Next.js의 경로 알림(route announcer)도 role="alert"라 문구로 고른다.
     await expect(page.getByRole("alert").filter({ hasText: /입력값 \d+곳을 확인해 주세요/ })).toBeVisible();
     await expectNoA11yViolations(page);
+  });
+});
+
+test.describe("어드민: 편집 충돌·실행 취소·미리 보기", () => {
+  test("두 곳에서 같은 유물을 고치면 늦게 저장한 쪽은 덮어쓰지 않고 안내한다(낙관적 잠금)", async ({ page, context }) => {
+    await loginAsCurator(page);
+    const other = await context.newPage();
+    for (const p of [page, other]) await p.goto(`${ADMIN_URL}/artifacts/art_ame_no_nuboko`);
+    await page.getByLabel("권능", { exact: true }).fill(`먼저 고친 권능 ${Date.now()}`);
+    await page.getByRole("button", { name: "저장", exact: true }).click();
+    await expect(page.getByText(/저장했습니다/)).toBeVisible();
+
+    const late = `늦게 고친 권능 ${Date.now()}`;
+    await other.getByLabel("권능", { exact: true }).fill(late);
+    await other.getByRole("button", { name: "저장", exact: true }).click();
+    await expect(other.getByRole("alert").filter({ hasText: /다른 곳에서 먼저 저장했습니다/ })).toBeVisible();
+    // 늦게 고친 내용은 지우지 않아 옮겨 적을 수 있다.
+    await expect(other.getByLabel("권능", { exact: true })).toHaveValue(late);
+    // 새로 고치면 먼저 저장한 내용이 보인다.
+    await other.reload();
+    await expect(other.getByLabel("권능", { exact: true })).toHaveValue(/먼저 고친 권능/);
+  });
+
+  test("주석 편집기는 실행 취소·다시 실행하고, 저장하지 않고 떠나려 하면 묻는다", async ({ page }) => {
+    await loginAsCurator(page);
+    await page.goto(`${ADMIN_URL}/artifacts/art_mjolnir/annotations`);
+    await expect(page.locator(".openseadragon-canvas")).toBeVisible();
+    const undo = page.getByRole("button", { name: "실행 취소" });
+    await expect(undo).toBeDisabled();
+    await page.getByRole("button", { name: /^1\.\s*망치 머리/ }).click();
+    const title = page.getByRole("textbox", { name: "제목" });
+    await title.fill("고친 제목");
+    await expect(page.getByRole("button", { name: "저장", exact: true })).toBeEnabled();
+
+    // 사이드바로 떠나려 하면 확인 창이 뜬다. 취소하면 머문다.
+    page.once("dialog", (dialog) => void dialog.dismiss());
+    await page.getByRole("link", { name: "대시보드" }).click();
+    await expect(page).toHaveURL(/\/annotations$/);
+
+    // 실행 취소로 처음 내용으로 돌아오면 저장할 것이 없다. 단축키로 다시 실행하고 다시 취소한다.
+    await undo.click();
+    await expect(title).toHaveValue("망치 머리");
+    await expect(page.getByRole("button", { name: "저장됨" })).toBeDisabled();
+    await page.keyboard.press("ControlOrMeta+Shift+z");
+    await expect(title).toHaveValue("고친 제목");
+    await page.getByRole("button", { name: "다시 실행" }).focus();
+    await page.keyboard.press("ControlOrMeta+z");
+    await expect(title).toHaveValue("망치 머리");
+
+    // 저장할 것이 없으면 묻지 않고 떠난다.
+    await page.getByRole("link", { name: "대시보드" }).click();
+    await expect(page).toHaveURL(`${ADMIN_URL}/`);
+  });
+
+  test("비공개 유물을 공개 사이트에서 미리 보고, 끝내면 방문자 화면으로 돌아간다", async ({ page, context }) => {
+    const slug = `e2e-preview-${Date.now()}`;
+    await loginAsCurator(page);
+    await createArtifact(page, { slug, title: "미리 보는 검" });
+    const [preview] = await Promise.all([
+      context.waitForEvent("page"),
+      page.getByRole("link", { name: /공개 사이트에서 미리 보기/ }).click(),
+    ]);
+    await expect(preview.getByRole("heading", { level: 1, name: "미리 보는 검" })).toBeVisible();
+    await expect(preview.getByText(/관리 화면에서 연 미리 보기입니다/)).toBeVisible();
+    // 초안 모드 화면은 요청 때 그리므로 메타데이터가 스트리밍되어 <body> 끝에 붙는다(Next 문서의 Streaming metadata).
+    await expect(preview.locator('meta[name="robots"]').first()).toHaveAttribute("content", /noindex/);
+
+    await preview.getByRole("button", { name: "미리 보기 끝내기" }).click();
+    await expect(preview).toHaveURL(/\/artifacts$/);
+    // 미리 보기를 끝내면 비공개 유물은 보이지 않는다.
+    await preview.goto(`/artifacts/${slug}`);
+    await expectNotFound(preview);
+    // 서명이 틀리거나 만료된 링크는 받지 않는다.
+    expect((await preview.request.get(`/api/preview?slug=${slug}&exp=${Date.now() + 60_000}&sig=bad`)).status()).toBe(401);
+    // 끝낸 뒤 갈 주소는 같은 사이트 안만 받는다. "/\evil.example"은 URL 해석에서 "//evil.example"(다른 사이트)이 된다.
+    const exit = await preview.request.post("/api/preview/exit", { form: { next: "/\\evil.example" }, maxRedirects: 0 });
+    expect(exit.status()).toBe(303);
+    const location = new URL(exit.headers()["location"] ?? "", preview.url());
+    expect([location.origin, location.pathname]).toEqual([new URL(preview.url()).origin, "/"]);
+  });
+
+  test("로그인 뒤 돌아갈 주소는 같은 사이트 안만 받는다", async ({ page }) => {
+    await page.goto(`${ADMIN_URL}/login?callbackUrl=${encodeURIComponent("/\\evil.example")}`);
+    await page.getByLabel("이메일").fill(CURATOR.email);
+    await page.getByLabel("비밀번호").fill(CURATOR.password);
+    await page.getByRole("button", { name: "로그인" }).click();
+    await expect(page.getByRole("heading", { name: /반갑습니다/ })).toBeVisible();
+    await expect(page).toHaveURL(`${ADMIN_URL}/`);
+  });
+});
+
+test.describe("공개 API 요청 제한", () => {
+  // IP마다 따로 센다. 로컬 next start는 받은 x-forwarded-for를 그대로 쓰므로 테스트마다 다른 IP로 보내,
+  // 다른 테스트의 검색이 막히지 않게 한다(Vercel은 방문자가 보낸 값을 덮어쓴다).
+  const as = (ip: string) => ({ headers: { "x-forwarded-for": ip } });
+
+  test("관리 화면의 공개 API와 공개 사이트의 검색 API 모두 IP마다 분당 120번까지 받는다", async ({ request }) => {
+    const exhaust = async (url: string, ip: string) => {
+      let status = 0;
+      for (let i = 0; i < 125 && status !== 429; i++) status = (await request.get(url, as(ip))).status();
+      return status;
+    };
+    const api = `${ADMIN_URL}/api/public/artifacts?limit=1`;
+    expect(await exhaust(api, "203.0.113.10")).toBe(429);
+    expect(Number((await request.get(api, as("203.0.113.10"))).headers()["retry-after"])).toBeGreaterThan(0);
+    expect((await request.get(api, as("203.0.113.11"))).status()).toBe(200);
+
+    // 관리 화면은 공개 사이트 서버의 요청(비밀값)을 세지 않으므로, 검색어를 바꿔 캐시를 비켜 가는 요청은 공개 사이트가 센다.
+    const search = "/api/search?q=%EA%B2%80&limit=1";
+    expect(await exhaust(search, "203.0.113.12")).toBe(429);
+    expect(Number((await request.get(search, as("203.0.113.12"))).headers()["retry-after"])).toBeGreaterThan(0);
+    expect((await request.get(search, as("203.0.113.13"))).status()).toBe(200);
   });
 });

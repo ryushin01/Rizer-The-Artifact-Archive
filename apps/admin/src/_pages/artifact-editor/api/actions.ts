@@ -11,9 +11,19 @@ import { createArtifactRepository } from "@/server/artifacts/repository";
 import { getEditor } from "@/server/auth/guard";
 import { notifyWeb } from "@/server/revalidate";
 import { getStorage } from "@/server/storage";
-import { type ActionResult, formDataToObject, formError, type FormState } from "@/shared/lib/form";
+import {
+  type ActionResult,
+  CONFLICT_MESSAGE,
+  expectedVersion,
+  formDataToObject,
+  formError,
+  type FormState,
+} from "@/shared/lib/form";
 
-/** 유물 저장. id가 있으면 고치고, 없으면 새로 만든 뒤 편집 화면으로 옮긴다. */
+/**
+ * 유물 저장. id가 있으면 고치고, 없으면 새로 만든 뒤 편집 화면으로 옮긴다.
+ * 고칠 때는 폼이 읽은 수정 시각(expectedUpdatedAt)과 같을 때만 쓴다(낙관적 잠금). 다르면 덮어쓰지 않고 안내한다.
+ */
 export async function saveArtifactAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const values = formDataToObject(formData);
   if (!(await getEditor())) return formError(values, READ_ONLY_MESSAGE);
@@ -32,7 +42,8 @@ export async function saveArtifactAction(_prev: FormState, formData: FormData): 
     const before = await repo.get(id);
     if (!before) return formError(values, "유물을 찾을 수 없습니다. 이미 삭제됐을 수 있습니다.");
     // 합성 이미지의 구성 소장품(parts)은 폼에 없으므로 기존 값을 유지한다.
-    await repo.update(id, input, { ...source, parts: before.source.parts ?? [] });
+    const saved = await repo.update(id, input, { ...source, parts: before.source.parts ?? [] }, new Date(), expectedVersion(values.expectedUpdatedAt));
+    if (!saved) return formError(values, CONFLICT_MESSAGE);
     await notifyWeb([...new Set([before.slug, input.slug])]);
     revalidatePath("/artifacts");
     return { status: "success", message: `「${input.title}」을(를) 저장했습니다.` };

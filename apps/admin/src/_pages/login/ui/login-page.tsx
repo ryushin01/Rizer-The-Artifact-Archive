@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Suspense } from "react";
 
+import { safeLocalPath } from "@rizer/domain";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rizer/ui/components/card";
 
 import { GUEST_PASSWORD, SEED_USERS } from "@/db/seed";
@@ -14,17 +15,13 @@ const ERRORS: Record<string, string> = {
   locked: "로그인을 5번 잘못해 15분 동안 잠겼습니다. 잠시 후 다시 시도해 주세요.",
 };
 
-/** 다른 사이트로 보내지 않도록 같은 사이트 안의 경로만 받는다. */
-function safeCallback(value: unknown) {
-  return typeof value === "string" && value.startsWith("/") && !value.startsWith("//") ? value : "/";
-}
-
 async function Form({ searchParams }: { searchParams: PageProps<"/login">["searchParams"] }) {
   const params = await searchParams;
   const error = typeof params.error === "string" ? (ERRORS[params.error] ?? "로그인하지 못했습니다.") : undefined;
   return (
     <LoginForm
-      callbackUrl={safeCallback(params.callbackUrl)}
+      // 로그인 뒤 다른 사이트로 보내지 않게 같은 사이트 안의 경로만 받는다("/\evil.com" 같은 값 포함).
+      callbackUrl={safeLocalPath(params.callbackUrl)}
       initialError={error}
       guest={{ email: SEED_USERS.guest.email, password: GUEST_PASSWORD }}
     />

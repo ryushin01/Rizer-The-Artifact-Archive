@@ -35,7 +35,8 @@ export function ImageCard({ artifact, readOnly }: { artifact: Artifact; readOnly
               style={{ backgroundImage: `url(${image.lqip})`, backgroundSize: "cover" }}
             />
           ) : (
-            <span className="text-sm text-muted-foreground">이미지 없음</span>
+            // 회색 바탕(muted) 위라 muted-foreground로는 대비가 4.34:1이라 더 진하게 쓴다(KWCAG 5.4.3, 4.5:1 이상).
+            <span className="text-sm text-foreground/70">이미지 없음</span>
           )}
         </div>
         <div className="flex flex-col gap-4">

@@ -15,11 +15,11 @@ const meta = {
   parameters: {
     store: { archive: { query: { sort: "featured" }, items: first, total: 6, status: "idle", error: null, more: "idle" } },
   },
-  // "더 보기"가 부르는 공개 API를 흉내 낸다. 다음 묶음(2점)을 돌려준다.
+  // "더 보기"가 부르는 공개 사이트의 검색 API를 흉내 낸다. 다음 묶음(2점)을 돌려준다.
   beforeEach: () => {
     const original = window.fetch;
     window.fetch = async (input, init) => {
-      if (String(input).includes("/api/public/artifacts")) {
+      if (String(input).includes("/api/search")) {
         const body: ArtifactListResponse = { items: rest, total: 6 };
         return new Response(JSON.stringify(body), { headers: { "content-type": "application/json" } });
       }

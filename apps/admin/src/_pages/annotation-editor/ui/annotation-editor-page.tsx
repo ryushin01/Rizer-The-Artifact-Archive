@@ -41,6 +41,7 @@ async function Content({ params }: PageProps<"/artifacts/[id]/annotations">) {
           image={artifact.image}
           imageAlt={artifact.imageAlt}
           initial={annotations}
+          version={artifact.updatedAt}
           readOnly={!canEdit(user)}
         />
       ) : (
