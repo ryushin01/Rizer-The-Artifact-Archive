@@ -83,6 +83,7 @@ vercel api "/v10/projects/<프로젝트>/env?upsert=true" -X POST --input -   # 
 - `/storybook`은 정적 파일 폴더라 `/storybook/index.html`로 보냅니다(`next.config.ts`의 `redirects`).
 - `/storybook/` 아래만 미리보기 iframe을 위해 `X-Frame-Options: SAMEORIGIN`, `frame-ancestors 'self'`를 쓰고, Storybook에서 `next/font/google`이 받는 Google 글꼴 서버를 허용합니다. 사이트의 나머지 헤더는 그대로입니다.
 - `pnpm build-storybook`(앱 빌드가 먼저 부르는 스크립트)으로 빌드할 때는 `public`(딥줌 타일 약 95MB)을 복사하지 않습니다. 같은 주소에서 열리므로 타일은 사이트의 것을 씁니다.
+- Paseo처럼 프로젝트 아이콘을 자동으로 찾는 도구는 `src/`를 보지 않고 각 앱의 `public/`을 하위 폴더까지 뒤지므로, `apps/web/public/` 바로 아래에 아이콘이 없으면 `apps/web/public/storybook/favicon.svg`(Storybook 로고)를 고를 수 있습니다(이름순으로 앞선 두 앱의 `brand/logo.png` 덕분에 피해 왔지만, 이 파일 이름이나 형식이 바뀌면 바로 드러남). 그래서 `apps/web/public/` 바로 아래에 사이트 아이콘(`apps/web/src/app/icon.png`)과 같은 `favicon.png`를 둡니다(사이트는 쓰지 않음). 아이콘을 바꾸면 함께 복사하고, `apps/web/src/app/public-favicon.test.ts`가 두 파일이 같은지 확인합니다.
 
 ## PR 미리보기 배포
 
