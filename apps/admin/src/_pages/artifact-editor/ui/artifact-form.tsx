@@ -45,10 +45,11 @@ export function ArtifactForm({ artifact, version, readOnly }: { artifact?: Edita
   const form = usePageForm(saveArtifactAction, toDefaults(artifact));
   useUnsavedChangesWarning(form.dirty && !readOnly);
   // 낙관적 잠금 기준: 폼이 그린 내용의 버전. 고친 것이 없으면 화면을 다시 읽을 때(공개 전환·이미지 교체 뒤) 새 버전을 따르고
-  // 폼도 새 내용으로 다시 그린다. 고치기 시작하면 붙잡아 둔다. 고친 내용은 그 버전을 바탕으로 한 것이라,
-  // 그사이 다른 곳이 저장했으면 저장이 충돌로 막혀야 한다(새 버전을 보내면 남이 저장한 칸을 말없이 덮어쓴다).
+  // 폼도 새 내용으로 다시 그린다. 고치기 시작했거나 저장에 실패해 보낸 값을 다시 그리고 있으면 붙잡아 둔다.
+  // 그 값은 그 버전을 바탕으로 한 것이라, 그사이 다른 곳이 저장했으면 저장이 충돌로 막혀야 한다
+  // (새 버전을 보내면 남이 저장한 칸을 말없이 덮어쓴다).
   const [base, setBase] = useState(version);
-  if (!form.dirty && version !== base) setBase(version);
+  if (!form.dirty && !form.failed && version !== base) setBase(version);
   const id = (name: string) => `artifact-${name}`;
   // 저장하는 동안에는 고칠 수 없게 한다. 저장이 실패하면 보낸 값으로 폼을 다시 그리므로, 그사이 고친 내용이 사라진다.
   const locked = readOnly || form.pending;

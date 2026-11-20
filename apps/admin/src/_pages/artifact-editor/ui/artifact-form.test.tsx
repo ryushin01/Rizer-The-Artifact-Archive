@@ -118,6 +118,19 @@ describe("ArtifactForm", () => {
     expect((saveArtifactAction.mock.calls[0]![1] as FormData).get("expectedVersion")).toBe("2");
   });
 
+  it("고치지 않고 저장했다가 충돌로 실패하면, 화면을 다시 읽어도 보낸 값의 버전을 그대로 둔다", async () => {
+    const artifact = makeArtifactFixture(0);
+    const sent = () => document.querySelector<HTMLInputElement>('input[name="expectedVersion"]')?.value;
+    saveArtifactAction.mockResolvedValue({ status: "error", formError: "먼저 저장했습니다.", fieldErrors: {}, values: { title: artifact.title, expectedVersion: "1" } });
+    const { rerender } = render(<ArtifactForm artifact={artifact} version={1} readOnly={false} />);
+    await userEvent.click(screen.getByRole("button", { name: "저장" }));
+    await vi.waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("먼저 저장했습니다."), WAIT);
+    // 공개 전환 등으로 화면을 다시 읽어 새 버전이 와도, 폼은 아직 예전 화면의 값을 그리고 있다.
+    rerender(<ArtifactForm artifact={{ ...artifact, title: "다른 곳의 이름" }} version={2} readOnly={false} />);
+    expect(sent()).toBe("1");
+    expect(screen.getByLabelText("이름")).toHaveValue(artifact.title);
+  });
+
   it("칸마다 레이블이 있고 필드 오류를 그 칸 아래에 보여 준다", async () => {
     saveArtifactAction.mockResolvedValue({
       status: "error",

@@ -62,6 +62,8 @@ export function usePageForm(
     /** form의 onChange. 고쳤다고 기록한다(저장하지 않고 떠날 때 묻는 데 쓴다). */
     onChange: () => setTouchedAt(state.attempt),
     dirty,
+    /** 저장에 실패해 보낸 값을 다시 그리고 있다(고친 것이 없어도 그 값은 보낼 때의 화면 내용이다). */
+    failed: state.status === "error",
     pending,
     formKey: state.attempt,
     formError: state.status === "error" ? state.formError : undefined,
