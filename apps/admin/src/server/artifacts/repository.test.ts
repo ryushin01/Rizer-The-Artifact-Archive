@@ -98,19 +98,33 @@ describe("artifact repository", () => {
   it("낙관적 잠금: 화면이 읽은 뒤 다른 곳이 먼저 저장했으면 유물·주석을 덮어쓰지 않는다", async () => {
     const repo = createArtifactRepository(await createTestDb());
     const row = (await repo.getBySlug("gram"))!;
-    const { id, slug, createdAt: _c, updatedAt: read, image: _i, annotationCount: _n, source, ...rest } = row;
+    const { id, slug, createdAt: _c, updatedAt: _u, image: _i, annotationCount: _n, source, contentVersion: read, annotationsVersion: readNotes, ...rest } = row;
     const input = { ...rest, slug };
+    // 같은 밀리초 안의 저장도 버전으로 가른다(수정 시각으로 비교하면 같은 시각의 두 저장을 구분하지 못한다).
+    const at = new Date();
     // 다른 탭이 먼저 저장한다.
-    const first = new Date(read.getTime() + 60_000);
-    expect(await repo.update(id, { ...input, title: "먼저 저장" }, source, first, read)).toEqual({ slug: "gram" });
-    // 처음 읽은 시각으로 저장하면 덮어쓰지 않는다.
-    expect(await repo.update(id, { ...input, title: "늦은 저장" }, source, new Date(first.getTime() + 1000), read)).toBeNull();
+    expect(await repo.update(id, { ...input, title: "먼저 저장" }, source, at, read)).toEqual({ slug: "gram", version: read + 1 });
+    // 처음 읽은 버전으로 저장하면 덮어쓰지 않는다.
+    expect(await repo.update(id, { ...input, title: "늦은 저장" }, source, at, read)).toBeNull();
     expect((await repo.get(id))?.title).toBe("먼저 저장");
-    expect(await repo.replaceAnnotations(id, [], new Date(first.getTime() + 2000), read)).toBe(false);
-    expect((await repo.listAnnotations(id)).length).toBeGreaterThan(0);
-    // 새로 읽은 시각이면 저장한다.
-    expect(await repo.replaceAnnotations(id, [], new Date(first.getTime() + 3000), first)).toBe(true);
+    // 주석 목록은 따로 센다. 폼 저장은 주석 버전을 올리지 않는다.
+    expect(await repo.replaceAnnotations(id, [], at, readNotes)).toBe(readNotes + 1);
     expect(await repo.listAnnotations(id)).toEqual([]);
+    expect(await repo.replaceAnnotations(id, [{ title: "늦은 주석", body: "", region: { x: 1, y: 1, w: 1, h: 1 }, order: 0 }], at, readNotes)).toBeNull();
+    expect(await repo.listAnnotations(id)).toEqual([]);
+  });
+
+  it("공개 전환·이미지 교체는 폼 버전을 올리지 않고, 오래된 폼은 공개 상태를 되돌리지 않는다", async () => {
+    const repo = createArtifactRepository(await createTestDb());
+    const row = (await repo.getBySlug("gram"))!;
+    const { id, slug, createdAt: _c, updatedAt: _u, image, annotationCount: _n, source, contentVersion: read, annotationsVersion: _a, ...rest } = row;
+    expect(rest.status).toBe("published");
+    // 같은 화면에서 이미지를 바꾸고, 다른 사람이 비공개로 돌린다.
+    await repo.setImage(id, image);
+    await repo.setStatus(id, "draft");
+    // 화면을 연 때의 버전으로 폼을 저장해도 충돌이 아니고, 폼에 남아 있던 "published"가 공개 상태를 되돌리지 않는다.
+    expect(await repo.update(id, { ...rest, slug, title: "고친 그람" }, source, new Date(), read)).toEqual({ slug: "gram", version: read + 1 });
+    expect(await repo.get(id)).toMatchObject({ title: "고친 그람", status: "draft", contentVersion: read + 1 });
   });
 
   it("같은 전시실의 다른 공개 유물을 고른다", async () => {

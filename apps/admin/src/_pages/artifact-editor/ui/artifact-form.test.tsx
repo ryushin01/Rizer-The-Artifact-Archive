@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { describe, expect, it, vi } from "vitest";
 
+import { makeArtifactFixture } from "@/entities/artifact";
 import { ACTION_ERROR_MESSAGE } from "@/shared/lib/use-guarded-action";
 
 import { ArtifactForm } from "./artifact-form";
@@ -93,6 +94,28 @@ describe("ArtifactForm", () => {
     await leave();
     expect(confirm).toHaveBeenCalledTimes(1);
     confirm.mockRestore();
+  });
+
+  it("고치기 시작한 뒤 화면을 다시 읽어도(공개 전환 등) 처음 버전을 보내, 그사이 다른 곳의 저장을 덮어쓰지 않는다", async () => {
+    const artifact = makeArtifactFixture(0);
+    const sent = () => document.querySelector<HTMLInputElement>('input[name="expectedVersion"]')?.value;
+    const { rerender } = render(<ArtifactForm artifact={artifact} version={1} readOnly={false} />);
+    expect(sent()).toBe("1");
+    // 고친 것이 없으면 새로 읽은 내용과 버전을 따른다.
+    rerender(<ArtifactForm artifact={{ ...artifact, title: "다른 곳의 이름" }} version={2} readOnly={false} />);
+    expect(sent()).toBe("2");
+    expect(screen.getByLabelText("이름")).toHaveValue("다른 곳의 이름");
+    // 고치기 시작하면 그때의 버전을 붙잡아 둔다. 고친 칸도 그대로 둔다.
+    await userEvent.type(screen.getByLabelText("이름"), " 고침");
+    rerender(<ArtifactForm artifact={{ ...artifact, title: "또 다른 이름" }} version={3} readOnly={false} />);
+    expect(sent()).toBe("2");
+    expect(screen.getByLabelText("이름")).toHaveValue("다른 곳의 이름 고침");
+
+    saveArtifactAction.mockClear();
+    saveArtifactAction.mockResolvedValue({ status: "idle" });
+    await userEvent.click(screen.getByRole("button", { name: "저장" }));
+    await vi.waitFor(() => expect(saveArtifactAction).toHaveBeenCalledTimes(1), WAIT);
+    expect((saveArtifactAction.mock.calls[0]![1] as FormData).get("expectedVersion")).toBe("2");
   });
 
   it("칸마다 레이블이 있고 필드 오류를 그 칸 아래에 보여 준다", async () => {

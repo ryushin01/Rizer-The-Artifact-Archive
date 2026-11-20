@@ -34,12 +34,12 @@ export const ValidationError: StoryObj<typeof meta> = {
   },
 };
 
-/** 기존 유물을 고칠 때는 화면이 읽은 수정 시각을 함께 보내(낙관적 잠금) 그사이 다른 곳의 저장을 덮어쓰지 않는다. */
+/** 기존 유물을 고칠 때는 폼이 그린 내용의 버전을 함께 보내(낙관적 잠금) 그사이 다른 곳의 저장을 덮어쓰지 않는다. */
 export const Edit: StoryObj<typeof meta> = {
-  args: { artifact: makeArtifactFixture(0), version: "2026-11-16T00:00:00.000Z" },
+  args: { artifact: makeArtifactFixture(0), version: 3 },
   play: async ({ canvasElement }) => {
     const form = canvasElement.querySelector("form")!;
-    await expect(form.querySelector('input[name="expectedUpdatedAt"]')).toHaveValue("2026-11-16T00:00:00.000Z");
+    await expect(form.querySelector('input[name="expectedVersion"]')).toHaveValue("3");
     await expect(within(canvasElement).getByLabelText("이름")).toHaveValue("엑스칼리버");
   },
 };

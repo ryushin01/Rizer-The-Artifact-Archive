@@ -2,7 +2,7 @@
 
 import { type Artifact, GALLERIES, KINDS } from "@rizer/domain";
 import { Loader2, Save } from "lucide-react";
-import { type ReactNode, useEffect, useRef } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { Button } from "@rizer/ui/components/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rizer/ui/components/card";
@@ -41,9 +41,14 @@ function toDefaults(artifact?: Editable): Record<string, string> {
  * 오류 문구·설명은 칸에 잇고(fieldA11y), 실패하면 첫 오류 칸으로 초점을 옮긴다(KWCAG 7.3.1).
  * 폼 전체 안내는 다시 마운트되는 폼 바깥의 알림 영역 하나로 알린다(칸마다 알리지 않는다).
  */
-export function ArtifactForm({ artifact, version, readOnly }: { artifact?: Editable; version?: string; readOnly: boolean }) {
+export function ArtifactForm({ artifact, version, readOnly }: { artifact?: Editable; version?: number; readOnly: boolean }) {
   const form = usePageForm(saveArtifactAction, toDefaults(artifact));
   useUnsavedChangesWarning(form.dirty && !readOnly);
+  // 낙관적 잠금 기준: 폼이 그린 내용의 버전. 고친 것이 없으면 화면을 다시 읽을 때(공개 전환·이미지 교체 뒤) 새 버전을 따르고
+  // 폼도 새 내용으로 다시 그린다. 고치기 시작하면 붙잡아 둔다. 고친 내용은 그 버전을 바탕으로 한 것이라,
+  // 그사이 다른 곳이 저장했으면 저장이 충돌로 막혀야 한다(새 버전을 보내면 남이 저장한 칸을 말없이 덮어쓴다).
+  const [base, setBase] = useState(version);
+  if (!form.dirty && version !== base) setBase(version);
   const id = (name: string) => `artifact-${name}`;
   // 저장하는 동안에는 고칠 수 없게 한다. 저장이 실패하면 보낸 값으로 폼을 다시 그리므로, 그사이 고친 내용이 사라진다.
   const locked = readOnly || form.pending;
@@ -130,7 +135,7 @@ export function ArtifactForm({ artifact, version, readOnly }: { artifact?: Edita
       <FormErrorAlert message={summary} />
       <form
         ref={formRef}
-        key={form.formKey}
+        key={`${form.formKey}:${base ?? "new"}`}
         action={form.formAction}
         onSubmit={form.onSubmit}
         onChange={form.onChange}
@@ -138,8 +143,8 @@ export function ArtifactForm({ artifact, version, readOnly }: { artifact?: Edita
         className="flex flex-col gap-6"
       >
         {artifact && <input type="hidden" name="id" value={artifact.id} />}
-        {/* 낙관적 잠금: 이 화면이 읽은 수정 시각. 저장·공개 전환·이미지 업로드 뒤 화면을 다시 읽으면 함께 바뀐다. */}
-        {version && <input type="hidden" name="expectedUpdatedAt" value={version} />}
+        {/* 낙관적 잠금: 이 폼이 그린 내용의 버전(위의 base) */}
+        {base !== undefined && <input type="hidden" name="expectedVersion" value={base} />}
 
         <Card>
           <CardHeader>

@@ -112,7 +112,7 @@ async function EditContent({ params, searchParams }: PageProps<"/artifacts/[id]"
         </Alert>
       )}
       <ImageCard artifact={artifact} readOnly={!editable} />
-      <ArtifactForm artifact={artifact} version={artifact.updatedAt} readOnly={!editable} />
+      <ArtifactForm artifact={artifact} version={found.versions.content} readOnly={!editable} />
     </>
   );
 }

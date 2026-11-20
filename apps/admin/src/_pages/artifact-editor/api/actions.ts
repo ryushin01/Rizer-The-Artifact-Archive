@@ -18,11 +18,13 @@ import {
   formDataToObject,
   formError,
   type FormState,
+  MISSING_VERSION_MESSAGE,
 } from "@/shared/lib/form";
 
 /**
  * 유물 저장. id가 있으면 고치고, 없으면 새로 만든 뒤 편집 화면으로 옮긴다.
- * 고칠 때는 폼이 읽은 수정 시각(expectedUpdatedAt)과 같을 때만 쓴다(낙관적 잠금). 다르면 덮어쓰지 않고 안내한다.
+ * 고칠 때는 폼이 읽은 내용 버전(expectedVersion)과 같을 때만 쓴다(낙관적 잠금). 다르면 덮어쓰지 않고 안내한다.
+ * 버전이 없으면 잠금을 건너뛰지 않도록 저장하지 않는다(화면은 늘 보낸다).
  */
 export async function saveArtifactAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const values = formDataToObject(formData);
@@ -39,10 +41,12 @@ export async function saveArtifactAction(_prev: FormState, formData: FormData): 
   }
 
   if (id) {
+    const expected = expectedVersion(values.expectedVersion);
+    if (expected === undefined) return formError(values, MISSING_VERSION_MESSAGE);
     const before = await repo.get(id);
     if (!before) return formError(values, "유물을 찾을 수 없습니다. 이미 삭제됐을 수 있습니다.");
     // 합성 이미지의 구성 소장품(parts)은 폼에 없으므로 기존 값을 유지한다.
-    const saved = await repo.update(id, input, { ...source, parts: before.source.parts ?? [] }, new Date(), expectedVersion(values.expectedUpdatedAt));
+    const saved = await repo.update(id, input, { ...source, parts: before.source.parts ?? [] }, new Date(), expected);
     if (!saved) return formError(values, CONFLICT_MESSAGE);
     await notifyWeb([...new Set([before.slug, input.slug])]);
     revalidatePath("/artifacts");

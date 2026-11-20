@@ -8,21 +8,27 @@ export const PREVIEW_TTL_MS = 10 * 60_000;
 
 const hex = (buffer: ArrayBuffer) => [...new Uint8Array(buffer)].map((b) => b.toString(16).padStart(2, "0")).join("");
 
+const encoder = new TextEncoder();
+
+const previewKey = (secret: string, usage: "sign" | "verify") =>
+  crypto.subtle.importKey("raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, [usage]);
+
+const previewMessage = (slug: string, expiresAt: number) => encoder.encode(`preview:${slug}:${expiresAt}`);
+
 export async function signPreview(secret: string, slug: string, expiresAt: number): Promise<string> {
-  const encoder = new TextEncoder();
-  const key = await crypto.subtle.importKey("raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  return hex(await crypto.subtle.sign("HMAC", key, encoder.encode(`preview:${slug}:${expiresAt}`)));
+  return hex(await crypto.subtle.sign("HMAC", await previewKey(secret, "sign"), previewMessage(slug, expiresAt)));
 }
 
-/** 길이가 같으면 끝까지 비교해, 어디서 달라지는지가 걸린 시간으로 드러나지 않게 한다. */
-function sameText(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
+/** 16진수 서명 → 바이트. SHA-256 길이(64자)의 16진수가 아니면 null이다. */
+function fromHex(value: string): Uint8Array<ArrayBuffer> | null {
+  if (!/^[0-9a-f]{64}$/i.test(value)) return null;
+  return Uint8Array.from(value.match(/../g)!, (pair) => parseInt(pair, 16));
 }
 
-/** 서명이 맞고 만료되지 않았는지. 너무 먼 만료 시각(유효 시간의 두 배 넘게)도 받지 않는다. */
+/**
+ * 서명이 맞고 만료되지 않았는지. 너무 먼 만료 시각(유효 시간의 두 배 넘게)도 받지 않는다.
+ * 서명 비교는 직접 하지 않고 Web Crypto의 HMAC verify에 맡긴다(상수 시간 비교, Node·엣지 공통).
+ */
 export async function verifyPreview(
   secret: string,
   slug: string,
@@ -31,5 +37,7 @@ export async function verifyPreview(
   now = Date.now(),
 ): Promise<boolean> {
   if (!Number.isFinite(expiresAt) || expiresAt < now || expiresAt > now + PREVIEW_TTL_MS * 2) return false;
-  return sameText(await signPreview(secret, slug, expiresAt), signature);
+  const bytes = fromHex(signature);
+  if (!bytes) return false;
+  return crypto.subtle.verify("HMAC", await previewKey(secret, "verify"), bytes, previewMessage(slug, expiresAt));
 }

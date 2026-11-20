@@ -9,7 +9,21 @@ describe("safeLocalPath", () => {
   });
 
   it("다른 사이트로 읽히는 값은 fallback으로 바꾼다", () => {
-    for (const value of ["/\\evil.com", "/\\/evil.com", "//evil.com", "/\t/evil.com", "https://evil.com", "evil.com", "", "javascript:alert(1)"]) {
+    for (const value of [
+      "/\\evil.com",
+      "/\\/evil.com",
+      "//evil.com",
+      "/\t/evil.com",
+      "https://evil.com",
+      "evil.com",
+      "",
+      "javascript:alert(1)",
+      // 해석하면 경로가 "//evil.com"이 된다(다시 해석하면 다른 사이트).
+      "/a/..//evil.com",
+      "/./\\evil.com",
+      "/%2e%2e//evil.com",
+      "/a/../\\evil.com",
+    ]) {
       expect(safeLocalPath(value), value).toBe("/");
     }
     expect(safeLocalPath(undefined, "/artifacts")).toBe("/artifacts");

@@ -30,13 +30,6 @@ export type AdminArtifactQuery = Omit<Partial<ArtifactQuery>, "sort"> & {
 
 const SEED_SLUGS = new Set(SEED_ARTIFACTS.map((a) => a.slug));
 
-/**
- * 낙관적 잠금: 화면이 읽어 간 수정 시각과 지금 수정 시각이 같을 때만 쓴다. 다르면 그사이 다른 곳(다른 탭·다른 큐레이터)이
- * 먼저 저장한 것이다. DB의 timestamptz는 마이크로초까지 두므로 밀리초로 잘라 JS Date와 비교한다.
- */
-const unchangedSince = (expected: Date) =>
-  sql`date_trunc('milliseconds', ${artifacts.updatedAt}) = ${expected.toISOString()}::timestamptz`;
-
 /** LIKE 패턴의 특수 문자를 그대로 찾도록 이스케이프한다. */
 const escapeLike = (s: string) => s.replace(/[\\%_]/g, (c) => `\\${c}`);
 
@@ -151,15 +144,17 @@ export function createArtifactRepository(db: Database) {
     },
 
     /**
-     * 고친다. expected(화면이 읽은 수정 시각)를 주면 그 뒤에 다른 곳이 저장하지 않았을 때만 쓴다(낙관적 잠금).
-     * 쓰지 않았으면 null이다(없는 유물이거나 충돌).
+     * 폼 내용을 고친다. expected(폼이 읽은 contentVersion)를 주면 그 뒤에 다른 곳이 폼을 저장하지 않았을 때만 쓰고
+     * 버전을 1 올린다(낙관적 잠금). 쓰지 않았으면 null이다(없는 유물이거나 충돌).
+     * 공개 상태는 쓰지 않는다. 공개 전환(setStatus)만 바꾸므로, 오래된 폼이 다른 사람의 공개 전환을 되돌리지 않는다.
      */
-    async update(id: string, input: ArtifactInput, source: ArtifactSource, now = new Date(), expected?: Date) {
+    async update(id: string, input: ArtifactInput, source: ArtifactSource, now = new Date(), expected?: number) {
+      const { status: _status, ...fields } = input;
       const rows = await db
         .update(artifacts)
-        .set({ ...input, source, updatedAt: now })
-        .where(expected ? and(eq(artifacts.id, id), unchangedSince(expected)) : eq(artifacts.id, id))
-        .returning({ slug: artifacts.slug });
+        .set({ ...fields, source, updatedAt: now, contentVersion: sql`${artifacts.contentVersion} + 1` })
+        .where(expected === undefined ? eq(artifacts.id, id) : and(eq(artifacts.id, id), eq(artifacts.contentVersion, expected)))
+        .returning({ slug: artifacts.slug, version: artifacts.contentVersion });
       return rows[0] ?? null;
     },
 
@@ -226,24 +221,28 @@ export function createArtifactRepository(db: Database) {
     },
 
     /**
-     * 주석을 통째로 바꾼다(편집기는 전체 목록을 저장한다). 바꿨으면 true, expected(편집기가 읽은 수정 시각) 뒤에
-     * 다른 곳이 먼저 저장했거나 유물이 없으면 아무것도 바꾸지 않고 false다(낙관적 잠금).
-     * 유물 행의 수정 시각을 먼저 바꿔 행을 잠근다. 서버가 켜질 때의 시드 주석 동기화도 같은 행을 잠그고 바꾸므로
+     * 주석을 통째로 바꾼다(편집기는 전체 목록을 저장한다). 바꿨으면 새 annotationsVersion, expected(편집기가 읽은 버전) 뒤에
+     * 다른 곳이 먼저 저장했거나 유물이 없으면 아무것도 바꾸지 않고 null이다(낙관적 잠금).
+     * 유물 행의 버전·수정 시각을 먼저 바꿔 행을 잠근다. 서버가 켜질 때의 시드 주석 동기화도 같은 행을 잠그고 바꾸므로
      * 둘이 엇갈려 주석이 섞이지 않는다(db/seed.ts의 refreshUntouchedSeedArtifacts).
      */
     async replaceAnnotations(
       artifactId: string,
       inputs: (AnnotationInput & { id?: string })[],
       now = new Date(),
-      expected?: Date,
-    ): Promise<boolean> {
+      expected?: number,
+    ): Promise<number | null> {
       return db.transaction(async (tx) => {
         const [locked] = await tx
           .update(artifacts)
-          .set({ updatedAt: now })
-          .where(expected ? and(eq(artifacts.id, artifactId), unchangedSince(expected)) : eq(artifacts.id, artifactId))
-          .returning({ id: artifacts.id });
-        if (!locked) return false;
+          .set({ updatedAt: now, annotationsVersion: sql`${artifacts.annotationsVersion} + 1` })
+          .where(
+            expected === undefined
+              ? eq(artifacts.id, artifactId)
+              : and(eq(artifacts.id, artifactId), eq(artifacts.annotationsVersion, expected)),
+          )
+          .returning({ version: artifacts.annotationsVersion });
+        if (!locked) return null;
         await tx.delete(annotations).where(eq(annotations.artifactId, artifactId));
         if (inputs.length) {
           await tx.insert(annotations).values(
@@ -257,7 +256,7 @@ export function createArtifactRepository(db: Database) {
             })),
           );
         }
-        return true;
+        return locked.version;
       });
     },
 

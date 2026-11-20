@@ -47,14 +47,17 @@ async function photoOf(url: string | undefined): Promise<{ src: string; backgrou
 
 type Params = { params: Promise<{ slug: string }> };
 
-/** 공유 이미지 PNG. 아카이브에 닿지 못해 기본 그림을 그렸으면 몇 초만 보관해 다음 요청에서 다시 그린다. */
+/**
+ * 공유 이미지 PNG. 아카이브에 닿지 못해 기본 그림을 그렸거나, 사진이 있는 유물인데 사진을 받지 못해(저장소 503·시간 초과)
+ * 사진 없이 그렸으면 몇 초만 보관해 다음 요청에서 다시 그린다. 사진이 없는 유물은 그대로 오래 보관한다.
+ */
 async function ogPng(slug: string, locale: Locale): Promise<Uint8Array> {
   "use cache";
   cacheTag(CACHE_TAGS.artifacts, CACHE_TAGS.artifact(slug));
   const detail = await getArtifact(slug, locale);
-  if (detail === "offline") cacheLife("seconds");
+  const { response, photoMissing } = await render(detail, locale);
+  if (detail === "offline" || photoMissing) cacheLife("seconds");
   else cacheLife("days");
-  const response = await render(detail, locale);
   return new Uint8Array(await response.arrayBuffer());
 }
 
@@ -62,10 +65,11 @@ async function render(detail: Awaited<ReturnType<typeof getArtifact>>, locale: L
   const t = MESSAGES[locale].meta;
   const font = await readFile(FONT);
   const artifact = detail && detail !== "offline" ? detail.artifact : null;
-  const photo = await photoOf(artifact?.image?.previewUrl);
+  const photoUrl = artifact?.image?.previewUrl;
+  const photo = await photoOf(photoUrl);
   const original = artifact && artifact.titleOriginal !== artifact.title && latinOrHangul.test(artifact.titleOriginal) ? artifact.titleOriginal : "";
 
-  return new ImageResponse(
+  const response = new ImageResponse(
     (
       <div style={{ display: "flex", width: "100%", height: "100%", background: "#050505", color: "#f4f2ee", fontFamily: "Pretendard" }}>
         <div
@@ -107,6 +111,7 @@ async function render(detail: Awaited<ReturnType<typeof getArtifact>>, locale: L
     ),
     { ...size, fonts: [{ name: "Pretendard", data: font, weight: 700, style: "normal" }] },
   );
+  return { response, photoMissing: Boolean(photoUrl) && !photo };
 }
 
 async function image({ params }: Params, locale: Locale) {

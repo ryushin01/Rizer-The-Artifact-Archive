@@ -17,6 +17,11 @@ describe("초안 미리보기 서명", () => {
     expect(await verifyPreview("s3cret", "excalibur", exp + 1, sig, now)).toBe(false);
     expect(await verifyPreview("s3cret", "excalibur", exp, sig, exp + 1)).toBe(false);
     expect(await verifyPreview("s3cret", "excalibur", exp, "short", now)).toBe(false);
+    // 16진수가 아니거나 한 글자만 다른 서명도 거절한다(대소문자는 같은 값으로 본다).
+    expect(await verifyPreview("s3cret", "excalibur", exp, `${sig.slice(0, -1)}z`, now)).toBe(false);
+    const flipped = `${sig.slice(0, -1)}${sig.endsWith("0") ? "1" : "0"}`;
+    expect(await verifyPreview("s3cret", "excalibur", exp, flipped, now)).toBe(false);
+    expect(await verifyPreview("s3cret", "excalibur", exp, sig.toUpperCase(), now)).toBe(true);
   });
 
   it("너무 먼 만료 시각은 받지 않는다(서명을 오래 쓰지 못하게)", async () => {

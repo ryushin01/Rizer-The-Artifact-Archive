@@ -15,6 +15,13 @@
       "when": 1794814598198,
       "tag": "0001_oval_warhawk",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794841723412,
+      "tag": "0002_bored_iron_patriot",
+      "breakpoints": true
     }
   ]
 }

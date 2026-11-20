@@ -40,6 +40,8 @@ export async function getForAdmin(id: string) {
   return {
     artifact: toArtifact(row, getStorage()),
     annotations: (await r.listAnnotations(id)).map(toAnnotation),
+    /** 편집 화면의 낙관적 잠금 기준(폼 내용, 주석 목록). 공개 API에는 내보내지 않는다. */
+    versions: { content: row.contentVersion, annotations: row.annotationsVersion },
   };
 }
 

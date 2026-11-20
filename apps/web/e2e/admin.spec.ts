@@ -165,19 +165,37 @@ test.describe("어드민: 편집 충돌·실행 취소·미리 보기", () => {
     await loginAsCurator(page);
     const other = await context.newPage();
     for (const p of [page, other]) await p.goto(`${ADMIN_URL}/artifacts/art_ame_no_nuboko`);
+    // 다른 탭은 먼저 고치기 시작한다(아직 저장하지 않음).
+    const late = `늦게 고친 권능 ${Date.now()}`;
+    await other.getByLabel("권능", { exact: true }).fill(late);
+
     await page.getByLabel("권능", { exact: true }).fill(`먼저 고친 권능 ${Date.now()}`);
     await page.getByRole("button", { name: "저장", exact: true }).click();
     await expect(page.getByText(/저장했습니다/)).toBeVisible();
+    // 같은 탭에서 이어서 저장하면 자기 저장과 충돌하지 않는다.
+    const again = `먼저 고친 권능 ${Date.now()} 다시`;
+    await page.getByLabel("권능", { exact: true }).fill(again);
+    const saved = page.waitForResponse((r) => r.request().method() === "POST" && r.url().endsWith("/artifacts/art_ame_no_nuboko"));
+    await page.getByRole("button", { name: "저장", exact: true }).click();
+    await saved;
+    await expect(page.getByRole("button", { name: "저장", exact: true })).toBeEnabled();
+    await expect(page.getByRole("alert").filter({ hasText: /다른 곳에서 먼저 저장했습니다/ })).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByLabel("권능", { exact: true })).toHaveValue(again);
 
-    const late = `늦게 고친 권능 ${Date.now()}`;
-    await other.getByLabel("권능", { exact: true }).fill(late);
+    // 늦은 탭이 공개 전환으로 화면을 다시 읽어 새 버전을 받아도, 고친 내용은 예전 화면을 바탕으로 한 것이라 막는다.
+    await other.getByRole("button", { name: "비공개로 전환" }).click();
+    await expect(other.getByRole("button", { name: "공개하기" })).toBeVisible();
+    await other.getByRole("button", { name: "공개하기" }).click();
+    await expect(other.getByRole("button", { name: "비공개로 전환" })).toBeVisible();
+    await expect(other.getByLabel("권능", { exact: true })).toHaveValue(late);
     await other.getByRole("button", { name: "저장", exact: true }).click();
     await expect(other.getByRole("alert").filter({ hasText: /다른 곳에서 먼저 저장했습니다/ })).toBeVisible();
     // 늦게 고친 내용은 지우지 않아 옮겨 적을 수 있다.
     await expect(other.getByLabel("권능", { exact: true })).toHaveValue(late);
     // 새로 고치면 먼저 저장한 내용이 보인다.
     await other.reload();
-    await expect(other.getByLabel("권능", { exact: true })).toHaveValue(/먼저 고친 권능/);
+    await expect(other.getByLabel("권능", { exact: true })).toHaveValue(again);
   });
 
   test("주석 편집기는 실행 취소·다시 실행하고, 저장하지 않고 떠나려 하면 묻는다", async ({ page }) => {
@@ -254,10 +272,10 @@ test.describe("공개 API 요청 제한", () => {
   const as = (ip: string) => ({ headers: { "x-forwarded-for": ip } });
 
   test("관리 화면의 공개 API와 공개 사이트의 검색 API 모두 IP마다 분당 120번까지 받는다", async ({ request }) => {
+    // 처음 120번은 모두 받고, 121번째에서 막는지 본다(한도가 더 작아도 429만 보면 통과하지 않게).
     const exhaust = async (url: string, ip: string) => {
-      let status = 0;
-      for (let i = 0; i < 125 && status !== 429; i++) status = (await request.get(url, as(ip))).status();
-      return status;
+      for (let i = 1; i <= 120; i++) expect((await request.get(url, as(ip))).status(), `${i}번째 요청`).toBe(200);
+      return (await request.get(url, as(ip))).status();
     };
     const api = `${ADMIN_URL}/api/public/artifacts?limit=1`;
     expect(await exhaust(api, "203.0.113.10")).toBe(429);

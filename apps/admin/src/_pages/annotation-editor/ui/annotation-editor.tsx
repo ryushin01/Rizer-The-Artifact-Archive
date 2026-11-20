@@ -65,8 +65,8 @@ export function AnnotationEditor({
   image: DeepZoomImage;
   imageAlt: string;
   initial: Annotation[];
-  /** 편집기가 읽은 유물의 수정 시각(낙관적 잠금 기준) */
-  version: string;
+  /** 편집기가 읽은 주석 목록의 버전(낙관적 잠금 기준) */
+  version: number;
   readOnly: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -85,11 +85,10 @@ export function AnnotationEditor({
   const { pending: saving, run: runSave } = useGuardedAction();
   const hintId = useId();
   const size = { width: image.width, height: image.height };
-  // 다음 저장의 낙관적 잠금 기준. 저장하면 서버가 돌려준 새 시각, 화면을 다시 읽으면 그 값으로 바꾼다.
+  // 다음 저장의 낙관적 잠금 기준. 편집기가 들고 있는 목록의 버전이라 저장에 성공했을 때만 서버가 돌려준 새 버전으로 바꾼다.
+  // 화면을 다시 읽어도(저장 뒤 revalidatePath) 목록은 처음 읽은 것을 계속 고치므로 props의 새 버전을 따르지 않는다.
+  // 따르면 그사이 다른 곳이 저장한 목록을 이 편집기의 예전 목록으로 덮어쓴다.
   const versionRef = useRef(version);
-  useEffect(() => {
-    versionRef.current = version;
-  }, [version]);
   useUnsavedChangesWarning(dirty && !readOnly);
 
   /** 목록을 바꾼다(실행 취소 기록에 남긴다). coalesce가 같은 변경은 1초 안이면 하나로 묶는다(글자 입력). */
@@ -284,7 +283,7 @@ export function AnnotationEditor({
       const result = await saveAnnotationsAction(artifactId, payload, versionRef.current);
       if (result.ok) {
         toast.success(result.message);
-        if (result.version) versionRef.current = result.version;
+        if (result.version !== undefined) versionRef.current = result.version;
         setSaved(snapshot);
       } else toast.error(result.message);
     });
