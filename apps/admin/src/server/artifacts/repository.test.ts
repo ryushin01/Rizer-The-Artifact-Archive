@@ -33,7 +33,8 @@ describe("artifact repository", () => {
 
   it("이름·원어·소유자로 검색하고 전시실로 거른다", async () => {
     const repo = createArtifactRepository(await createTestDb());
-    expect((await repo.list({ q: "excal" })).map((r) => r.slug)).toEqual(["excalibur"]);
+    // 원어(Excalibur, Scabbard of Excalibur)로 찾고, 대표 유물인 엑스칼리버를 앞에 둔다.
+    expect((await repo.list({ q: "excal" })).map((r) => r.slug)).toEqual(["excalibur", "excalibur-scabbard"]);
     expect((await repo.list({ q: "mjöl" })).map((r) => r.slug)).toEqual(["mjolnir"]);
     expect((await repo.list({ q: "토르" })).map((r) => r.slug)).toContain("mjolnir");
     const korean = SEED_ARTIFACTS.filter((a) => a.gallery === "korean").map((a) => a.slug);
