@@ -42,14 +42,21 @@ sequenceDiagram
     participant 화면 as 아카이브 화면
     participant 스토어 as Redux 스토어<br/>(archive 슬라이스)
     participant 사가 as archiveSaga
-    participant 공개API as admin /api/public/artifacts
+    participant 검색API as web /api/search<br/>(IP마다 분당 120번, 'use cache' + cacheTag)
+    participant 공개API as admin /api/public/artifacts<br/>(IP마다 분당 120번)
 
     방문자->>화면: 검색어 입력
     화면->>스토어: queryChanged({ q })
     스토어->>사가: takeLatest
     사가->>사가: 300ms 기다림 (그사이 새 입력이 오면 이전 작업 취소)
-    사가->>공개API: fetchArtifacts(조건, limit 24)
-    공개API-->>사가: 결과, 전체 개수
+    사가->>검색API: fetchArtifacts(조건, limit 24)
+    alt 같은 조건을 캐시에 둔 적이 있음
+        검색API-->>사가: 캐시의 결과 (DB까지 가지 않음)
+    else 처음이거나 저장으로 태그가 비워짐
+        검색API->>공개API: 서버끼리의 비밀값(Bearer)으로 요청 (요청 제한 제외)
+        공개API-->>검색API: 결과, 전체 개수
+        검색API-->>사가: 결과 (태그를 달아 보관)
+    end
     사가->>스토어: fetchSucceeded
     사가->>화면: 주소를 조건과 맞춤 (replaceState)
     방문자->>화면: 전시실·종류·정렬 버튼
@@ -57,8 +64,8 @@ sequenceDiagram
     방문자->>화면: "더 보기" (여러 번 눌러도)
     화면->>스토어: moreRequested
     스토어->>사가: takeLeading (한 번만)
-    사가->>공개API: offset = 보이는 개수
-    공개API-->>사가: 다음 묶음
+    사가->>검색API: offset = 보이는 개수
+    검색API-->>사가: 다음 묶음
     사가->>스토어: moreSucceeded (그사이 조건이 바뀌었으면 버림)
 ```
 
@@ -91,3 +98,30 @@ sequenceDiagram
         액션-->>업로더: /api/artifacts/:id/image 로 직접 업로드
     end
 ```
+
+## 4. 초안 미리보기와 편집 충돌 막기
+
+관리 화면에서 비공개 유물을 공개 화면 모양으로 봅니다. 서명한 링크로만 들어가고, 미리 보는 동안에는 캐시를 건너뜁니다.
+
+```mermaid
+sequenceDiagram
+    actor 큐레이터
+    participant 관리 as 관리 화면<br/>/api/artifacts/:id/preview
+    participant 시작 as web /api/preview
+    participant 화면 as web 유물 화면<br/>(draftMode)
+    participant 공개API as admin /api/public/artifacts/:slug
+
+    큐레이터->>관리: "공개 사이트에서 미리 보기" (새 창)
+    관리->>관리: 로그인 확인, 10분짜리 서명 (HMAC-SHA256, REVALIDATE_SECRET)
+    관리-->>큐레이터: 307 → web /api/preview?slug&exp&sig
+    큐레이터->>시작: 서명·만료 확인
+    시작->>시작: draftMode().enable() (쿠키)
+    시작-->>큐레이터: 307 → /artifacts/:slug
+    큐레이터->>화면: 쿠키와 함께 요청 ('use cache'를 건너뜀)
+    화면->>공개API: ?preview=1, Bearer 비밀값 (비공개도 받음)
+    공개API-->>화면: 초안
+    화면-->>큐레이터: 미리 보기 안내 + noindex
+    큐레이터->>화면: "미리 보기 끝내기" (POST /api/preview/exit)
+```
+
+저장은 화면이 읽은 버전을 함께 보냅니다(낙관적 잠금). 유물 폼은 `content_version`, 주석 편집기는 `annotations_version`을 쓰고, 저장하면 1씩 올립니다. 다른 탭이나 다른 큐레이터가 먼저 저장했으면 `UPDATE … WHERE content_version = 읽은 버전`이 아무 줄도 바꾸지 못해, 덮어쓰지 않고 "먼저 저장했습니다"로 안내합니다. 버전이 없거나 잘못된 요청은 저장하지 않습니다. 주석 편집기는 저장에 성공했을 때만 서버가 돌려준 새 버전을 다음 저장의 기준으로 쓰고, 유물 폼은 고치기 시작한 때의 버전을 붙잡아 둡니다(그 뒤 공개 전환으로 화면을 다시 읽어도 새 버전을 보내지 않음).

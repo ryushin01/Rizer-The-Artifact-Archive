@@ -2,7 +2,7 @@
 
 import { type Artifact, GALLERIES, KINDS } from "@rizer/domain";
 import { Loader2, Save } from "lucide-react";
-import { type ReactNode, useEffect, useRef } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { Button } from "@rizer/ui/components/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rizer/ui/components/card";
@@ -15,6 +15,7 @@ import { Textarea } from "@rizer/ui/components/textarea";
 import { FormErrorAlert } from "@/shared/ui/form-error-alert";
 import { fieldA11y } from "@/shared/lib/field-a11y";
 import { usePageForm } from "@/shared/lib/use-page-form";
+import { useUnsavedChangesWarning } from "@/shared/lib/use-unsaved-changes";
 
 import { saveArtifactAction } from "../api/actions";
 
@@ -40,8 +41,15 @@ function toDefaults(artifact?: Editable): Record<string, string> {
  * 오류 문구·설명은 칸에 잇고(fieldA11y), 실패하면 첫 오류 칸으로 초점을 옮긴다(KWCAG 7.3.1).
  * 폼 전체 안내는 다시 마운트되는 폼 바깥의 알림 영역 하나로 알린다(칸마다 알리지 않는다).
  */
-export function ArtifactForm({ artifact, readOnly }: { artifact?: Editable; readOnly: boolean }) {
+export function ArtifactForm({ artifact, version, readOnly }: { artifact?: Editable; version?: number; readOnly: boolean }) {
   const form = usePageForm(saveArtifactAction, toDefaults(artifact));
+  useUnsavedChangesWarning(form.dirty && !readOnly);
+  // 낙관적 잠금 기준: 폼이 그린 내용의 버전. 고친 것이 없으면 화면을 다시 읽을 때(공개 전환·이미지 교체 뒤) 새 버전을 따르고
+  // 폼도 새 내용으로 다시 그린다. 고치기 시작했거나 저장에 실패해 보낸 값을 다시 그리고 있으면 붙잡아 둔다.
+  // 그 값은 그 버전을 바탕으로 한 것이라, 그사이 다른 곳이 저장했으면 저장이 충돌로 막혀야 한다
+  // (새 버전을 보내면 남이 저장한 칸을 말없이 덮어쓴다).
+  const [base, setBase] = useState(version);
+  if (!form.dirty && !form.failed && version !== base) setBase(version);
   const id = (name: string) => `artifact-${name}`;
   // 저장하는 동안에는 고칠 수 없게 한다. 저장이 실패하면 보낸 값으로 폼을 다시 그리므로, 그사이 고친 내용이 사라진다.
   const locked = readOnly || form.pending;
@@ -103,7 +111,8 @@ export function ArtifactForm({ artifact, readOnly }: { artifact?: Editable; read
     return (
       <Field data-invalid={form.invalid(name)}>
         <FieldLabel htmlFor={id(name)}>{label}</FieldLabel>
-        <Select name={name} items={items} defaultValue={form.text(name)} readOnly={locked}>
+        {/* Base UI Select는 값을 바꿔도 폼에 change 이벤트를 내보내지 않으므로, 고쳤다는 기록을 직접 남긴다. */}
+        <Select name={name} items={items} defaultValue={form.text(name)} readOnly={locked} onValueChange={form.onChange}>
           <SelectTrigger id={id(name)} className="w-full" {...control}>
             <SelectValue />
           </SelectTrigger>
@@ -125,8 +134,18 @@ export function ArtifactForm({ artifact, readOnly }: { artifact?: Editable; read
   return (
     <div className="flex flex-col gap-6">
       <FormErrorAlert message={summary} />
-      <form ref={formRef} key={form.formKey} action={form.formAction} onSubmit={form.onSubmit} noValidate className="flex flex-col gap-6">
+      <form
+        ref={formRef}
+        key={`${form.formKey}:${base ?? "new"}`}
+        action={form.formAction}
+        onSubmit={form.onSubmit}
+        onChange={form.onChange}
+        noValidate
+        className="flex flex-col gap-6"
+      >
         {artifact && <input type="hidden" name="id" value={artifact.id} />}
+        {/* 낙관적 잠금: 이 폼이 그린 내용의 버전(위의 base) */}
+        {base !== undefined && <input type="hidden" name="expectedVersion" value={base} />}
 
         <Card>
           <CardHeader>

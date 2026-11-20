@@ -1,7 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { galleryName, kindName, type Locale } from "@rizer/domain";
+import { CACHE_TAGS, galleryName, kindName, type Locale } from "@rizer/domain";
+import { cacheLife, cacheTag } from "next/cache";
 import { ImageResponse } from "next/og";
 import sharp from "sharp";
 
@@ -11,6 +12,8 @@ import { MESSAGES } from "@/shared/i18n";
 /**
  * 유물마다 공유용 이미지(1200×630). 왼쪽에 소장품 사진, 오른쪽에 이름과 권능을 놓는다.
  * 한글은 Pretendard Bold(OFL)로 그린다. 글꼴에 없는 문자(데바나가리, 한자 등)가 든 원어 이름은 뺀다.
+ * 그린 PNG는 유물의 캐시 태그로 보관한다(`'use cache'`). 공유될 때마다 사진을 받아 다시 그리지 않고,
+ * 관리 화면에서 저장하면 태그가 비워져 다음 요청에서 새로 그린다.
  */
 export const alt = MESSAGES.ko.meta.ogAlt;
 export const altEn = MESSAGES.en.meta.ogAlt;
@@ -44,15 +47,29 @@ async function photoOf(url: string | undefined): Promise<{ src: string; backgrou
 
 type Params = { params: Promise<{ slug: string }> };
 
-async function render({ params }: Params, locale: Locale) {
-  const { slug } = await params;
+/**
+ * 공유 이미지 PNG. 아카이브에 닿지 못해 기본 그림을 그렸거나, 사진이 있는 유물인데 사진을 받지 못해(저장소 503·시간 초과)
+ * 사진 없이 그렸으면 몇 초만 보관해 다음 요청에서 다시 그린다. 사진이 없는 유물은 그대로 오래 보관한다.
+ */
+async function ogPng(slug: string, locale: Locale): Promise<Uint8Array> {
+  "use cache";
+  cacheTag(CACHE_TAGS.artifacts, CACHE_TAGS.artifact(slug));
+  const detail = await getArtifact(slug, locale);
+  const { response, photoMissing } = await render(detail, locale);
+  if (detail === "offline" || photoMissing) cacheLife("seconds");
+  else cacheLife("days");
+  return new Uint8Array(await response.arrayBuffer());
+}
+
+async function render(detail: Awaited<ReturnType<typeof getArtifact>>, locale: Locale) {
   const t = MESSAGES[locale].meta;
-  const [font, detail] = await Promise.all([readFile(FONT), getArtifact(slug, locale)]);
+  const font = await readFile(FONT);
   const artifact = detail && detail !== "offline" ? detail.artifact : null;
-  const photo = await photoOf(artifact?.image?.previewUrl);
+  const photoUrl = artifact?.image?.previewUrl;
+  const photo = await photoOf(photoUrl);
   const original = artifact && artifact.titleOriginal !== artifact.title && latinOrHangul.test(artifact.titleOriginal) ? artifact.titleOriginal : "";
 
-  return new ImageResponse(
+  const response = new ImageResponse(
     (
       <div style={{ display: "flex", width: "100%", height: "100%", background: "#050505", color: "#f4f2ee", fontFamily: "Pretendard" }}>
         <div
@@ -94,7 +111,13 @@ async function render({ params }: Params, locale: Locale) {
     ),
     { ...size, fonts: [{ name: "Pretendard", data: font, weight: 700, style: "normal" }] },
   );
+  return { response, photoMissing: Boolean(photoUrl) && !photo };
 }
 
-export const ArtifactOgImage = (props: Params) => render(props, "ko");
-export const ArtifactOgImageEn = (props: Params) => render(props, "en");
+async function image({ params }: Params, locale: Locale) {
+  const { slug } = await params;
+  return new Response(Buffer.from(await ogPng(slug, locale)), { headers: { "content-type": contentType } });
+}
+
+export const ArtifactOgImage = (props: Params) => image(props, "ko");
+export const ArtifactOgImageEn = (props: Params) => image(props, "en");

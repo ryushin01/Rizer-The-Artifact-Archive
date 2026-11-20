@@ -22,8 +22,8 @@
 | `pnpm typecheck` | TypeScript 7(`tsc7`)로 타입 검사. 도구용 TypeScript는 6입니다(typescript-eslint 호환) |
 | `pnpm lint` | ESLint(FSD 경계 규칙 `packages/config/eslint-fsd.mjs`)와 Steiger(FSD 구조 검사) |
 | `pnpm test` / `test:coverage` | 단위 테스트(Vitest) |
-| `pnpm test:storybook` | 공개 사이트의 모든 스토리를 Chromium에서 그리고 axe 접근성 검사 |
-| `pnpm storybook` | Storybook 개발 서버(6006) |
+| `pnpm test:storybook` | 두 앱의 모든 스토리를 Chromium에서 그리고 axe 접근성 검사 |
+| `pnpm storybook` | 공개 사이트 Storybook 개발 서버(6006). 관리 화면은 `pnpm --filter @rizer/admin storybook`(6007) |
 | `pnpm e2e` | 두 앱을 프로덕션 빌드로 띄워 E2E(관리 3180, 공개 3181, 메모리 DB) |
 | `pnpm build` | 프로덕션 빌드 |
 | `pnpm tiles <원본> <출력 폴더> [이름]` | 큰 원본을 로컬에서 타일로 자른다 |
@@ -51,14 +51,14 @@
 | admin | `SEED_DEMO`, `CURATOR_PASSWORD` | 운영에서 시드를 넣을지, 큐레이터 비밀번호 |
 | admin | `STORAGE_DRIVER`(`local`·`s3`·`blob`), `S3_*`·`BLOB_READ_WRITE_TOKEN`, `STORAGE_PUBLIC_URL` | 원본·타일 저장소 |
 | admin | `STATIC_TILES_URL` | 시드 타일(`tiles/…`)을 내보내는 곳. 기본 `WEB_URL` |
-| admin | `WEB_URL`, `WEB_REVALIDATE_URL`, `REVALIDATE_SECRET` | 공개 사이트 링크와 캐시 비우기 |
-| web | `ARCHIVE_API_URL`, `NEXT_PUBLIC_ARCHIVE_API_URL` | 관리 화면의 공개 API(서버·브라우저). `NEXT_PUBLIC_`은 빌드 때 들어갑니다 |
-| web | `REVALIDATE_SECRET`, `SITE_URL`, `STORAGE_PUBLIC_URL` | 캐시 비우기, 사이트 주소, 타일 도메인(CSP) |
+| admin | `WEB_URL`, `WEB_REVALIDATE_URL`, `REVALIDATE_SECRET` | 공개 사이트 링크(초안 미리보기 포함)와 캐시 비우기 |
+| web | `ARCHIVE_API_URL`, `NEXT_PUBLIC_ARCHIVE_API_URL` | 관리 화면의 공개 API(서버가 읽음). 브라우저 검색은 공개 사이트의 `/api/search`를 거치고, `NEXT_PUBLIC_`은 바닥글의 관리 화면 링크에만 씁니다 |
+| web | `REVALIDATE_SECRET`, `SITE_URL`, `STORAGE_PUBLIC_URL` | 두 앱이 함께 가진 비밀값(캐시 비우기, 공개 API를 서버끼리 읽을 때의 Bearer, 초안 미리보기 서명), 사이트 주소, 타일 도메인(CSP) |
 
 ## 테스트
 
 - **단위(Vitest):** 각 패키지·앱의 `*.test.ts(x)`. 저장소 테스트는 테스트마다 새 메모리 PGlite(`createTestDb`)를 씁니다. 사가는 `redux-saga-test-plan`의 `expectSaga`로 확인합니다.
-- **스토리(Storybook + Vitest 브라우저 모드):** 공개 사이트 컴포넌트 옆의 `*.stories.tsx`. `play` 함수와 axe 검사가 실패하면 테스트가 실패합니다. 스토어가 필요한 스토리는 `parameters.store`로 처음 상태를 넘깁니다.
+- **스토리(Storybook + Vitest 브라우저 모드):** 두 앱 컴포넌트 옆의 `*.stories.tsx`. `play` 함수와 axe 검사가 실패하면 테스트가 실패합니다. 공개 사이트에서 스토어가 필요한 스토리는 `parameters.store`로 처음 상태를 넘깁니다. 관리 화면의 서버 액션은 스토리에서 돌 수 없으므로 `.storybook/preview.tsx`의 `sb.mock()`이 같은 폴더의 `__mocks__`로 바꾸고, 스토리는 `mocked(액션).mockResolvedValue(…)`로 결과를 정합니다.
 - **E2E(Playwright):** `apps/web/e2e`. 관리 화면에서 만들고 공개하면 공개 사이트에 보이는 흐름까지 확인합니다. 데이터를 바꾸는 테스트는 겹치지 않게 고유한 주소(`Date.now()`)나 다른 유물(뒤랑달)을 씁니다.
 
 ## 성능 측정
@@ -93,6 +93,10 @@
 | 스크립트(tsx)에서 top-level await 오류 | `apps/admin`은 CommonJS 패키지 | 스크립트는 `.mts`로 작성 |
 | 저장 중 연결이 끊기면 화면 전체가 오류 화면으로 바뀌고 편집 내용이 사라짐 | React 19는 `startTransition`·`useActionState` 안에서 던진 오류를 가장 가까운 오류 경계로 보냄 | 버튼 액션은 `useGuardedAction`, 화면 폼은 `usePageForm`이 잡아 알림으로 바꾼다. 서버 액션의 `redirect()`는 브라우저에서 액션 Promise의 거부로 오므로 `unstable_rethrow`로 다시 던진다 |
 | 테스트가 끝난 뒤 목이 한 번 더 불려 실패 | `beforeEach(() => mock.mockReset())`처럼 함수를 돌려주면 Vitest가 정리 함수로 여겨 테스트 뒤에 부른다 | `beforeEach(() => { mock.mockReset(); })`처럼 중괄호로 감싼다 |
+| axe `label-content-name-mismatch`(KWCAG 6.5.3) | 보이는 글자가 접근 이름에 낱말로 들어 있어야 한다. 숫자에 붙인 "1쪽"은 "1"을 낱말로 품지 않는다 | 이름을 "1 쪽"처럼 띄우거나, aria-label 대신 보이는 글자 + 화면 낭독기용 글자(sr-only)로 이름을 만든다 |
+| 스토리에서 서버 액션 모듈을 불러오다 실패 | `"use server"` 모듈이 서버 전용 코드(`server-only`, DB)를 불러온다 | `sb.mock(import("…/actions.ts"))`와 같은 폴더의 `__mocks__/actions.ts` |
+| 셀렉트만 바꾸면 폼의 `onChange`가 불리지 않음 | Base UI Select는 값을 바꿔도 숨은 input에 change 이벤트를 내보내지 않는다(체크박스는 내보냄) | 폼 전체의 변경을 셀 때는 Select에 `onValueChange`도 단다 |
+| E2E에서 요청 제한을 다 쓰면 다른 테스트의 검색까지 429 | 제한은 IP마다 세고, 테스트는 모두 같은 IP다 | 한도를 다 쓰는 테스트는 `x-forwarded-for`로 다른 IP를 보낸다(로컬 `next start`는 받은 값을 그대로 쓴다) |
 | 주석 개수가 0으로 나옴 | 서브쿼리 안의 `artifacts.id`가 따옴표 없는 `"id"`로 그려져 `annotations.id`로 읽힘 | 테이블 이름을 직접 씀(`repository.ts`) |
 
 ## 품질 예산

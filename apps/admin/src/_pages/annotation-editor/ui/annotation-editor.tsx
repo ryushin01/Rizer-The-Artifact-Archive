@@ -13,14 +13,16 @@ import {
   Loader2,
   PenSquare,
   Plus,
+  Redo2,
   Save,
   Trash2,
+  Undo2,
   Upload,
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
 import type OpenSeadragon from "openseadragon";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useReducer, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@rizer/ui/components/badge";
@@ -30,49 +32,71 @@ import { Input } from "@rizer/ui/components/input";
 import { Textarea } from "@rizer/ui/components/textarea";
 
 import { useGuardedAction } from "@/shared/lib/use-guarded-action";
+import { useUnsavedChangesWarning } from "@/shared/lib/use-unsaved-changes";
 
 import { saveAnnotationsAction } from "../api/actions";
+import { historyReducer, type Item, startHistory } from "../model/history";
 import { pixelsToRegion, regionFromViewport, toAnnotoriousShape, type PixelRect } from "../model/region";
-
-type Item = { id: string; title: string; body: string; region: Region };
 
 type Shape = { id: string; target: { selector: { geometry: PixelRect } } };
 
 let counter = 0;
 const tempId = () => `new_${Date.now().toString(36)}_${counter++}`;
+/** 변경 시각(실행 취소 묶음 판단용). 이벤트 처리기에서만 부른다. */
+const eventTime = () => Date.now();
 
 /**
  * 딥줌 이미지 위에 사각형 주석을 그리고 설명을 단다.
  * - 마우스: "영역 그리기"를 켜고 끌어서 그린다. 그린 영역은 모서리를 끌어 고친다.
  * - 키보드: 뷰어에서 화살표·+/-로 움직인 뒤 "보이는 영역으로 추가"를 누르고, 목록에서 x·y·너비·높이를 숫자로 고친다.
- * 저장은 목록 전체를 한 번에 보낸다.
+ * - 실행 취소·다시 실행: 버튼이나 Ctrl(⌘)+Z, Ctrl(⌘)+Shift+Z(글 칸 안에서는 브라우저의 글자 실행 취소).
+ * 저장은 목록 전체를 한 번에 보낸다. 편집기를 연 뒤 다른 곳에서 먼저 저장했으면 덮어쓰지 않는다(version, 낙관적 잠금).
+ * 저장하지 않은 변경이 있으면 새로 고침·창 닫기·사이드바 이동 전에 묻는다.
  */
 export function AnnotationEditor({
   artifactId,
   image,
   imageAlt,
   initial,
+  version,
   readOnly,
 }: {
   artifactId: string;
   image: DeepZoomImage;
   imageAlt: string;
   initial: Annotation[];
+  /** 편집기가 읽은 주석 목록의 버전(낙관적 잠금 기준) */
+  version: number;
   readOnly: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<OpenSeadragon.Viewer | null>(null);
   const annoRef = useRef<OpenSeadragonAnnotator | null>(null);
   const [ready, setReady] = useState(false);
-  const [items, setItems] = useState<Item[]>(() =>
-    initial.map((a) => ({ id: a.id, title: a.title, body: a.body, region: a.region })),
+  const [history, dispatch] = useReducer(historyReducer, initial, (list) =>
+    startHistory(list.map((a) => ({ id: a.id, title: a.title, body: a.body, region: a.region }))),
   );
+  const items = history.present;
+  // 마지막으로 저장한(또는 처음 읽은) 목록. 지금 목록과 다르면 저장하지 않은 변경이 있다(실행 취소로 돌아오면 없음).
+  const [saved, setSaved] = useState(() => JSON.stringify(items));
+  const dirty = JSON.stringify(items) !== saved;
   const [selected, setSelected] = useState<string | null>(null);
   const [drawing, setDrawing] = useState(false);
-  const [dirty, setDirty] = useState(false);
   const { pending: saving, run: runSave } = useGuardedAction();
   const hintId = useId();
   const size = { width: image.width, height: image.height };
+  // 다음 저장의 낙관적 잠금 기준. 편집기가 들고 있는 목록의 버전이라 저장에 성공했을 때만 서버가 돌려준 새 버전으로 바꾼다.
+  // 화면을 다시 읽어도(저장 뒤 revalidatePath) 목록은 처음 읽은 것을 계속 고치므로 props의 새 버전을 따르지 않는다.
+  // 따르면 그사이 다른 곳이 저장한 목록을 이 편집기의 예전 목록으로 덮어쓴다.
+  const versionRef = useRef(version);
+  useUnsavedChangesWarning(dirty && !readOnly);
+
+  /** 목록을 바꾼다(실행 취소 기록에 남긴다). coalesce가 같은 변경은 1초 안이면 하나로 묶는다(글자 입력). */
+  const apply = (update: (list: Item[]) => Item[], coalesce?: string) =>
+    dispatch({ type: "apply", update, coalesce, at: eventTime() });
+  /** Annotorious의 사각형을 목록과 맞춘다(실행 취소·가져오기처럼 목록을 통째로 바꿀 때). */
+  const syncShapes = (list: Item[]) =>
+    annoRef.current?.setAnnotations(list.map((i) => toAnnotoriousShape(i.id, i.region, size)) as never, true);
 
   // 뷰어와 Annotorious는 브라우저에서만 돈다. 한 번 만들고 화면을 떠날 때 정리한다.
   useEffect(() => {
@@ -106,15 +130,17 @@ export function AnnotationEditor({
       anno.on("createAnnotation", (created) => {
         const shape = created as unknown as Shape;
         const region = pixelsToRegion(shape.target.selector.geometry, sizeAtMount);
-        setItems((list) => [...list, { id: shape.id, title: `새 주석 ${list.length + 1}`, body: "", region }]);
+        dispatch({
+          type: "apply",
+          at: Date.now(),
+          update: (list) => [...list, { id: shape.id, title: `새 주석 ${list.length + 1}`, body: "", region }],
+        });
         setSelected(shape.id);
-        setDirty(true);
       });
       anno.on("updateAnnotation", (updated) => {
         const shape = updated as unknown as Shape;
         const region = pixelsToRegion(shape.target.selector.geometry, sizeAtMount);
-        setItems((list) => list.map((i) => (i.id === shape.id ? { ...i, region } : i)));
-        setDirty(true);
+        dispatch({ type: "apply", at: Date.now(), update: (list) => list.map((i) => (i.id === shape.id ? { ...i, region } : i)) });
       });
       anno.on("selectionChanged", (selection) => {
         setSelected((selection[0] as unknown as Shape | undefined)?.id ?? null);
@@ -134,13 +160,39 @@ export function AnnotationEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [image.dziUrl]);
 
-  // 저장하지 않은 변경이 있으면 화면을 떠나기 전에 묻는다.
+  const undo = () => {
+    const target = history.past.at(-1);
+    if (!target) return;
+    dispatch({ type: "undo" });
+    syncShapes(target);
+    if (selected && !target.some((i) => i.id === selected)) setSelected(null);
+  };
+  const redo = () => {
+    const target = history.future[0];
+    if (!target) return;
+    dispatch({ type: "redo" });
+    syncShapes(target);
+    if (selected && !target.some((i) => i.id === selected)) setSelected(null);
+  };
+
+  // Ctrl(⌘)+Z 실행 취소, Ctrl(⌘)+Shift+Z·Ctrl+Y 다시 실행. 글 칸 안에서는 브라우저의 글자 실행 취소를 그대로 둔다.
   useEffect(() => {
-    if (!dirty) return;
-    const onBeforeUnload = (e: BeforeUnloadEvent) => e.preventDefault();
-    window.addEventListener("beforeunload", onBeforeUnload);
-    return () => window.removeEventListener("beforeunload", onBeforeUnload);
-  }, [dirty]);
+    if (readOnly) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
+      if ((event.target as HTMLElement | null)?.closest?.("input, textarea, select, [contenteditable='true']")) return;
+      const key = event.key.toLowerCase();
+      if (key === "z" && !event.shiftKey) {
+        event.preventDefault();
+        undo();
+      } else if ((key === "z" && event.shiftKey) || key === "y") {
+        event.preventDefault();
+        redo();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
 
   const toggleDrawing = () => {
     const next = !drawing;
@@ -161,32 +213,29 @@ export function AnnotationEditor({
     const region = regionFromViewport({ x: rect.x, y: rect.y, w: rect.width, h: rect.height }, size);
     const id = tempId();
     annoRef.current?.addAnnotation(toAnnotoriousShape(id, region, size) as never);
-    setItems((list) => [...list, { id, title: `새 주석 ${list.length + 1}`, body: "", region }]);
+    apply((list) => [...list, { id, title: `새 주석 ${list.length + 1}`, body: "", region }]);
     setSelected(id);
-    setDirty(true);
   };
 
-  const update = (id: string, patch: Partial<Item>) => {
-    setItems((list) => list.map((i) => (i.id === id ? { ...i, ...patch } : i)));
+  /** 한 주석을 고친다. coalesce로 같은 칸의 연속 입력을 한 번의 실행 취소로 묶는다. */
+  const update = (id: string, patch: Partial<Item>, coalesce?: string) => {
+    apply((list) => list.map((i) => (i.id === id ? { ...i, ...patch } : i)), coalesce);
     if (patch.region) annoRef.current?.updateAnnotation(toAnnotoriousShape(id, patch.region, size) as never);
-    setDirty(true);
   };
 
   const remove = (id: string) => {
     annoRef.current?.removeAnnotation(id);
-    setItems((list) => list.filter((i) => i.id !== id));
+    apply((list) => list.filter((i) => i.id !== id));
     if (selected === id) setSelected(null);
-    setDirty(true);
   };
 
   const move = (index: number, delta: -1 | 1) => {
-    setItems((list) => {
+    apply((list) => {
       const next = [...list];
       const [item] = next.splice(index, 1);
       next.splice(index + delta, 0, item!);
       return next;
     });
-    setDirty(true);
   };
 
   /** W3C Web Annotation JSON 파일로 내려받는다. 읽기 전용 계정도 쓸 수 있다. */
@@ -209,10 +258,9 @@ export function AnnotationEditor({
     if (!file) return;
     try {
       const imported = fromWebAnnotations(JSON.parse(await file.text()), size).map((a) => ({ id: tempId(), ...a }));
-      annoRef.current?.setAnnotations(imported.map((a) => toAnnotoriousShape(a.id, a.region, size)) as never, true);
-      setItems(imported);
+      syncShapes(imported);
+      apply(() => imported);
       setSelected(null);
-      setDirty(true);
       toast.success(`주석 ${imported.length}개를 가져왔습니다. 저장을 눌러야 반영됩니다.`);
     } catch (error) {
       toast.error(error instanceof SyntaxError ? "JSON 파일을 읽지 못했습니다." : error instanceof Error ? error.message : "가져오지 못했습니다.");
@@ -224,6 +272,7 @@ export function AnnotationEditor({
   // 저장이 실패해도(연결 끊김 등) 편집 중인 목록은 그대로 두고 알림만 띄운다.
   const save = () =>
     runSave(async () => {
+      const snapshot = JSON.stringify(items);
       const payload = items.map((i, order) => ({
         id: i.id.startsWith("ann_") ? i.id : undefined,
         title: i.title,
@@ -231,10 +280,11 @@ export function AnnotationEditor({
         region: i.region,
         order,
       }));
-      const result = await saveAnnotationsAction(artifactId, payload);
+      const result = await saveAnnotationsAction(artifactId, payload, versionRef.current);
       if (result.ok) {
         toast.success(result.message);
-        setDirty(false);
+        if (result.version !== undefined) versionRef.current = result.version;
+        setSaved(snapshot);
       } else toast.error(result.message);
     });
 
@@ -256,7 +306,7 @@ export function AnnotationEditor({
         readOnly={readOnly}
         onChange={(e) => {
           const value = Number(e.target.value);
-          if (Number.isFinite(value)) update(item.id, { region: { ...item.region, [key]: value } });
+          if (Number.isFinite(value)) update(item.id, { region: { ...item.region, [key]: value } }, `region:${item.id}:${key}`);
         }}
       />
     </Field>
@@ -275,6 +325,30 @@ export function AnnotationEditor({
               <Button type="button" variant="outline" size="sm" onClick={addFromViewport} disabled={!ready}>
                 <Crosshair aria-hidden />
                 보이는 영역으로 추가
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={undo}
+                disabled={history.past.length === 0}
+                aria-label="실행 취소"
+                aria-keyshortcuts="Control+Z Meta+Z"
+                title="실행 취소 (Ctrl+Z)"
+              >
+                <Undo2 aria-hidden />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={redo}
+                disabled={history.future.length === 0}
+                aria-label="다시 실행"
+                aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z Control+Y"
+                title="다시 실행 (Ctrl+Shift+Z)"
+              >
+                <Redo2 aria-hidden />
               </Button>
             </>
           )}
@@ -370,11 +444,11 @@ export function AnnotationEditor({
                   <FieldGroup className="gap-3">
                     <Field>
                       <FieldLabel htmlFor={`${item.id}-title`}>제목</FieldLabel>
-                      <Input id={`${item.id}-title`} value={item.title} readOnly={readOnly} maxLength={80} onChange={(e) => update(item.id, { title: e.target.value })} />
+                      <Input id={`${item.id}-title`} value={item.title} readOnly={readOnly} maxLength={80} onChange={(e) => update(item.id, { title: e.target.value }, `title:${item.id}`)} />
                     </Field>
                     <Field>
                       <FieldLabel htmlFor={`${item.id}-body`}>설명</FieldLabel>
-                      <Textarea id={`${item.id}-body`} value={item.body} readOnly={readOnly} rows={4} maxLength={1200} onChange={(e) => update(item.id, { body: e.target.value })} />
+                      <Textarea id={`${item.id}-body`} value={item.body} readOnly={readOnly} rows={4} maxLength={1200} onChange={(e) => update(item.id, { body: e.target.value }, `body:${item.id}`)} />
                     </Field>
                     <fieldset className="grid grid-cols-4 gap-2">
                       <legend className="mb-1 text-xs text-muted-foreground">영역(이미지 크기에 대한 백분율)</legend>

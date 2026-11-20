@@ -1,5 +1,5 @@
 import { SEED_ANNOTATIONS, SEED_ARTIFACTS } from "@rizer/domain/seed";
-import { and, count, eq, inArray, isNull } from "drizzle-orm";
+import { and, count, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import type { SeedImageManifest } from "@/entities/artifact";
 
@@ -123,7 +123,8 @@ export async function refreshUntouchedSeedArtifacts(db: Database, manifest: Seed
     const { slug: _slug, ...fields } = seed;
     const current = Object.fromEntries(Object.keys(fields).map((k) => [k, row[k as keyof typeof row]]));
     const patch: Partial<typeof artifacts.$inferInsert> = {};
-    if (stable(current) !== stable(fields)) {
+    const fieldsChanged = stable(current) !== stable(fields);
+    if (fieldsChanged) {
       Object.assign(patch, fields);
       counts.fields++;
     }
@@ -134,7 +135,9 @@ export async function refreshUntouchedSeedArtifacts(db: Database, manifest: Seed
     }
     // 읽은 뒤에 큐레이터가 고쳤으면(수정 시각이 바뀜) 덮어쓰지 않도록 '손대지 않음' 조건을 다시 건다.
     const untouched = and(eq(artifacts.id, row.id), eq(artifacts.updatedAt, artifacts.createdAt));
-    if (Object.keys(patch).length) await db.update(artifacts).set(patch).where(untouched);
+    // 내용이 바뀌면 내용 버전도 올려, 그 전에 열어 둔 편집 폼이 예전 해설로 덮어쓰지 않고 충돌로 막히게 한다.
+    const bump = fieldsChanged ? { contentVersion: sql`${artifacts.contentVersion} + 1` } : {};
+    if (Object.keys(patch).length) await db.update(artifacts).set({ ...patch, ...bump }).where(untouched);
 
     const wanted = (SEED_ANNOTATIONS[row.slug] ?? []).map((a) => [a.title, a.body, a.region.x, a.region.y, a.region.w, a.region.h]);
     if (stable(notesOf(row.id)) !== stable(wanted)) {
@@ -146,6 +149,8 @@ export async function refreshUntouchedSeedArtifacts(db: Database, manifest: Seed
         if (!still) return false;
         await tx.delete(annotations).where(eq(annotations.artifactId, row.id));
         await insertSeedAnnotations(tx, [row.slug]);
+        // 주석 버전도 올려, 그 전에 열어 둔 주석 편집기가 예전 목록으로 덮어쓰지 않고 충돌로 막히게 한다.
+        await tx.update(artifacts).set({ annotationsVersion: sql`${artifacts.annotationsVersion} + 1` }).where(eq(artifacts.id, row.id));
         return true;
       });
       if (replaced) counts.annotations++;

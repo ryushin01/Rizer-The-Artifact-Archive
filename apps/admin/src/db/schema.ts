@@ -42,6 +42,13 @@ export const artifacts = pgTable(
     featured: boolean("featured").notNull().default(false),
     source: jsonb("source").$type<ArtifactSource>().notNull(),
     image: jsonb("image").$type<StoredImage | null>(),
+    /**
+     * 낙관적 잠금 버전. 유물 폼의 내용은 contentVersion, 주석 목록은 annotationsVersion으로 따로 센다.
+     * 저장할 때 화면이 읽은 버전과 같아야 쓰고 1을 올린다. 공개 전환·이미지 교체는 폼·주석 내용이 아니라서 올리지 않는다
+     * (수정 시각 하나로 세면 자기 화면의 이미지 교체 뒤 폼 저장이 충돌로 막힌다).
+     */
+    contentVersion: integer("content_version").notNull().default(0),
+    annotationsVersion: integer("annotations_version").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },

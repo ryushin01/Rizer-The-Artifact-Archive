@@ -49,7 +49,7 @@ Vercel Blob Hobby는 업로드·목록 같은 **고급 작업이 월 2,000회**�
 | `NEXTAUTH_URL`, `NEXTAUTH_SECRET`                    | `https://rizer-admin-ryushin01.vercel.app`, 임의 문자열         |
 | `SEED_DEMO`, `CURATOR_PASSWORD`                      | `1`, 큐레이터 비밀번호                                          |
 | `STORAGE_DRIVER`, `BLOB_READ_WRITE_TOKEN`            | `blob`, Blob 스토어 연결 시 자동                                |
-| `WEB_URL`, `WEB_REVALIDATE_URL`, `REVALIDATE_SECRET` | 공개 사이트 주소, `…/api/revalidate`, 공개 사이트와 같은 비밀값 |
+| `WEB_URL`, `WEB_REVALIDATE_URL`, `REVALIDATE_SECRET` | 공개 사이트 주소(초안 미리보기 링크도 이 주소), `…/api/revalidate`, 공개 사이트와 같은 비밀값 |
 
 ### rizer-web
 
@@ -58,7 +58,7 @@ Vercel Blob Hobby는 업로드·목록 같은 **고급 작업이 월 2,000회**�
 | `ARCHIVE_API_URL`, `NEXT_PUBLIC_ARCHIVE_API_URL` | `https://rizer-admin-ryushin01.vercel.app` (`NEXT_PUBLIC_`은 빌드 때 들어가므로 바꾸면 다시 배포) |
 | `SITE_URL`                                       | `https://rizer-ryushin01.vercel.app`                                                          |
 | `STORAGE_DRIVER`                                 | `blob` (CSP에 Blob 공개 도메인을 넣는다)                                                          |
-| `REVALIDATE_SECRET`                              | 관리 화면과 같은 값                                                                               |
+| `REVALIDATE_SECRET`                              | 관리 화면과 같은 값. 캐시 비우기, 공개 API를 서버끼리 읽을 때(요청 제한 제외), 초안 미리보기 서명에 함께 쓴다 |
 
 ## 처음 설정할 때 한 일
 

@@ -11,6 +11,7 @@ import { localePath, MESSAGES } from "@/shared/i18n";
 import { artifactStructuredData, jsonLdText } from "../model/structured-data";
 import { ArtifactDossier } from "./artifact-dossier";
 import { DeepZoomViewer } from "./deep-zoom-viewer";
+import { PreviewBanner } from "./preview-banner";
 
 import { ArtifactLayout, Offline, ViewerColumn } from "./artifact-layout";
 
@@ -30,6 +31,8 @@ async function metadataFor({ params }: Props, locale: Locale): Promise<Metadata>
   if (detail === "offline") return { title: MESSAGES[locale].meta.artifactFallback };
   const { artifact } = detail;
   return {
+    // 초안 미리보기는 검색 엔진에 남기지 않는다.
+    ...(detail.preview && { robots: { index: false, follow: false } }),
     title: artifact.title,
     description: `${artifact.summary} ${artifact.power}`,
     openGraph: {
@@ -74,7 +77,18 @@ async function Content({ params, locale = "ko" }: LocaleProps) {
           <p>{MESSAGES[locale].artifact.preparing}</p>
         )}
       </ViewerColumn>
-      <ArtifactDossier artifact={artifact} annotations={annotations} related={related} />
+      <ArtifactDossier
+        artifact={artifact}
+        annotations={annotations}
+        related={related}
+        banner={
+          detail.preview && (
+            <PreviewBanner
+              exitTo={localePath(locale, artifact.status === "published" ? `/artifacts/${artifact.slug}` : "/artifacts")}
+            />
+          )
+        }
+      />
     </ArtifactLayout>
   );
 }

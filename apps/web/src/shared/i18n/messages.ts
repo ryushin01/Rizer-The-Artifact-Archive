@@ -155,6 +155,9 @@ const ko = {
     note: (number: string, title: string) => `주석 ${number} · ${title}`,
   },
   artifact: {
+    preview: "미리 보기",
+    previewNote: "관리 화면에서 연 미리 보기입니다. 공개하지 않은 유물은 방문자에게 보이지 않습니다.",
+    previewExit: "미리 보기 끝내기",
     offline: "아카이브에 잠시 연결할 수 없습니다. 잠시 후 새로고침해 주세요.",
     preparing: "이미지를 준비하고 있습니다.",
     loading: "유물을 불러오는 중…",
@@ -368,6 +371,9 @@ const en: Messages = {
     note: (number: string, title: string) => `Note ${number} · ${title}`,
   },
   artifact: {
+    preview: "Preview",
+    previewNote: "This preview was opened from the admin. Visitors can't see unpublished artifacts.",
+    previewExit: "End preview",
     offline:
       "The archive is temporarily unavailable. Please refresh in a moment.",
     preparing: "The image is being prepared.",

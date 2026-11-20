@@ -1,1 +1,1 @@
-export { getArtifact, getArtifacts } from "./server";
+export { type ArtifactDetail, getArtifact, getArtifacts } from "./server";

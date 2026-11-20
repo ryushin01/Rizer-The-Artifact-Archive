@@ -45,6 +45,9 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactCompiler: true,
   cacheComponents: true,
+  // Partial Prefetching(링크가 화면의 공통 껍데기만 미리 받음)을 켜면 카드 → 유물 화면 전환에서 불러오는 화면이 먼저 보인다.
+  // 지금처럼 캐시된 화면 전체를 미리 받는다. Next 17에서 기본값이 되면 전환을 확인하며 옮긴다.
+  partialPrefetching: false,
   compiler: { styledComponents: true },
   headers: async () => [
     { source: "/((?!storybook/).*)", headers },

@@ -74,6 +74,8 @@ describe("시드 동기화", () => {
     expect(vajra.imageAlt).not.toBe("옛 설명");
     expect(vajra.image?.dziKey).toBe(image.dziKey);
     expect(vajra.updatedAt.getTime()).toBe(vajra.createdAt.getTime());
+    // 버전을 올려, 그 전에 열어 둔 편집 화면이 예전 내용으로 덮어쓰지 않고 충돌로 막히게 한다.
+    expect([vajra.contentVersion, vajra.annotationsVersion]).toEqual([1, 1]);
     expect(await countAnnotations(db, "art_vajra")).toBe(SEED_ANNOTATIONS.vajra!.length);
     expect((await repo.getBySlug("gram"))?.title).toBe("고친 그람");
     expect(await countAnnotations(db, "art_gram")).toBe(0);

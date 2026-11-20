@@ -1,5 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 
+import { ADMIN_URL } from "./env";
 import { expectNoA11yViolations, expectNotFound, skipGate } from "./helpers";
 
 test.describe("첫 화면", () => {
@@ -77,7 +78,13 @@ test.describe("아카이브", () => {
     await page.goto("/artifacts");
     // 다른 테스트가 동시에 유물을 공개할 수 있어 정확한 개수는 단위 테스트에서 확인한다.
     await expect(page.getByRole("search").getByRole("status")).toHaveText(/^유물 \d+점$/);
+    // 브라우저는 관리 화면의 공개 API를 직접 부르지 않고, 공개 사이트의 검색 API(캐시를 거침)를 부른다.
+    const adminCalls: string[] = [];
+    page.on("request", (r) => r.url().startsWith(`${ADMIN_URL}/api/public`) && adminCalls.push(r.url()));
+    const searched = page.waitForResponse((r) => r.url().includes("/api/search?") && r.url().includes("q="));
     await page.getByRole("searchbox", { name: "검색" }).fill("토르");
+    expect((await searched).status()).toBe(200);
+    expect(adminCalls).toEqual([]);
     // 해설과 주석까지 찾으므로 여러 점이 나오고, 이름이 맞는 쪽이 앞에 온다.
     await expect(page.getByRole("search").getByRole("status")).toHaveText(/^유물 \d+점$/);
     await expect(page.getByRole("link", { name: "묠니르" })).toBeVisible();

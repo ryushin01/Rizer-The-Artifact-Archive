@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useActionState, useRef } from "react";
+import { type FormEvent, useActionState, useRef, useState } from "react";
 import { unstable_rethrow } from "next/navigation";
 import { toast } from "sonner";
 
@@ -44,6 +44,9 @@ export function usePageForm(
     },
     { status: "idle", attempt: 0 },
   );
+  // 마지막으로 고친 때의 시도 번호. 저장에 성공하면 시도 번호가 바뀌어 저장한 것으로 본다. 실패하면 아직 저장하지 않은 것이다.
+  const [touchedAt, setTouchedAt] = useState<number | null>(null);
+  const dirty = touchedAt !== null && (touchedAt === state.attempt || state.status === "error");
   const errors = state.status === "error" ? state.fieldErrors : {};
   const values = state.status === "error" ? state.values : defaults;
 
@@ -56,6 +59,11 @@ export function usePageForm(
   return {
     formAction,
     onSubmit,
+    /** form의 onChange. 고쳤다고 기록한다(저장하지 않고 떠날 때 묻는 데 쓴다). */
+    onChange: () => setTouchedAt(state.attempt),
+    dirty,
+    /** 저장에 실패해 보낸 값을 다시 그리고 있다(고친 것이 없어도 그 값은 보낼 때의 화면 내용이다). */
+    failed: state.status === "error",
     pending,
     formKey: state.attempt,
     formError: state.status === "error" ? state.formError : undefined,

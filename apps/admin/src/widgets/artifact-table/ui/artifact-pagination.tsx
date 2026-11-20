@@ -50,7 +50,8 @@ export function ArtifactPagination({
             </PaginationItem>
           ) : (
             <PaginationItem key={p}>
-              <PaginationLink href={href(p)} isActive={p === page} aria-label={`${p}쪽`}>
+              {/* 이름은 보이는 숫자로 시작하는 낱말이어야 음성 입력("2 쪽")으로도 고른다(KWCAG 6.5.3). */}
+              <PaginationLink href={href(p)} isActive={p === page} aria-label={`${p} 쪽`}>
                 {p}
               </PaginationLink>
             </PaginationItem>

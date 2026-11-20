@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { describe, expect, it, vi } from "vitest";
 
+import { makeArtifactFixture } from "@/entities/artifact";
 import { ACTION_ERROR_MESSAGE } from "@/shared/lib/use-guarded-action";
 
 import { ArtifactForm } from "./artifact-form";
@@ -56,6 +57,78 @@ describe("ArtifactForm", () => {
     await vi.waitFor(() => expect(toast.error).toHaveBeenCalledWith(ACTION_ERROR_MESSAGE), WAIT);
     await vi.waitFor(() => expect(screen.getByLabelText("이름")).not.toHaveAttribute("readonly"), WAIT);
     expect(screen.getByLabelText("이름")).toHaveValue("시험의 검");
+  });
+
+  it("셀렉트·체크박스만 바꿔도 저장하지 않은 변경으로 보고, 다른 화면 링크로 떠나기 전에 묻는다", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+    const { unmount } = render(
+      <>
+        {/* jsdom은 실제로 화면을 옮기지 못하므로, 묻지 않고 지나간 클릭도 여기서 멈춘다. */}
+        <a href="/artifacts" onClick={(event) => event.preventDefault()}>
+          유물 목록
+        </a>
+        <ArtifactForm readOnly={false} />
+      </>,
+    );
+    const leave = () => userEvent.click(screen.getByRole("link", { name: "유물 목록" }));
+    await leave();
+    expect(confirm).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole("combobox", { name: "전시실" }));
+    await userEvent.click(await screen.findByRole("option", { name: "북유럽·게르만 신화" }));
+    await leave();
+    expect(confirm).toHaveBeenCalledTimes(1);
+    unmount();
+
+    // 체크박스는 숨은 input의 change 이벤트가 폼까지 올라온다.
+    confirm.mockClear();
+    render(
+      <>
+        <a href="/artifacts" onClick={(event) => event.preventDefault()}>
+          유물 목록
+        </a>
+        <ArtifactForm readOnly={false} />
+      </>,
+    );
+    await userEvent.click(screen.getByRole("checkbox"));
+    await leave();
+    expect(confirm).toHaveBeenCalledTimes(1);
+    confirm.mockRestore();
+  });
+
+  it("고치기 시작한 뒤 화면을 다시 읽어도(공개 전환 등) 처음 버전을 보내, 그사이 다른 곳의 저장을 덮어쓰지 않는다", async () => {
+    const artifact = makeArtifactFixture(0);
+    const sent = () => document.querySelector<HTMLInputElement>('input[name="expectedVersion"]')?.value;
+    const { rerender } = render(<ArtifactForm artifact={artifact} version={1} readOnly={false} />);
+    expect(sent()).toBe("1");
+    // 고친 것이 없으면 새로 읽은 내용과 버전을 따른다.
+    rerender(<ArtifactForm artifact={{ ...artifact, title: "다른 곳의 이름" }} version={2} readOnly={false} />);
+    expect(sent()).toBe("2");
+    expect(screen.getByLabelText("이름")).toHaveValue("다른 곳의 이름");
+    // 고치기 시작하면 그때의 버전을 붙잡아 둔다. 고친 칸도 그대로 둔다.
+    await userEvent.type(screen.getByLabelText("이름"), " 고침");
+    rerender(<ArtifactForm artifact={{ ...artifact, title: "또 다른 이름" }} version={3} readOnly={false} />);
+    expect(sent()).toBe("2");
+    expect(screen.getByLabelText("이름")).toHaveValue("다른 곳의 이름 고침");
+
+    saveArtifactAction.mockClear();
+    saveArtifactAction.mockResolvedValue({ status: "idle" });
+    await userEvent.click(screen.getByRole("button", { name: "저장" }));
+    await vi.waitFor(() => expect(saveArtifactAction).toHaveBeenCalledTimes(1), WAIT);
+    expect((saveArtifactAction.mock.calls[0]![1] as FormData).get("expectedVersion")).toBe("2");
+  });
+
+  it("고치지 않고 저장했다가 충돌로 실패하면, 화면을 다시 읽어도 보낸 값의 버전을 그대로 둔다", async () => {
+    const artifact = makeArtifactFixture(0);
+    const sent = () => document.querySelector<HTMLInputElement>('input[name="expectedVersion"]')?.value;
+    saveArtifactAction.mockResolvedValue({ status: "error", formError: "먼저 저장했습니다.", fieldErrors: {}, values: { title: artifact.title, expectedVersion: "1" } });
+    const { rerender } = render(<ArtifactForm artifact={artifact} version={1} readOnly={false} />);
+    await userEvent.click(screen.getByRole("button", { name: "저장" }));
+    await vi.waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("먼저 저장했습니다."), WAIT);
+    // 공개 전환 등으로 화면을 다시 읽어 새 버전이 와도, 폼은 아직 예전 화면의 값을 그리고 있다.
+    rerender(<ArtifactForm artifact={{ ...artifact, title: "다른 곳의 이름" }} version={2} readOnly={false} />);
+    expect(sent()).toBe("1");
+    expect(screen.getByLabelText("이름")).toHaveValue(artifact.title);
   });
 
   it("칸마다 레이블이 있고 필드 오류를 그 칸 아래에 보여 준다", async () => {
