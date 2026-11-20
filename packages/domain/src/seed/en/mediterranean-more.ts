@@ -282,11 +282,11 @@ The bronze serpent remained in Jerusalem for centuries. According to the Book of
 The crown later became one of the most precious relics. There are records of pilgrims venerating it in Jerusalem in the early fifth century, and later it was kept in the imperial palace of Constantinople. In 1238, when Baldwin II, the impoverished emperor of the Latin Empire, pawned it to Venetian merchants, King Louis IX of France paid the debt and brought it to Paris.
 
 Louis IX built the Sainte-Chapelle, enclosed in stained glass, within his palace to house the crown. Thorns taken from it were distributed among reliquaries all over Europe. The crown, kept in the Cathedral of Notre-Dame, was rescued from the flames of the 2019 fire.`,
-    imageAlt: "A black-and-white photograph of Christ Crowned with Thorns, carved in boxwood in seventeenth-century Spain or Portugal. Christ sits wearing the crown of thorns in a shell-shaped niche, above a base carved with scrolls and faces.",
+    imageAlt: "The right wing of a diptych painted in tempera and gold on oak in Styria, Austria, about 1400. Above, two men press the crown of thorns onto the head of the seated Christ with crossed staves; below, Christ prays in the garden while his disciples sleep.",
     annotations: [
-      n("Christ crowned with thorns", "Christ sits in a shell-shaped niche wearing the crown of thorns. This small figure was carved in boxwood in seventeenth-century Spain or Portugal."),
-      n("Shell niche", "A niche shaped like a scallop shell spread like a fan surrounds the figure."),
-      n("Carved base", "A base carved with scrolls and faces. Louis IX of France built the Sainte-Chapelle in his Paris palace to house the crown of thorns."),
+      n("Crown of thorns", "Christ sits wearing the crown of thorns and a red robe. The soldiers plaited a crown of thorns, put a reed in his hand and mocked him as King of the Jews."),
+      n("Men with staves", "Two men on either side press the crown onto his head with crossed staves, a scene often painted in late medieval northern Europe. Louis IX of France built the Sainte-Chapelle in his Paris palace to house the crown of thorns."),
+      n("Garden of Gethsemane", "The lower panel shows Christ praying in the Garden of Gethsemane on the night before his arrest, while his disciples sleep. It is the right wing of a diptych painted in Styria, Austria, about 1400."),
     ],
   },
   "true-cross": {
@@ -453,11 +453,11 @@ On the way back, while Gilgamesh was bathing in a cool spring, a snake smelled t
 In Lugal-e, Sharur tells Ninurta that Asag, a monster born in the mountains, is ravaging the land with an army of stone warriors. When Ninurta is driven back in the first battle, Sharur flies to Enlil, king of the gods, and returns with his counsel, and Ninurta at last defeats Asag.
 
 After the battle Ninurta piled up stones to make the mountains and gathered the waters flowing down from them into the Tigris to water the fields. He cursed the stones that had sided with Asag and blessed those that had sided with him, giving each kind of stone its use.`,
-    imageAlt: "A black-and-white photograph of a Sumerian marble mace head of about 2900–2700 BCE. The round stone has a hole at the top for the shaft, and a bull's head bulges out from its side.",
+    imageAlt: "A pink limestone mace head from Predynastic Egypt, about 3650–3100 BCE. A face is carved on the front of the pear-shaped body, with a long nose, two drilled eyes and a thin mouth, and pierced knobs project from both sides.",
     annotations: [
-      n("Bull's head", "Two bulls' heads are carved in relief on the mace head, one projecting forward. This Sumerian marble mace head dates from about 2900–2700 BCE."),
-      n("Shaft hole", "A wooden shaft was fitted into the hole at the top."),
-      n("Round body", "The round body. Ninurta's mace Sharur could speak, flew off on its own to spy on the enemy and reported back to its master."),
+      n("Face on the front", "Two eyes are drilled above a long nose, with a thin mouth incised below. Ninurta's mace Sharur could speak, flew off on its own to spy on the enemy and reported back to its master."),
+      n("Side knobs", "Pierced knobs are carved on both sides of the body. The mace head is small: 4 cm high and 5.6 cm wide."),
+      n("Pink limestone body", "Pink limestone is carved into a pear shape and polished smooth. It dates from Predynastic Egypt, about 3650–3100 BCE, and is among the very early real mace heads."),
     ],
   },
   "inannas-jewels": {
@@ -567,11 +567,11 @@ In the Shahnameh this cup belongs to Kay Khosrow, but later Persian poets called
 When the repentant Sam came looking for his son, the Simurgh gave Zal some of her feathers as she let him go. If trouble came, she told him, he should burn a feather and she would fly to help him at once. Later, when Zal's wife Rudabeh was near death in childbirth, Zal burned a feather. The Simurgh came and showed how to deliver the child by cutting open her belly and how to heal the wound, and the child so born was Rostam, the greatest hero of Iran.
 
 When Rostam was gravely wounded fighting the invincible prince Esfandiyar, Zal burned a feather again. The Simurgh healed Rostam's wounds and told him to make an arrow from a tamarisk branch and shoot Esfandiyar in the eyes.`,
-    imageAlt: "A page from a Shahnameh painted in Iran about 1300–30, \"Zal Is Restored to His Father Sam by the Simurgh.\" Persian verses are written in several columns at the top, and the painting below shows a long-tailed divine bird, the young Zal, and a retinue leading a horse.",
+    imageAlt: "A page from a Shahnameh made in Iran about 1330–40, \"Zal in the Simurgh's Nest.\" Persian verses fill several columns at the top and right; a small painting at lower left shows the great red-headed Simurgh, the naked child Zal on a rocky mountain and two white animals.",
     annotations: [
-      n("Simurgh", "At left is the Simurgh, a divine bird trailing a splendid tail. The Simurgh raised the abandoned baby Zal in her nest."),
-      n("Zal and his father Sam", "The young man in the middle is Zal; at right are his father Sam and his retinue. This is a page from a Shahnameh painted in Iran about 1300–30."),
-      n("Text of the poem", "Above, Ferdowsi's verses are written in several columns. Letting Zal go, the Simurgh gave him her feather, saying she would come if he burned it in time of trouble."),
+      n("Simurgh", "A great bird with a red head and many-colored wings looks down at the child on the rocky mountain. The Simurgh carried the baby Zal, abandoned because he was born white-haired, to her nest and raised him."),
+      n("Young Zal", "The naked child Zal stands on the mountaintop. The painting is tiny, 5.6 cm wide and 8.1 cm high. It was painted in Iran about 1330–40."),
+      n("Text of the poem", "Ferdowsi's verses are written in several columns. Sending Zal back to his father, the Simurgh gave him her feather, saying she would come if he burned it in time of trouble."),
     ],
   },
 };

@@ -22,6 +22,6 @@ export const Places: StoryObj<typeof meta> = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getAllByRole("link")).toHaveLength(GALLERIES.length);
-    await expect(canvas.getByRole("link", { name: /아서왕과 기사 전설\s*2점/ })).toHaveAttribute("href", "/artifacts?gallery=arthurian");
+    await expect(canvas.getByRole("link", { name: /아더왕과 기사 전설\s*2점/ })).toHaveAttribute("href", "/artifacts?gallery=arthurian");
   },
 };

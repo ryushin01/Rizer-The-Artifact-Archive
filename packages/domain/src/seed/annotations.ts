@@ -1,5 +1,6 @@
 import type { AnnotationInput } from "../annotation";
 import { LEGEND_ANNOTATIONS } from "./legends/annotations";
+import { EXTRA_ANNOTATIONS } from "./legends/annotations-extra";
 import { MORE_ANNOTATIONS } from "./legends/annotations-more";
 
 export type SeedAnnotation = Omit<AnnotationInput, "order">;
@@ -17,7 +18,7 @@ const a = (title: string, body: string, x: number, y: number, w: number, h: numb
 const FEATURED_ANNOTATIONS: Record<string, SeedAnnotation[]> = {
   excalibur: [
     a("둥근 자루 끝", "자루 끝의 둥근 추는 칼의 무게중심을 손 가까이 당겨, 긴 칼을 한 손으로도 다루기 쉽게 한다.", 42, 5, 16, 8),
-    a("십자형 코등이", "곧게 뻗은 코등이는 중세 기사의 검을 십자가처럼 보이게 했다. 아서는 이 검을 땅에 꽂고 맹세를 받았다고 그려지곤 한다.", 30, 24, 40, 6),
+    a("십자형 코등이", "곧게 뻗은 코등이는 중세 기사의 검을 십자가처럼 보이게 했다. 아더는 이 검을 땅에 꽂고 맹세를 받았다고 그려지곤 한다.", 30, 24, 40, 6),
     a("곧은 양날", "끝으로 갈수록 가늘어지는 양날은 베기와 찌르기를 모두 위한 모양이다. 전설은 이 칼날이 적의 갑옷을 천처럼 갈랐다고 전한다.", 43, 32, 14, 42),
     a("칼끝", "맬러리는 베디비어가 검을 호수에 던지자 물속에서 손이 솟아 칼끝부터 받아 들었다고 적는다.", 44, 84, 12, 10),
   ],
@@ -105,4 +106,5 @@ export const SEED_ANNOTATIONS: Record<string, SeedAnnotation[]> = {
   ...FEATURED_ANNOTATIONS,
   ...LEGEND_ANNOTATIONS,
   ...MORE_ANNOTATIONS,
+  ...EXTRA_ANNOTATIONS,
 };

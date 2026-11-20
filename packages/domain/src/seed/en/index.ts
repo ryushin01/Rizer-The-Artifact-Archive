@@ -1,9 +1,12 @@
+import { EN_ASIA_EXTRA } from "./asia-extra";
 import { EN_ASIA_MORE } from "./asia-more";
 import { EN_CELTIC_ASIA } from "./celtic-asia";
+import { EN_EUROPE_EXTRA } from "./europe-extra";
 import { EN_EUROPE_MORE } from "./europe-more";
 import { EN_EUROPE_NORTH } from "./europe-north";
 import { EN_FEATURED } from "./featured";
 import { EN_MEDITERRANEAN, EN_MORE } from "./mediterranean";
+import { EN_MEDITERRANEAN_EXTRA } from "./mediterranean-extra";
 import { EN_MEDITERRANEAN_MORE } from "./mediterranean-more";
 import type { EnArtifact } from "./types";
 
@@ -19,4 +22,7 @@ export const SEED_EN: Record<string, EnArtifact> = {
   ...EN_EUROPE_MORE,
   ...EN_MEDITERRANEAN_MORE,
   ...EN_ASIA_MORE,
+  ...EN_EUROPE_EXTRA,
+  ...EN_MEDITERRANEAN_EXTRA,
+  ...EN_ASIA_EXTRA,
 };

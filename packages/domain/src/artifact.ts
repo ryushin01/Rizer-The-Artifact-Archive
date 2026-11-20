@@ -15,7 +15,7 @@ export type ArtifactStatus = z.infer<typeof artifactStatusSchema>;
  * 공개 사이트의 필터와 어드민 선택지가 같은 목록을 쓴다.
  */
 export const GALLERIES = [
-  { id: "arthurian", label: "아서왕과 기사 전설", labelEn: "Arthurian & Chivalric" },
+  { id: "arthurian", label: "아더왕과 기사 전설", labelEn: "Arthurian & Chivalric" },
   { id: "norse", label: "북유럽·게르만 신화", labelEn: "Norse & Germanic" },
   { id: "celtic", label: "켈트 신화", labelEn: "Celtic" },
   { id: "greek", label: "그리스 신화", labelEn: "Greek" },

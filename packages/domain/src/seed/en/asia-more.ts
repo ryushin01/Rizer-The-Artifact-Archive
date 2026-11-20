@@ -472,11 +472,11 @@ Not daring to go all the way to India, the prince waited about three years and t
 The crafty prince pretended to set sail and then went into hiding, gathered six skilled craftsmen and had them spend more than a thousand days making a branch that looked real. He presented it with a false tale of overcoming monsters and starvation at sea to reach Mount Horai, and the princess was left with no choice but to marry him.
 
 Just then the craftsmen arrived, complaining that they had not yet been paid for their thousand days of work. With the lie exposed, the princess joyfully sent the branch back, and the prince vanished into the mountains in shame. Mount Horai is an island from Chinese tales of immortals, where the First Emperor of Qin is said to have sent Xu Fu to search for the elixir of immortality.`,
-    imageAlt: "Mount Horai, a nineteenth-century Japanese red-lacquered sake cup. Inside, pine and plum trees, two flying cranes and a turtle at the water's edge are painted in gold and silver.",
+    imageAlt: "A long, narrow portable writing box from Edo-period Japan, nineteenth century. On gold lacquer sprinkled with gold flakes, Mount Horai, the island of the immortals, is raised in relief: a rocky peak soars in the middle, with round-leaved trees, tiled pavilions and rippling water.",
     annotations: [
-      n("Two cranes", "Two cranes fly across a red sky. Cranes and turtles are long-lived creatures, so they were painted together in pictures of Mount Horai, the island of the immortals."),
-      n("Pine and plum", "Gold and silver foil is applied to the pine and plum branches. This sake cup was made in nineteenth-century Japan."),
-      n("Turtle", "A turtle lies at the water's edge. Prince Kuramochi had craftsmen make a fake of the branch from Mount Horai, with silver roots, a golden trunk and fruit of white jewels."),
+      n("Peaks of Mount Horai", "The rocky peaks are raised in gold and silver lacquer so they soar upward. Mount Horai is the island of the immortals said to lie in the eastern sea."),
+      n("Jewel-like trees", "Clusters of round leaves bulge like jewels. Prince Kuramochi had craftsmen make a fake of the branch from Mount Horai, with silver roots, a golden trunk and fruit of white jewels."),
+      n("Pavilions by the water", "Tiled pavilions stand by the water. Inside, clouds, birds and water plants are painted, with a space for a tiny inkstone. The box was made in nineteenth-century Edo-period Japan."),
     ],
   },
   "fire-rat-robe": {
