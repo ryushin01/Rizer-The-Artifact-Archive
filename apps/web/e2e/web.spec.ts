@@ -92,7 +92,7 @@ test.describe("아카이브", () => {
 
     await page.getByRole("button", { name: "조건 지우기" }).click();
     await page.getByRole("radio", { name: "한국 신화와 설화" }).check();
-    await expect(page.getByRole("search").getByRole("status")).toHaveText("유물 4점");
+    await expect(page.getByRole("search").getByRole("status")).toHaveText("유물 14점");
     await expect(page).toHaveURL(/gallery=korean/);
     await expectNoA11yViolations(page);
   });
@@ -133,7 +133,7 @@ test.describe("아카이브", () => {
 
   test("주소의 조건으로 서버에서 바로 거른다", async ({ page }) => {
     await page.goto("/artifacts?gallery=norse");
-    await expect(page.getByRole("search").getByRole("status")).toHaveText("유물 18점");
+    await expect(page.getByRole("search").getByRole("status")).toHaveText("유물 28점");
     await expect(
       page.getByRole("radio", { name: "북유럽·게르만 신화" }),
     ).toBeChecked();

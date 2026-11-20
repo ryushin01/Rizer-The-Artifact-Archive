@@ -8,7 +8,7 @@ import { PageHeading } from "./page-heading";
 const meta = {
   title: "Widgets/AppShell/PageHeading",
   component: PageHeading,
-  args: { title: "유물", description: "전설 속 유물 100점" },
+  args: { title: "유물", description: "전설 속 유물 200점" },
 } satisfies Meta<typeof PageHeading>;
 export default meta;
 
