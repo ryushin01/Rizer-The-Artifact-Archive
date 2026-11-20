@@ -92,6 +92,9 @@ export function DeepZoomViewer({ title, image, imageAlt, annotations, transition
         gestureSettingsMouse: { clickToZoom: false, scrollToZoom: true },
         placeholderFillStyle: image.dominantColor,
         immediateRender: false,
+        // 기본(WebGL)은 타일마다 텍스처를 올려, GPU가 없는 환경(소프트웨어 WebGL)에서는 본 뷰어와 미니맵이
+        // 메인 스레드를 수백 ms씩 막는다. 사진 한 장과 HTML 주석만 그리므로 캔버스로 충분하다.
+        drawer: "canvas",
       });
 
       viewer.addHandler("open", () => {
