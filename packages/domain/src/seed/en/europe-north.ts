@@ -2,7 +2,7 @@ import type { EnArtifact } from "./types";
 
 const n = (title: string, body: string) => ({ title, body });
 
-/** 아서왕·기사 전설과 북유럽·게르만 신화의 영어 번역 */
+/** 아더왕·기사 전설과 북유럽·게르만 신화의 영어 번역 */
 export const EN_EUROPE_NORTH: Record<string, EnArtifact> = {
   clarent: {
     title: "Clarent",

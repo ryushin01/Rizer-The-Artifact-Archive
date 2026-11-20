@@ -1728,16 +1728,16 @@
     "version": "20261120101832"
   },
   "crown-of-thorns": {
-    "dziKey": "tiles/art_crown_of_thorns/v20261120101837/image.dzi",
-    "previewKey": "tiles/art_crown_of_thorns/v20261120101837/preview.webp",
-    "thumbKey": "tiles/art_crown_of_thorns/v20261120101837/thumb.webp",
+    "dziKey": "tiles/art_crown_of_thorns/v20261120112349/image.dzi",
+    "previewKey": "tiles/art_crown_of_thorns/v20261120112349/preview.webp",
+    "thumbKey": "tiles/art_crown_of_thorns/v20261120112349/thumb.webp",
     "originalKey": "",
-    "width": 864,
-    "height": 1592,
-    "lqip": "data:image/webp;base64,UklGRo4AAABXRUJQVlA4IIIAAAAwBACdASoNABgAPu1kqk4ppaQiMAgBMB2JaQAAYeq/lbV2tXR1Dh6zoAAA/tXri4wBtYSthYHgv3M3dRcZcPqCouMAvsfIjJ8/l2cmJjExpPi+8AGJ87b3R5KQvySf/oxLgZX9FXO0sv1d+gumTdODG2tD1i/OB3kq9vH5+It4AAAA",
-    "dominantColor": "#d8d8d8",
-    "tileCount": 21,
-    "version": "20261120101837"
+    "width": 1911,
+    "height": 3000,
+    "lqip": "data:image/webp;base64,UklGRpoAAABXRUJQVlA4II4AAAAQBACdASoPABgAPu1iqU2ppaOiMAgBMB2JQBWAMXwb32kIBayyH4u0AAD9Uev/GWijht6yOscR5JNVQ3SLh+OSz4icVQHgDDLYA59fk5V2oYdTBR1cn6XsE00RZTxujhUrqd0t0hou5L7raBj1UtN9dOKJb4e21ro1SPkFM7y5HG4DUiyr9LKb8FfAAAAA",
+    "dominantColor": "#a88868",
+    "tileCount": 43,
+    "version": "20261120112349"
   },
   "true-cross": {
     "dziKey": "tiles/art_true_cross/v20261120101906/image.dzi",
@@ -1836,16 +1836,16 @@
     "version": "20261120102012"
   },
   "sharur": {
-    "dziKey": "tiles/art_sharur/v20261120102015/image.dzi",
-    "previewKey": "tiles/art_sharur/v20261120102015/preview.webp",
-    "thumbKey": "tiles/art_sharur/v20261120102015/thumb.webp",
+    "dziKey": "tiles/art_sharur/v20261120112353/image.dzi",
+    "previewKey": "tiles/art_sharur/v20261120112353/preview.webp",
+    "thumbKey": "tiles/art_sharur/v20261120112353/thumb.webp",
     "originalKey": "",
-    "width": 695,
-    "height": 800,
-    "lqip": "data:image/webp;base64,UklGRpgAAABXRUJQVlA4IIwAAADQBACdASoVABgAPu1ip04ppSMiMBgMATAdiWkAACUqssPl4GVhgPwOjYxbJw8oAADZ4vovThvObegKNqoUiwxKUZ3BjK/m9+yGiIzOabFF3QiWZDJpv86T7FuZnQ8b6NRS0O4NIfp6Wo/yRIm2+yDSJ3eLhutM1u8EmqyW6aMXPLyMEXE+Aio3SEAAAA==",
-    "dominantColor": "#e8e8e8",
-    "tileCount": 15,
-    "version": "20261120102015"
+    "width": 3000,
+    "height": 2000,
+    "lqip": "data:image/webp;base64,UklGRloAAABXRUJQVlA4IE4AAADwAwCdASoYABAAPu1mq04ppaQiMAgBMB2JQBdmUABpvs5YRo99RGKgAP7sOaMbm7A7LhfAf7vnMTFkr5LOCf5ozmTFqdzm5Jb8dw1XAAA=",
+    "dominantColor": "#a8a898",
+    "tileCount": 43,
+    "version": "20261120112353"
   },
   "inannas-jewels": {
     "dziKey": "tiles/art_inannas_jewels/v20261120102017/image.dzi",
@@ -1908,16 +1908,16 @@
     "version": "20261120102056"
   },
   "simurgh-feather": {
-    "dziKey": "tiles/art_simurgh_feather/v20261120102100/image.dzi",
-    "previewKey": "tiles/art_simurgh_feather/v20261120102100/preview.webp",
-    "thumbKey": "tiles/art_simurgh_feather/v20261120102100/thumb.webp",
+    "dziKey": "tiles/art_simurgh_feather/v20261120112355/image.dzi",
+    "previewKey": "tiles/art_simurgh_feather/v20261120112355/preview.webp",
+    "thumbKey": "tiles/art_simurgh_feather/v20261120112355/thumb.webp",
     "originalKey": "",
-    "width": 900,
-    "height": 1154,
-    "lqip": "data:image/webp;base64,UklGRmYAAABXRUJQVlA4IFoAAADQAwCdASoTABgAPu1krE+ppSQiMBgIATAdiWMAnS/FgOdNy70VFgAA/ExrVbJr8q0bo1s5G60vqvvP5514lVPCA8D3syGutzggYdHOFjKwi/26XlRjcgEIgAA=",
-    "dominantColor": "#b88868",
-    "tileCount": 19,
-    "version": "20261120102100"
+    "width": 2093,
+    "height": 3000,
+    "lqip": "data:image/webp;base64,UklGRnQAAABXRUJQVlA4IGgAAAAQBACdASoRABgAPu1krFAppSQisBgIATAdiWUAvkgQ74J9jT9+CSmRAAD+s7V+9uH6SO30lDN4UNuNg4buuTpDhYLvT3jbJXFS27bzOZ3RoQrZbcLbPg5uct9WnO5oBnggltaumSAAAA==",
+    "dominantColor": "#b8a888",
+    "tileCount": 54,
+    "version": "20261120112355"
   },
   "brahmastra": {
     "dziKey": "tiles/art_brahmastra/v20261120102114/image.dzi",
@@ -2208,16 +2208,16 @@
     "version": "20261120102505"
   },
   "jeweled-branch-of-horai": {
-    "dziKey": "tiles/art_jeweled_branch_of_horai/v20261120102508/image.dzi",
-    "previewKey": "tiles/art_jeweled_branch_of_horai/v20261120102508/preview.webp",
-    "thumbKey": "tiles/art_jeweled_branch_of_horai/v20261120102508/thumb.webp",
+    "dziKey": "tiles/art_jeweled_branch_of_horai/v20261120112401/image.dzi",
+    "previewKey": "tiles/art_jeweled_branch_of_horai/v20261120112401/preview.webp",
+    "thumbKey": "tiles/art_jeweled_branch_of_horai/v20261120112401/thumb.webp",
     "originalKey": "",
-    "width": 860,
-    "height": 790,
-    "lqip": "data:image/webp;base64,UklGRrIAAABXRUJQVlA4IKYAAABQBQCdASoYABYAPu1ur1IppiQiqAgBMB2JaACw7BBX7Rlu0gQ9Tb0RfBdqN/ZZLdFzkwAA/t7pLHMlVwCit1L171fGYWMtNvqykGOE2fLfpkHEd8aPsz4HbBaN/8SCcWov30guqcdmgo7mj5bHBVnhnj4mYWAf5i/zYzgZT3hCjOB+N/0Gfq6/p2f+g1YME/1wjzJwOgiGC8S7XHvuJ51WyZAbbcAA",
-    "dominantColor": "#d8d8d8",
-    "tileCount": 15,
-    "version": "20261120102508"
+    "width": 1894,
+    "height": 3000,
+    "lqip": "data:image/webp;base64,UklGRnIAAABXRUJQVlA4IGYAAADwAwCdASoPABgAPu1kqk4ppaQiMAgBMB2JYgCdIKnC4Y5NH/VmhieAAPyrgdcuA33s0OhR8wboxF6gP55mTpFlK6dnD7jqlxw9qgtv8qc5r53yp208rAPCyx9QW6ylcy+FTomAAAA=",
+    "dominantColor": "#a8a8a8",
+    "tileCount": 43,
+    "version": "20261120112401"
   },
   "fire-rat-robe": {
     "dziKey": "tiles/art_fire_rat_robe/v20261120102511/image.dzi",

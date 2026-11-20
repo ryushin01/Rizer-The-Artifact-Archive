@@ -6,9 +6,9 @@
 
 | 유물 | 전시실 | 사진 속 실제 소장품 (등록 번호) |
 |---|---|---|
-| 엑스칼리버 | 아서왕과 기사 전설 | [Hand-and-a-Half Sword](https://www.metmuseum.org/art/collection/search/35888) — European or possibly British, 15th century (14.25.1196) |
-| 성배 | 아서왕과 기사 전설 | [The Antioch "Chalice"](https://www.metmuseum.org/art/collection/search/468346) — Byzantine, 500–550 (50.4) |
-| 뒤랑달 | 아서왕과 기사 전설 | [Two-Handed Sword](https://www.metmuseum.org/art/collection/search/35388) — British or Western European, ca. 1400–1450 (2023.580.1) |
+| 엑스칼리버 | 아더왕과 기사 전설 | [Hand-and-a-Half Sword](https://www.metmuseum.org/art/collection/search/35888) — European or possibly British, 15th century (14.25.1196) |
+| 성배 | 아더왕과 기사 전설 | [The Antioch "Chalice"](https://www.metmuseum.org/art/collection/search/468346) — Byzantine, 500–550 (50.4) |
+| 뒤랑달 | 아더왕과 기사 전설 | [Two-Handed Sword](https://www.metmuseum.org/art/collection/search/35388) — British or Western European, ca. 1400–1450 (2023.580.1) |
 | 묠니르 | 북유럽·게르만 신화 | [War Hammer](https://www.metmuseum.org/art/collection/search/25073) — French, ca. 1450 (04.3.49) |
 | 궁니르 | 북유럽·게르만 신화 | [Spearhead](https://www.metmuseum.org/art/collection/search/24939) — European, ca. 800–1000 (1989.220) |
 | 그람 | 북유럽·게르만 신화 | [Viking Sword](https://www.metmuseum.org/art/collection/search/24832) — European, probably Scandinavia, 10th century (55.46.1) |
@@ -22,15 +22,15 @@
 | 야타노카가미 | 일본 신화 | [Mirror (Shinjūkyō) Based on Han Dynasty Prototype with Cosmological Design](https://www.metmuseum.org/art/collection/search/44835) — Japan, 4th–5th century (1975.268.383) |
 | 만파식적 | 한국 신화와 설화 | [Shakuhachi](https://www.metmuseum.org/art/collection/search/500684) — Japanese, 19th century (89.4.126) |
 | 천부인 | 한국 신화와 설화 | 합성: [Short Sword (Duan Jian)](https://www.metmuseum.org/art/collection/search/26566) (1998.418), [Mirror in Han style](https://www.metmuseum.org/art/collection/search/61370) (10.70), [Dōtaku (Bronze Bell)](https://www.metmuseum.org/art/collection/search/44831) (18.68) |
-| 클라렌트 | 아서왕과 기사 전설 | [Two-Handed Sword](https://www.metmuseum.org/art/collection/search/27344) — Italian, 15th–16th century (14.25.935) |
-| 카른웨난 | 아서왕과 기사 전설 | [Roundel Dagger](https://www.metmuseum.org/art/collection/search/32672) — possibly British, 14th century (26.145.31) |
-| 롱고미니아드 | 아서왕과 기사 전설 | [Lance Head ("Flügellanz")](https://www.metmuseum.org/art/collection/search/473657) — Carolingian or Ottonian, ca. 9th–10th century (2002.382) |
-| 프리드웬 | 아서왕과 기사 전설 | [Parade Shield Depicting the Conversion of Saint Paul](https://www.metmuseum.org/art/collection/search/22895) — Italian, Milan, ca. 1570 (25.163.1) |
-| 오트클레르 | 아서왕과 기사 전설 | [Sword](https://www.metmuseum.org/art/collection/search/23367) — Western European, ca. 1400 (32.75.225) |
-| 주아이외즈 | 아서왕과 기사 전설 | [Cross Hilt Sword](https://www.metmuseum.org/art/collection/search/35367) — hilt, British, London; blade, German, Solingen, 1600–1625 (2010.165) |
-| 티소나 | 아서왕과 기사 전설 | [Sword with Scabbard](https://www.metmuseum.org/art/collection/search/25573) — Spanish, late 15th century (04.3.459a, b) |
-| 콜라다 | 아서왕과 기사 전설 | [Sword](https://www.metmuseum.org/art/collection/search/27459) — Spanish, ca. 1500 (14.25.1098) |
-| 커타나 | 아서왕과 기사 전설 | [Basket-Hilted Sword](https://www.metmuseum.org/art/collection/search/24812) — British, 1600–1625 (49.163.6) |
+| 클라렌트 | 아더왕과 기사 전설 | [Two-Handed Sword](https://www.metmuseum.org/art/collection/search/27344) — Italian, 15th–16th century (14.25.935) |
+| 카른웨난 | 아더왕과 기사 전설 | [Roundel Dagger](https://www.metmuseum.org/art/collection/search/32672) — possibly British, 14th century (26.145.31) |
+| 롱고미니아드 | 아더왕과 기사 전설 | [Lance Head ("Flügellanz")](https://www.metmuseum.org/art/collection/search/473657) — Carolingian or Ottonian, ca. 9th–10th century (2002.382) |
+| 프리드웬 | 아더왕과 기사 전설 | [Parade Shield Depicting the Conversion of Saint Paul](https://www.metmuseum.org/art/collection/search/22895) — Italian, Milan, ca. 1570 (25.163.1) |
+| 오트클레르 | 아더왕과 기사 전설 | [Sword](https://www.metmuseum.org/art/collection/search/23367) — Western European, ca. 1400 (32.75.225) |
+| 주아이외즈 | 아더왕과 기사 전설 | [Cross Hilt Sword](https://www.metmuseum.org/art/collection/search/35367) — hilt, British, London; blade, German, Solingen, 1600–1625 (2010.165) |
+| 티소나 | 아더왕과 기사 전설 | [Sword with Scabbard](https://www.metmuseum.org/art/collection/search/25573) — Spanish, late 15th century (04.3.459a, b) |
+| 콜라다 | 아더왕과 기사 전설 | [Sword](https://www.metmuseum.org/art/collection/search/27459) — Spanish, ca. 1500 (14.25.1098) |
+| 커타나 | 아더왕과 기사 전설 | [Basket-Hilted Sword](https://www.metmuseum.org/art/collection/search/24812) — British, 1600–1625 (49.163.6) |
 | 티르빙 | 북유럽·게르만 신화 | [Sword and scabbard](https://www.metmuseum.org/art/collection/search/325710) — Sasanian, ca. 7th century CE (65.28a, b) |
 | 흐룬팅 | 북유럽·게르만 신화 | [Sword](https://www.metmuseum.org/art/collection/search/27513) — probably Central European, 13th century BCE (54.46.8) |
 | 거인의 검 | 북유럽·게르만 신화 | [Two-Handed Processional Sword carried by Guard of Duke Julius of Brunswick](https://www.metmuseum.org/art/collection/search/25077) — German, Brunswick, dated 1573 (04.3.60) |
@@ -106,16 +106,16 @@
 | 언약궤 | 성서와 성유물 | [Reliquary Chasse](https://www.metmuseum.org/art/collection/search/469859) — British, 1207–13 (1980.417) |
 | 알라딘의 램프 | 이집트·중동 전설 | [Oil Lamp](https://www.metmuseum.org/art/collection/search/449344) — Iran, 9th century (38.40.133) |
 | 우치데노코즈치 | 일본 신화 | [Mallet of Daikoku, One of the Gods of Good Fortune, and a Rat](https://www.metmuseum.org/art/collection/search/53998) — Japan, probably 1828 (JP2232) |
-| 올리팡 | 아서왕과 기사 전설 | [Oliphant](https://www.metmuseum.org/art/collection/search/464221) — South Italian, 12th century (17.190.218) |
-| 바야르 | 아서왕과 기사 전설 | [Trotting horse](https://www.metmuseum.org/art/collection/search/195196) — Giambologna, probably 1587–91 (24.212.23) |
-| 맘브리노의 투구 | 아서왕과 기사 전설 | [Barber's basin](https://www.metmuseum.org/art/collection/search/189140) — 18th century (06.872) |
-| 히포그리프 | 아서왕과 기사 전설 | [The Griffin](https://clevelandart.org/art/1926.466) — Germany, c. 1480–90 (1926.466) |
-| 가웨인의 초록 띠 | 아서왕과 기사 전설 | [Belt for a Lady's Dress](https://clevelandart.org/art/1930.742) — Italy, Siena(?), c. 1375–1400 (1930.742) |
-| 트리스탄과 이졸데의 사랑의 묘약 | 아서왕과 기사 전설 | [Flask](https://www.metmuseum.org/art/collection/search/467692) — German, 15th century (40.67.1) |
-| 엑스칼리버의 칼집 | 아서왕과 기사 전설 | [Piece from a Luxury Dagger](https://www.metmuseum.org/art/collection/search/469018) — Langobardic, ca. 600 (95.15.88) |
-| 원탁 | 아서왕과 기사 전설 | [Three Worthy Christians: Charlemagne, King Arthur, and Geoffrey of Bouillon](https://www.metmuseum.org/art/collection/search/373039) — Daniel Hopfer, ca. 1516 (51.501.386) |
-| 이상한 띠의 검 | 아서왕과 기사 전설 | [Sword Belt](https://www.metmuseum.org/art/collection/search/23344) — French, late 18th century (29.158.725) |
-| 뤼네트의 반지 | 아서왕과 기사 전설 | [Ring](https://www.metmuseum.org/art/collection/search/476384) — German, 10th–11th century (2004.274) |
+| 올리팡 | 아더왕과 기사 전설 | [Oliphant](https://www.metmuseum.org/art/collection/search/464221) — South Italian, 12th century (17.190.218) |
+| 바야르 | 아더왕과 기사 전설 | [Trotting horse](https://www.metmuseum.org/art/collection/search/195196) — Giambologna, probably 1587–91 (24.212.23) |
+| 맘브리노의 투구 | 아더왕과 기사 전설 | [Barber's basin](https://www.metmuseum.org/art/collection/search/189140) — 18th century (06.872) |
+| 히포그리프 | 아더왕과 기사 전설 | [The Griffin](https://clevelandart.org/art/1926.466) — Germany, c. 1480–90 (1926.466) |
+| 가웨인의 초록 띠 | 아더왕과 기사 전설 | [Belt for a Lady's Dress](https://clevelandart.org/art/1930.742) — Italy, Siena(?), c. 1375–1400 (1930.742) |
+| 트리스탄과 이졸데의 사랑의 묘약 | 아더왕과 기사 전설 | [Flask](https://www.metmuseum.org/art/collection/search/467692) — German, 15th century (40.67.1) |
+| 엑스칼리버의 칼집 | 아더왕과 기사 전설 | [Piece from a Luxury Dagger](https://www.metmuseum.org/art/collection/search/469018) — Langobardic, ca. 600 (95.15.88) |
+| 원탁 | 아더왕과 기사 전설 | [Three Worthy Christians: Charlemagne, King Arthur, and Geoffrey of Bouillon](https://www.metmuseum.org/art/collection/search/373039) — Daniel Hopfer, ca. 1516 (51.501.386) |
+| 이상한 띠의 검 | 아더왕과 기사 전설 | [Sword Belt](https://www.metmuseum.org/art/collection/search/23344) — French, late 18th century (29.158.725) |
+| 뤼네트의 반지 | 아더왕과 기사 전설 | [Ring](https://www.metmuseum.org/art/collection/search/476384) — German, 10th–11th century (2004.274) |
 | 글레이프니르 | 북유럽·게르만 신화 | [Fragment of a Band (1 of 2)](https://clevelandart.org/art/1940.492.a) — Italy, Sicily, end of 11th century, late 1000s (1940.492.a) |
 | 미스틸테인 | 북유럽·게르만 신화 | [Two Arrows](https://www.metmuseum.org/art/collection/search/30340) — Turkish or Iranian, probably 16th century (36.25.2591a, b) |
 | 굴린부르스티 | 북유럽·게르만 신화 | [Wild Boar](https://www.metmuseum.org/art/collection/search/203939) — Giovanni Francesco Susini, late 17th century (64.101.1451) |
@@ -150,7 +150,7 @@
 | 삼손의 나귀 턱뼈 | 성서와 성유물 | [Samson](https://clevelandart.org/art/1972.50) — France, 1630–31 (1972.50) |
 | 다윗의 무릿매 | 성서와 성유물 | [David Triumphant over Goliath](https://clevelandart.org/art/1992.131) — Italy, late 15th-early 16th Century, late 1400s - early 1500s (1992.131) |
 | 구리 뱀 | 성서와 성유물 | [Moses praying to end the serpents’ attack on the Israelites (folio 63 verso), from a Mirror of Holiness (Mir’at al-quds) of Father Jerome Xavier](https://clevelandart.org/art/2005.145.63.b) — Mughal India, Allahabad, made for Prince Salim (1569–1627), 1602–4 (2005.145.63.b) |
-| 가시 면류관 | 성서와 성유물 | [Christ Crowned with Thorns](https://www.metmuseum.org/art/collection/search/197079) — 17th century (32.100.217a–c) |
+| 가시 면류관 | 성서와 성유물 | [Diptych with the Passion of Christ (right wing): Crowning with Thorns and Agony on the Garden](https://clevelandart.org/art/1945.115.b) — Austria, Styria, 15th century, c. 1400 (1945.115.b) |
 | 참 십자가 | 성서와 성유물 | [Reliquary of the True Cross](https://clevelandart.org/art/1952.89) — Cross: Latin Kingdom of Jerusalem; Panel: Rhine-Meuse region, Gothic period, 13th century, c. 1214 (1952.89) |
 | 동방 박사의 예물 | 성서와 성유물 | [The Adoration of the Magi](https://clevelandart.org/art/1942.536) — Italy, Siena, 1440–45 (1942.536) |
 | 금송아지 | 성서와 성유물 | [Bull Calf Polemount](https://clevelandart.org/art/1970.61) — Sumerian, Iraq, c. 2700 BCE (1970.61) |
@@ -159,13 +159,13 @@
 | 호루스의 눈 | 이집트·중동 전설 | [Wedjat Eye Amulet](https://www.metmuseum.org/art/collection/search/561047) — Third Intermediate Period, ca. 1080–664 BCE (26.7.1032) |
 | 운명의 서판 | 이집트·중동 전설 | [Cuneiform tablet](https://www.metmuseum.org/art/collection/search/324238) — Iran, ca. 850–750 BCE (52.119.12) |
 | 길가메시의 불로초 | 이집트·중동 전설 | [Plaque in the form of a tree](https://www.metmuseum.org/art/collection/search/324759) — Assyrian, ca. 9th–8th century BCE (58.31.22) |
-| 샤르우르 | 이집트·중동 전설 | [Mace head with two bull's heads](https://www.metmuseum.org/art/collection/search/324057) — Sumerian, ca. 2900–2700 BCE (49.23.3) |
+| 샤르우르 | 이집트·중동 전설 | [Piriform macehead with male faces](https://www.metmuseum.org/art/collection/search/547211) — Egypt, Predynastic, Naqada II–Naqada III, ca. 3650–3100 BCE (10.176.56) |
 | 이난나의 일곱 장신구 | 이집트·중동 전설 | [Headdress](https://www.metmuseum.org/art/collection/search/322903) — Sumerian, ca. 2600–2500 BCE (33.35.3) |
 | 마신을 가둔 놋쇠 병 | 이집트·중동 전설 | [Luxury Inlaid Container](https://clevelandart.org/art/1944.482) — Northern Iraq, Ayyubid period, c. 1250–1350 (1944.482) |
 | 토트의 책 | 이집트·중동 전설 | [Scribe's Palette](https://clevelandart.org/art/1914.727) — Egypt, New Kingdom (1540–1069 BCE), Dynasties 18–19, 1540–1186 BCE (1914.727) |
 | 카베의 깃발 | 이집트·중동 전설 | [Processional Standard ('Alam)](https://www.metmuseum.org/art/collection/search/457977) — late 17th–early 18th century (2013.37) |
 | 잠시드의 잔 | 이집트·중동 전설 | [The Wade Cup with Animated Script](https://clevelandart.org/art/1944.485) — Iran, Seljuq period of Iran (1037–1194), 1200–1221 (1944.485) |
-| 시무르그의 깃털 | 이집트·중동 전설 | ["Zal is Restored to his Father Sam by the Simurgh", Folio from a Shahnama (Book of Kings)](https://www.metmuseum.org/art/collection/search/452041) — Abu'l Qasim Firdausi, ca. 1300–30 (69.74.1) |
+| 시무르그의 깃털 | 이집트·중동 전설 | ["Zal in the Simurgh's Nest", Folio from a Shahnama (Book of Kings)](https://www.metmuseum.org/art/collection/search/452627) — Iran, ca. 1330–40 (1974.290.2) |
 | 브라흐마스트라 | 인도 신화 | [Rama and Lakshmana Fighting Ravana, from a Dashavatara (Ten Incarnations [of Vishnu]) series](https://clevelandart.org/art/1953.357) — Northern India, Pahari Region, Himachal Pradesh, Rajput Kingdom of Chamba, Court of Raj Singh (reigned 1764–94), c. 1765 (1953.357) |
 | 피나카 | 인도 신화 | [Bow](https://www.metmuseum.org/art/collection/search/25830) — Italian or Indo-Persian, ca. 1500 (13.146) |
 | 카우모다키 | 인도 신화 | [Mace (Gada)](https://www.metmuseum.org/art/collection/search/29617) — Indo-Persian, 17th century (36.149.3) |
@@ -190,7 +190,7 @@
 | 하고로모 | 일본 신화 | [Noh Costume (Chōken)](https://clevelandart.org/art/1916.1) — Japan, Edo period (1615–1868), 1800–1850 (1916.1) |
 | 시오미쓰타마와 시오후루타마 | 일본 신화 | [Tide-Changing Jewel with Dragon](https://clevelandart.org/art/1947.682) — Japan, Meiji period (1868–1912), early 1900s (1947.682) |
 | 부처의 돌 바리때 | 일본 신화 | [Alms Bowl](https://clevelandart.org/art/1949.156) — Japan, Heian period (794–1185), c. 900s (1949.156) |
-| 봉래산의 구슬 가지 | 일본 신화 | [One of a Pair of Wine Cups (Sakazuki) with Mount Hōrai](https://www.metmuseum.org/art/collection/search/57730) — Japan, 19th century (81.1.568) |
+| 봉래산의 구슬 가지 | 일본 신화 | [Box](https://clevelandart.org/art/1974.271) — Japan, Edo period (1615–1868), 1800s (1974.271) |
 | 불쥐 가죽옷 | 일본 신화 | [The Tale of the Bamboo Cutter](https://www.metmuseum.org/art/collection/search/45361) — Japan, late 17th century (21.174.1a–c) |
 | 가구야 공주의 불사약 | 일본 신화 | [Inro](https://clevelandart.org/art/1944.217) — Japan, Edo period (1615–1868), c. 1785 (1944.217) |
 | 히게키리 | 일본 신화 | [Nakamura Nakazo I as Watanabe no Tsuna](https://clevelandart.org/art/1921.314.c) — Japan, Edo period (1615–1868), 1781 (1921.314.c) |
