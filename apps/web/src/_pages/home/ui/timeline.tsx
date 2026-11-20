@@ -10,7 +10,7 @@ import { Container, MonoLabel, RedDot, SectionHeader } from "@/shared/ui";
 
 import type { TimelineItem } from "../model";
 
-/** 연표를 나누는 시대. 고른 시대의 유물만 보여 줘 200점 가까운 유물을 한 줄로 넘기지 않아도 되게 한다. */
+/** 연표를 나누는 시대. 고른 시대의 유물만 보여 줘 300점에 이르는 유물을 한 줄로 넘기지 않아도 되게 한다. */
 const ERAS = [
   { id: "all", test: () => true },
   { id: "ancient", test: (y: number) => y < 0 },

@@ -1,5 +1,6 @@
 import type { AnnotationInput } from "../annotation";
 import { LEGEND_ANNOTATIONS } from "./legends/annotations";
+import { EXTRA_ANNOTATIONS } from "./legends/annotations-extra";
 import { MORE_ANNOTATIONS } from "./legends/annotations-more";
 
 export type SeedAnnotation = Omit<AnnotationInput, "order">;
@@ -105,4 +106,5 @@ export const SEED_ANNOTATIONS: Record<string, SeedAnnotation[]> = {
   ...FEATURED_ANNOTATIONS,
   ...LEGEND_ANNOTATIONS,
   ...MORE_ANNOTATIONS,
+  ...EXTRA_ANNOTATIONS,
 };
