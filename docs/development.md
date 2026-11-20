@@ -107,7 +107,9 @@
 
 공개 사이트는 어드민 API에서 유물을 읽으므로 Lighthouse는 `apps/web/scripts/lighthouse-servers.sh`로 E2E와 같은 포트·환경 값(`e2e/env.ts`)에서 두 앱을 함께 띄웁니다. 실행 값은 스크립트가 기본으로 넣지만 `NEXT_PUBLIC_ARCHIVE_API_URL`은 빌드할 때 굳으므로, 로컬에서 잴 때는 `e2e/env.ts`의 값을 환경 변수로 넣고 두 앱을 빌드한 뒤 `pnpm --filter @rizer/web lhci`를 돌립니다(CI는 작업 전체에 같은 값을 넣음).
 
-유물 상세는 딥줌 뷰어(OpenSeadragon)가 타일을 해독해 CI 러너에서 TBT가 230~370ms까지 나옵니다(로컬 0~70ms). 그래서 상세만 TBT 기준을 400ms로 둡니다.
+유물 상세의 딥줌 뷰어(OpenSeadragon)는 캔버스로 그립니다(`drawer: "canvas"`). 기본인 WebGL 그리기는 GPU가 없는 CI 러너에서 소프트웨어 WebGL로 타일 텍스처를 올려 TBT가 230~370ms까지 나왔고, 데스크톱 설정은 CPU를 감속하지 않아 같은 코드에서도 러너의 CPU 성능(benchmarkIndex 약 2400~4000)에 따라 성능 점수가 0.81~0.99로 갈렸습니다. 캔버스로 바꾼 뒤(1.0.1)에는 느린 러너(약 2500)에서도 TBT 0ms·성능 1.0입니다. 상세의 TBT 기준은 그때 둔 400ms 그대로입니다.
+
+CI에서 점수가 흔들리면 업로드된 Lighthouse 보고서에서 `environment.benchmarkIndex`(러너의 CPU 성능)와 `bootup-time`(스크립트별 CPU 시간)을 먼저 봅니다. 코드가 같은데 점수만 다르면 러너 차이입니다.
 
 두 검사 모두 프로덕션 빌드가 먼저 있어야 하며, CI는 빌드 뒤에 돌립니다.
 
