@@ -2,9 +2,9 @@
 
 ## 1. 프로젝트 개요
 
-전설 속 유물 300점을 딥줌으로 확대해 보고 부분마다 달린 해설을 읽는 온라인 전시실(`apps/web`)과, 큐레이터가 유물·해설·주석을 편집하는 관리 화면(`apps/admin`)입니다. 한국어 UI(영어판 `/en`).
+전설 속 유물을 딥줌으로 확대해 보고 부분마다 달린 해설을 읽는 온라인 전시실(`apps/web`)과, 큐레이터가 유물·해설·주석을 편집하는 관리 화면(`apps/admin`)입니다. 한국어 UI(영어판 `/en`).
 
-- 화면 축 2개: 전시실(공개 웹) · 큐레이터 어드민
+- 화면 축: 전시실(공개 웹) · 큐레이터 어드민
 - 운영: 전시실 https://rizer-ryushin01.vercel.app · 관리 화면 https://rizer-admin-ryushin01.vercel.app/login (**게스트로 둘러보기**로 읽기 전용 입장) · Storybook https://rizer-ryushin01.vercel.app/storybook/index.html
 - 먼저 `README.md`, `docs/development.md`(명령·환경 변수·알려진 함정), `docs/architecture.md`(데이터 흐름·FSD·상태 관리·접근성)를 읽습니다.
 
