@@ -7,6 +7,7 @@ import { ImageResponse } from "next/og";
 import sharp from "sharp";
 
 import { getArtifact } from "@/shared/api/index.server";
+import { siteUrl } from "@/shared/config";
 import { MESSAGES } from "@/shared/i18n";
 
 /**
@@ -33,7 +34,8 @@ const latinOrHangul = /^[\u0000-ɏḀ-ỿ가-힣\s·'’]+$/;
 async function photoOf(url: string | undefined): Promise<{ src: string; background: string } | null> {
   if (!url) return null;
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    // 저장해 둔 사본의 사진은 이 사이트 기준 경로(/tiles/…)라 사이트 주소를 붙인다.
+    const res = await fetch(new URL(url, siteUrl()), { signal: AbortSignal.timeout(5000) });
     if (!res.ok) return null;
     const input = Buffer.from(await res.arrayBuffer());
     // 왼쪽 칸을 사진의 바탕색(왼쪽 위 모서리)으로 칠해 사진과 이어 보이게 한다.
@@ -56,7 +58,7 @@ async function ogPng(slug: string, locale: Locale): Promise<Uint8Array> {
   cacheTag(CACHE_TAGS.artifacts, CACHE_TAGS.artifact(slug));
   const detail = await getArtifact(slug, locale);
   const { response, photoMissing } = await render(detail, locale);
-  if (detail === "offline" || photoMissing) cacheLife("seconds");
+  if (detail === "offline" || detail?.offline || photoMissing) cacheLife("seconds");
   else cacheLife("days");
   return new Uint8Array(await response.arrayBuffer());
 }

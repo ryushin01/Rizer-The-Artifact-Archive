@@ -60,6 +60,15 @@
 - **단위(Vitest):** 각 패키지·앱의 `*.test.ts(x)`. 저장소 테스트는 테스트마다 새 메모리 PGlite(`createTestDb`)를 씁니다. 사가는 `redux-saga-test-plan`의 `expectSaga`로 확인합니다.
 - **스토리(Storybook + Vitest 브라우저 모드):** 두 앱 컴포넌트 옆의 `*.stories.tsx`. `play` 함수와 axe 검사가 실패하면 테스트가 실패합니다. 공개 사이트에서 스토어가 필요한 스토리는 `parameters.store`로 처음 상태를 넘깁니다. 관리 화면의 서버 액션은 스토리에서 돌 수 없으므로 `.storybook/preview.tsx`의 `sb.mock()`이 같은 폴더의 `__mocks__`로 바꾸고, 스토리는 `mocked(액션).mockResolvedValue(…)`로 결과를 정합니다.
 - **E2E(Playwright):** `apps/web/e2e`. 관리 화면에서 만들고 공개하면 공개 사이트에 보이는 흐름까지 확인합니다. 데이터를 바꾸는 테스트는 겹치지 않게 고유한 주소(`Date.now()`)나 다른 유물(뒤랑달)을 씁니다.
+- **오프라인 E2E:** `apps/web/e2e/offline.spec.ts`가 localhost 밖 요청을 모두 막은 상태에서 전시실(첫 화면·아카이브·유물)과 관리 화면(게스트 대시보드·유물 목록)이 내용과 함께 뜨는지, axe 위반과 외부 요청이 없는지 봅니다. 같은 빌드를 관리 화면이 꺼진 상태(`ARCHIVE_API_URL`을 아무도 듣지 않는 주소로, 포트 3182)로 하나 더 띄워 사본 대체와 상태 안내도 확인합니다.
+
+## 오프라인·로컬 실행
+
+- `.env` 없이 `pnpm install` → `pnpm dev`로 두 앱이 데모 데이터(PGlite 시드)로 돕니다. 프로덕션 빌드로 보려면 E2E 값(`apps/web/e2e/env.ts`의 `E2E_ENV`: 메모리 DB, `SEED_DEMO=1`, 개발용 비밀값)을 넣고 `pnpm build` 뒤 각 앱을 `start`합니다.
+- 공개 사이트가 관리 화면(공개 API)에 8초 안에 닿지 못하면(꺼짐, DB 끊김, 시간 초과) 저장해 둔 사본 `apps/web/src/shared/api/snapshot/archive-snapshot.json`(공개 유물 300점의 목록·상세, 한국어·영어, 약 2.9MB, 서버에서만 읽음)으로 답하고 화면에 `role="status"` 안내를 띄웁니다. 검색·필터·정렬·더 보기도 사본에서 합니다. 사본으로 답한 결과는 몇 초만 캐시해, 관리 화면이 돌아오면 바로 원래 데이터로 돌아갑니다.
+- 사본의 사진은 공개 사이트의 정적 타일(`/tiles/…`)을 가리켜 외부 연결 없이 보입니다. 시드 유물·해설을 바꾸면 시드로 띄운 관리 화면에서 사본을 다시 만듭니다: `PGLITE_DATA_DIR=memory:// pnpm dev:admin` 뒤 `pnpm --filter @rizer/web snapshot`(`ADMIN_URL`, 기본 `http://localhost:3000`).
+- 글꼴은 `next/font/google`이 빌드할 때 받아 자체 호스팅하므로 방문자는 Google Fonts에 요청하지 않습니다. 단, 처음 빌드할 때는 글꼴을 받을 인터넷이 필요합니다.
+- Sentry는 DSN이 있을 때만 켜지고, 보내기에 실패해도 화면에 영향을 주지 않습니다.
 
 ## 성능 측정
 

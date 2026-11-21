@@ -205,6 +205,9 @@ const ko = {
     copied: "이 주석으로 오는 링크를 복사했습니다.",
     copyFailed: "복사하지 못했습니다. 주소 표시줄의 주소를 복사해 주세요.",
   },
+  snapshot: {
+    notice: "관리 서버에 잠시 연결할 수 없어, 이 사이트에 저장해 둔 사본으로 전시를 보여 드립니다. 최근 수정한 내용은 빠져 있을 수 있습니다.",
+  },
   notFound: {
     pageTitle: "페이지를 찾을 수 없습니다 · Rizer Archive",
     message:
@@ -421,6 +424,10 @@ const en: Messages = {
     copy: "Copy link to this note",
     copied: "Copied a link to this note.",
     copyFailed: "Could not copy. Please copy the address from the address bar.",
+  },
+  snapshot: {
+    notice:
+      "The archive server is temporarily unavailable, so the exhibition is shown from a copy stored on this site. Recent edits may be missing.",
   },
   notFound: {
     pageTitle: "Page not found · Rizer Archive",

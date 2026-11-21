@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { ARCHIVE_PAGE_SIZE, ArchiveFilters, ArchiveHydrator } from "@/features/filter-archive";
 import { getArtifacts } from "@/shared/api/index.server";
 import { MESSAGES } from "@/shared/i18n";
-import { Container } from "@/shared/ui";
+import { Container, SnapshotNotice } from "@/shared/ui";
 import { ArchiveGrid } from "./archive-grid";
 
 import { ArchiveHeader } from "./archive-header";
@@ -30,12 +30,13 @@ async function Results({ searchParams, locale }: Props & { locale: Locale }) {
   const { items, total, offline } = await getArtifacts({ ...query, limit: ARCHIVE_PAGE_SIZE });
   return (
     <>
+      {offline && <SnapshotNotice />}
       <ArchiveHydrator
         key={JSON.stringify(query)}
         query={query}
         items={items}
         total={total}
-        error={offline ? MESSAGES[locale].archive.loadError : undefined}
+        error={offline && !items.length ? MESSAGES[locale].archive.loadError : undefined}
       />
       <ArchiveFilters key={`f-${JSON.stringify(query)}`} />
       <ArchiveGrid />

@@ -1,7 +1,7 @@
 # Rizer — The Artifact Archive
 
 [![CI](https://github.com/ryushin01/Rizer-The-Artifact-Archive/actions/workflows/ci.yml/badge.svg)](https://github.com/ryushin01/Rizer-The-Artifact-Archive/actions/workflows/ci.yml)
-![version](https://img.shields.io/badge/version-1.0.1-e2283c)
+![version](https://img.shields.io/badge/version-1.3.0-e2283c)
 ![Storybook](https://img.shields.io/badge/Storybook-10-FF4785?logo=storybook&logoColor=white)
 
 엑스칼리버, 성배, 묠니르, 여의봉 같은 세계 곳곳의 전설이나 판타지 속에 등장하는 유물 300점을 고해상도 딥줌으로 확대해 보고, 사진의 부분마다 달린 해설을 읽는 온라인 전시실입니다. 큐레이터는 관리 화면에서 유물·해설·이미지 주석을 편집합니다.
@@ -71,6 +71,8 @@ pnpm dev           # 관리 화면 http://localhost:3000, 공개 사이트 http:
 ```
 
 시드 유물 300점의 딥줌 타일은 저장소에 들어 있습니다. 관리 화면은 **게스트로 둘러보기**(읽기 전용) 또는 `curator@rizer.dev` / `rizer1234`(개발용)로 들어갑니다.
+
+`.env` 없이 바로 돌고(개발 값은 커밋된 `.env.development`, DB는 PGlite), 인터넷이 끊겨도 됩니다. 글꼴은 빌드 때 받아 자체 호스팅하고 이미지는 저장소의 타일을 씁니다. 관리 화면(공개 API)이나 DB(Neon)에 닿지 못하면 공개 사이트는 저장해 둔 사본(`apps/web/src/shared/api/snapshot`)으로 전시를 그대로 보여 주고 "저장해 둔 사본으로 보여 드립니다" 안내(`role="status"`)를 띄웁니다. 그래서 공개 사이트만 따로 띄워도(`pnpm --filter @rizer/web dev`) 유물 300점이 모두 보입니다.
 
 | 명령                               | 설명                                            |
 | ---------------------------------- | ----------------------------------------------- |
