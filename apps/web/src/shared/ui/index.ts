@@ -26,3 +26,4 @@ export {
   IconSearch,
 } from "./icons";
 export { SectionHeader } from "./section-header";
+export { SnapshotNotice } from "./snapshot-notice";

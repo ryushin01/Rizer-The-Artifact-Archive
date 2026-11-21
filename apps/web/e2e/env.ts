@@ -3,6 +3,10 @@
 export const ADMIN_PORT = Number(process.env.E2E_ADMIN_PORT ?? 3180);
 export const WEB_PORT = Number(process.env.E2E_WEB_PORT ?? 3181);
 export const ADMIN_URL = `http://localhost:${ADMIN_PORT}`;
+/** 관리 화면이 꺼진 상황을 흉내 내는 공개 사이트(아무도 듣지 않는 주소를 관리 화면으로 둠) */
+export const OFFLINE_WEB_PORT = Number(process.env.E2E_OFFLINE_WEB_PORT ?? 3182);
+export const OFFLINE_WEB_URL = `http://localhost:${OFFLINE_WEB_PORT}`;
+export const DEAD_ADMIN_URL = "http://localhost:3189";
 export const CURATOR = { email: "curator@rizer.dev", password: "e2e-curator-pass" };
 
 export const E2E_ENV = {

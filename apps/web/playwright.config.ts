@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-import { ADMIN_PORT, E2E_ENV, WEB_PORT } from "./e2e/env";
+import { ADMIN_PORT, DEAD_ADMIN_URL, E2E_ENV, OFFLINE_WEB_PORT, WEB_PORT } from "./e2e/env";
 
 // CI는 앞 단계의 pnpm build 결과를 그대로 쓴다(빌드 때 같은 E2E_ENV를 넣는다).
 const buildThen = (dir: string, command: string) =>
@@ -41,6 +41,14 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
       timeout: 300_000,
       env: E2E_ENV,
+    },
+    // 같은 빌드를 관리 화면이 꺼진 상태로 하나 더 띄운다(offline.spec). 서버가 읽는 ARCHIVE_API_URL만 바꾼다.
+    {
+      command: `pnpm --dir . start --port ${OFFLINE_WEB_PORT}`,
+      url: `http://localhost:${OFFLINE_WEB_PORT}`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 300_000,
+      env: { ...E2E_ENV, ARCHIVE_API_URL: DEAD_ADMIN_URL },
     },
   ],
 });

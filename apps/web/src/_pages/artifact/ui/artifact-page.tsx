@@ -7,6 +7,7 @@ import { TourSync } from "@/features/annotation-tour";
 import { getArtifact, getArtifacts } from "@/shared/api/index.server";
 import { siteUrl } from "@/shared/config";
 import { localePath, MESSAGES } from "@/shared/i18n";
+import { SnapshotNotice } from "@/shared/ui";
 
 import { artifactStructuredData, jsonLdText } from "../model/structured-data";
 import { ArtifactDossier } from "./artifact-dossier";
@@ -82,10 +83,12 @@ async function Content({ params, locale = "ko" }: LocaleProps) {
         annotations={annotations}
         related={related}
         banner={
-          detail.preview && (
+          detail.preview ? (
             <PreviewBanner
               exitTo={localePath(locale, artifact.status === "published" ? `/artifacts/${artifact.slug}` : "/artifacts")}
             />
+          ) : (
+            detail.offline && <SnapshotNotice />
           )
         }
       />

@@ -23,7 +23,9 @@ export async function searchHandler(request: NextRequest) {
     );
   }
   const query = parseArtifactQuery(Object.fromEntries(request.nextUrl.searchParams));
+  // 관리 화면에 닿지 못했으면 저장해 둔 사본에서 찾은 결과다(화면은 서버가 그린 안내를 이미 띄우고 있다).
   const { offline, ...body } = await getArtifacts(query);
-  if (offline) return NextResponse.json({ message: "아카이브에 닿지 못했습니다." }, { status: 503, headers: { "cache-control": "no-store" } });
-  return NextResponse.json(body, { headers: { "cache-control": "no-store" } });
+  return NextResponse.json(body, {
+    headers: { "cache-control": "no-store", ...(offline && { "x-archive-snapshot": "1" }) },
+  });
 }

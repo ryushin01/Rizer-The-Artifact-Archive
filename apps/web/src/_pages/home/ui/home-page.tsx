@@ -2,6 +2,7 @@ import type { Locale } from "@rizer/domain";
 import { Suspense } from "react";
 
 import { getArtifacts } from "@/shared/api/index.server";
+import { SnapshotNotice } from "@/shared/ui";
 import { Collection } from "./collection";
 import { Faq } from "./faq";
 import { FinalCta } from "./final-cta";
@@ -20,10 +21,11 @@ const COLLECTION_SIZE = 16;
  * 공개 API에 닿지 못하면(빌드 중 어드민이 꺼져 있음 등) 짧게만 캐시하므로 요청 때 채운다(Suspense).
  */
 async function Exhibition({ locale }: { locale: Locale }) {
-  const { items } = await getArtifacts(locale === "ko" ? {} : { locale });
+  const { items, offline } = await getArtifacts(locale === "ko" ? {} : { locale });
   const featured = items.filter((a) => a.featured);
   return (
     <>
+      {offline && <SnapshotNotice />}
       <Hero featured={featured.length ? featured : items.slice(0, 5)} />
       <Statement />
       <Collection artifacts={items.slice(0, COLLECTION_SIZE)} total={items.length} />
