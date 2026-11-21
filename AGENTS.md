@@ -76,7 +76,9 @@ pnpm --filter @rizer/web lhci             # Lighthouse CI(lighthouserc.json)
 - **흐름: GitHub Flow.** `main`에 직접 커밋·푸시하지 않고, 최신 `main`에서 브랜치를 만들어 PR로만 병합합니다.
 - **브랜치 이름:** `feat/…`, `fix/…`, `refactor/…`, `docs/…`, `test/…`, `chore/…`, `release/…`(실제로는 `perf/…`도 씀, 예: `feat/artifacts-300`, `perf/artifact-viewer-tbt`).
 - **커밋 메시지: Conventional Commits가 표준**입니다(`<타입>: <한국어 요약> (x.y.z)`, 타입 `feat`, `fix`, `refactor`, `perf`, `docs`, `test`, `style`, `chore`, `ci`, `build`). 이 저장소의 실제 관례는 다릅니다: 기능 PR은 타입 없이 버전을 괄호 없이 붙였고(`유물 300점으로 늘리기 1.2.0: 새 유물 100점, …`), 타입을 쓴 PR도 버전을 괄호 없이 끝에 붙였습니다(`fix: 딥줌 뷰어를 캔버스로 그려 CI Lighthouse 점수가 러너에 따라 떨어지던 문제 1.0.1`). 새 PR은 표준 형식(`feat: … (1.3.0)`)으로 씁니다. 문서·잡일은 버전 없이 `docs: …`, `chore: …`. 호환이 깨지면 본문에 `BREAKING CHANGE:`.
-- 본문은 한국어 목록으로 적고 끝에 `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`을 붙입니다.
+- 본문은 한국어 목록으로 적습니다.
+- **작성자:** 커밋 작성자는 항상 ryushin01(`ryushin0 <141554987+ryushin01@users.noreply.github.com>`)입니다(기여자는 ryushin01만 남김). 백엔드 코드가 있는 저장소라 공동 작성자 줄은 `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` 하나만 넣습니다.
+- GitHub Actions가 커밋하는 워크플로는 작성자를 ryushin01로 설정합니다(`github-actions[bot]` 금지). Dependabot PR은 그대로 병합하지 말고 같은 변경을 ryushin01 커밋으로 다시 만들어 병합합니다.
 - **버전: Semantic Versioning.** 루트 `package.json`의 `version`과 README 버전 배지를 함께 맞춥니다(지금 README 배지는 1.0.1로 `package.json` 1.2.0보다 뒤처져 있으니 다음 버전 PR에서 맞춥니다). 앱·패키지의 `package.json`에는 버전을 따로 올리지 않습니다.
 - **변경 기록: Keep a Changelog 기반.** `CHANGELOG.md`(제목 `# 변경 기록`)에 최신 버전을 위에 두고 `## x.y.z — YYYY-MM-DD` 아래 요약 문단과 주제별 `###` 소제목(예: `### 새 유물`, `### 운영`)으로 적습니다. `[Unreleased]` 절과 추가·변경·수정·제거 소제목은 쓰지 않습니다(표준과 다른 점).
 - **병합:** squash(제목 끝에 `(#번호)`). CI가 통과하면 바로 병합하고 CodeRabbit 리뷰는 기다리지 않습니다.
