@@ -23,7 +23,7 @@
 
 ```bash
 pnpm install
-pnpm dev                                  # 관리 화면(3000) + 공개 사이트(3001)
+pnpm dev                                  # 관리 화면(3000) + 공개 사이트(3001), .env 없이 PGlite로 돎
 pnpm dev:admin                            # 관리 화면만
 pnpm storybook                            # 공개 사이트 Storybook(6006)
 pnpm --filter @rizer/admin storybook      # 관리 화면 Storybook(6007)
@@ -31,7 +31,10 @@ pnpm --filter @rizer/admin db:reset       # 개발 DB(PGlite) 지우고 다시 �
 pnpm seed:images                          # 시드 원본 받아 타일로 자르기(--synthetic, --only, --missing)
 pnpm --filter @rizer/admin export:seed-tiles   # 공개용 정적 타일과 seed-images.json 다시 만들기
 pnpm tiles <원본> <출력 폴더> [이름]
+pnpm --filter @rizer/web snapshot         # 공개 사이트용 사본 다시 만들기(시드로 띄운 관리 화면 필요)
 ```
+
+- 오프라인 대체: 공개 사이트가 관리 화면 공개 API(`ARCHIVE_API_URL`)에 8초 안에 닿지 못하면 `apps/web/src/shared/api/snapshot/archive-snapshot.json`(서버에서만 읽음)으로 목록·상세·검색(`/api/search`, `x-archive-snapshot: 1`)을 답하고 `role="status"` 안내를 띄웁니다. 유물·해설 시드를 바꾸면 사본도 다시 만듭니다. 자세히: `docs/development.md`.
 
 - 개발 값은 각 앱의 `.env.development`, 운영 변수 목록은 `.env.example`에 있습니다. 이름만: admin `DATABASE_URL`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `SEED_DEMO`, `CURATOR_PASSWORD`, `STORAGE_DRIVER`, `S3_*`, `BLOB_READ_WRITE_TOKEN`, `STORAGE_PUBLIC_URL`, `STATIC_TILES_URL`, `WEB_URL`, `WEB_REVALIDATE_URL`, `REVALIDATE_SECRET` / web `ARCHIVE_API_URL`, `NEXT_PUBLIC_ARCHIVE_API_URL`, `REVALIDATE_SECRET`, `SITE_URL`, `STORAGE_PUBLIC_URL`
 - 빌드 때 읽는 변수(`next.config.ts`의 CSP 등)는 `turbo.json`의 `build.env`에 적어야 Vercel 빌드에 넘어갑니다.
@@ -40,7 +43,7 @@ pnpm tiles <원본> <출력 폴더> [이름]
 
 완료 기준: 루트에서 `pnpm typecheck && pnpm lint && pnpm test && pnpm test:storybook && pnpm e2e && pnpm build`가 모두 통과.
 
-CI(`.github/workflows/ci.yml`)는 이 순서로 돕니다.
+CI(`.github/workflows/ci.yml`, `main` 푸시·모든 PR)는 이 순서로 돕니다.
 
 ```bash
 pnpm install --frozen-lockfile
@@ -52,24 +55,24 @@ pnpm --filter @rizer/web exec playwright install --with-deps chromium
 pnpm test:storybook                       # 두 앱의 모든 스토리 + axe
 pnpm --filter @rizer/admin seed:images --synthetic
 pnpm build
-pnpm e2e                                  # Playwright(관리 3180, 공개 3181, 메모리 DB)
+pnpm e2e                                  # Playwright(관리 3180, 공개 3181, 관리 화면 끈 공개 3182, 메모리 DB)
 pnpm --filter @rizer/web size             # size-limit: JS 470 kB, CSS 96 kB(gzip)
 pnpm --filter @rizer/web lhci             # Lighthouse CI(lighthouserc.json)
 ```
 
+- `apps/web/e2e/offline.spec.ts`는 localhost 밖 요청을 모두 막고 두 앱이 내용과 axe 위반 없이 뜨는지, 관리 화면이 꺼진 공개 사이트(3182)가 사본으로 대체하는지 봅니다.
 - E2E·Lighthouse 환경 값은 CI의 `env`와 `apps/web/e2e/env.ts`에 있습니다. 로컬에서 Lighthouse를 잴 때는 그 값을 넣고 두 앱을 빌드한 뒤 돌립니다.
 - 스토리(`*.stories.tsx`)와 테스트를 컴포넌트 옆에 둡니다. 관리 화면의 서버 액션은 스토리에서 `sb.mock()`과 같은 폴더의 `__mocks__`로 바꿉니다.
-- **Testing Library 원칙:** 구현 세부가 아니라 사용자가 보는 동작을 검사하고, 요소는 역할·이름(`getByRole`)으로 찾습니다. 도구는 단위·컴포넌트 Vitest + `@testing-library/react`(+ `user-event`, `jest-dom`), 사가는 `redux-saga-test-plan`, 화면 흐름 Playwright E2E, 접근성 axe(Storybook 스토리 테스트 `addon-a11y`, E2E의 `@axe-core/playwright`)입니다.
+- **Testing Library 원칙:** 구현 세부가 아니라 사용자가 보는 동작을 검사하고, 요소는 역할·이름(`getByRole`)으로 찾습니다. 버그를 고치면 고치기 전에 실패하는 테스트를 함께 넣습니다. 도구는 단위·컴포넌트 Vitest + `@testing-library/react`(+ `user-event`, `jest-dom`), 사가는 `redux-saga-test-plan`, 화면 흐름 Playwright E2E, 접근성 axe(Storybook 스토리 테스트 `addon-a11y`, E2E의 `@axe-core/playwright`)입니다.
 
 ## 5. 코드 스타일
 
-- **TypeScript strict**(`packages/config/tsconfig.base.json`의 `"strict": true`를 모든 앱·패키지가 이어받음)를 유지하고 `any`·`as` 단언·`@ts-ignore`는 피합니다. 타입 검사는 `tsc7`, 도구용 TypeScript는 6입니다.
+- TypeScript strict(`packages/config/tsconfig.base.json`을 모든 앱·패키지가 이어받음), `any`·`as` 단언·`@ts-ignore` 금지. 타입 검사는 `tsc7`(`packages/config`의 TypeScript 7), 도구용 TypeScript는 6입니다.
 - **포매터 없음:** Prettier·Biome 설정이 없습니다(표준과 다른 점). 주변 코드 모양(큰따옴표, 세미콜론)을 그대로 따르고, 포매터를 새로 들이지 않습니다.
 - 위 FSD·스타일 체계 규칙을 지킵니다. `apps/admin`은 CommonJS 패키지라 tsx 스크립트는 `.mts`로 씁니다.
 - 유물 데이터의 원본은 `packages/domain/src/seed`(카탈로그·주석)입니다. 바꾸면 `docs/credits.md`와 영어 번역(`seed/en`)도 맞춥니다. 사진은 CC0 소장품만 쓰고 출처(`source`)를 밝힙니다.
 - 데이터를 읽는 서버 컴포넌트는 Suspense 안에 둡니다(CI 빌드 프리렌더 오류). 그 밖의 함정은 `docs/development.md`의 `알려진 함정` 표를 먼저 봅니다.
-- 접근성(**WCAG 2.2·KWCAG 2.2**): 새 UI는 KWCAG 2.2 항목을 직접 점검합니다. 네이티브 요소 우선, 글자 대비 4.5:1 이상, 키보드 조작과 `:focus-visible` 초점 표시, 조작 크기 24px 이상, 입력칸 레이블과 오류 연결(`aria-invalid`·`aria-describedby`, 오류 칸으로 초점 이동), 화면 전환 없는 안내는 `role="status"`, 보이는 글자를 접근 이름에 낱말로 넣기(6.5.3). 자동 검사는 eslint-plugin-jsx-a11y recommended(`packages/config/eslint-next.mjs`), Storybook·Playwright의 axe, Lighthouse 접근성 100점 하한입니다.
-- 버그를 고치면 고치기 전에 실패하는 테스트를 함께 넣습니다.
+- 접근성(WCAG 2.2·KWCAG 2.2, 기본은 공통 규칙): 새 UI는 KWCAG 2.2 항목을 직접 점검하고(`docs/accessibility.md`), 보이는 글자를 접근 이름에 낱말로 넣습니다(6.5.3). 자동 검사는 eslint-plugin-jsx-a11y recommended(`packages/config/eslint-next.mjs`), Storybook·Playwright의 axe, Lighthouse 접근성 100점 하한입니다.
 
 ## 6. Git·PR
 
@@ -79,7 +82,7 @@ pnpm --filter @rizer/web lhci             # Lighthouse CI(lighthouserc.json)
 - 본문은 한국어 목록으로 적습니다.
 - **작성자:** 커밋 작성자는 항상 ryushin01(`ryushin0 <141554987+ryushin01@users.noreply.github.com>`)입니다(기여자는 ryushin01만 남김). 백엔드 코드가 있는 저장소라 공동 작성자 줄은 `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` 하나만 넣습니다.
 - GitHub Actions가 커밋하는 워크플로는 작성자를 ryushin01로 설정합니다(`github-actions[bot]` 금지). Dependabot PR은 그대로 병합하지 말고 같은 변경을 ryushin01 커밋으로 다시 만들어 병합합니다.
-- **버전: Semantic Versioning.** 루트 `package.json`의 `version`과 README 버전 배지를 함께 맞춥니다(지금 README 배지는 1.0.1로 `package.json` 1.2.0보다 뒤처져 있으니 다음 버전 PR에서 맞춥니다). 앱·패키지의 `package.json`에는 버전을 따로 올리지 않습니다.
+- **버전: Semantic Versioning.** 루트와 두 앱(`apps/web`, `apps/admin`)의 `package.json` `version`, README 버전 배지를 함께 맞춥니다. `packages/*`는 `0.1.0` 그대로 둡니다.
 - **변경 기록: Keep a Changelog 기반.** `CHANGELOG.md`(제목 `# 변경 기록`)에 최신 버전을 위에 두고 `## x.y.z — YYYY-MM-DD` 아래 요약 문단과 주제별 `###` 소제목(예: `### 새 유물`, `### 운영`)으로 적습니다. `[Unreleased]` 절과 추가·변경·수정·제거 소제목은 쓰지 않습니다(표준과 다른 점).
 - **병합:** squash(제목 끝에 `(#번호)`). CI가 통과하면 바로 병합하고 CodeRabbit 리뷰는 기다리지 않습니다.
 
@@ -98,6 +101,10 @@ pnpm --filter @rizer/web lhci             # Lighthouse CI(lighthouserc.json)
 - 시드 타일은 Vercel Blob에 두지 않습니다(Hobby 고급 작업 월 2,000회 한도). 유물을 더 늘리기 전에 R2(`STORAGE_DRIVER=s3`, `STATIC_TILES_URL`)로 옮기기를 권합니다. Git LFS는 쓰지 않습니다.
 - 공개 사이트 주소를 바꿀 때는 `docs/deployment.md`의 순서를 지킵니다(환경 변수만 먼저 바꾸지 않기).
 - 관리 화면 CSP의 `allowEval`(Annotorious의 PixiJS)과 `apps/web/public/favicon.png`(Storybook 로고 대신 아이콘으로 잡히도록)는 이유가 있어 둔 것입니다.
+
+- CI·배포·릴리스 상태는 명령 결과(`gh run`, `gh release`, `curl`, Vercel API)로 확인한 것만 말합니다.
+- 먼저 묻기: 새 런타임 의존성, 빌드·배포 설정(`next.config.ts`, `turbo.json`, `vercel.json`, `tsconfig`) 변경, 운영 Neon에 적용될 되돌리기 어려운 마이그레이션.
+- 절대 금지: 비밀값을 `NEXT_PUBLIC_*`에 넣기, 운영 `.env` 커밋, `eslint-disable`·`--no-verify`로 검사 우회, `main` 직접 푸시.
 
 ## 9. 공통 규칙
 
